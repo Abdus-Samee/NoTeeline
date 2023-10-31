@@ -1,0 +1,264 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  /* background-color: #242424; */
+  background-color: #FFF2D8;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 20%;
+  background-color: #BCA37F;
+  overflow-y: auto;
+}
+
+.note-content {
+  position: fixed;
+  top: 0;
+  left: 22%;
+  width: 78%;
+  height: 100%;
+  text-align: left;
+  overflow-y: auto;
+  padding-left: 1%;
+}
+
+// BEGIN: scrollbar-style
+.note-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.note-content::-webkit-scrollbar-track {
+  background: red;
+}
+
+.note-content::-webkit-scrollbar-thumb {
+  background: blue;
+  border-radius: 10px;
+}
+// END: scrollbar-style
+
+.note-ui {
+  width: 100%;
+}
+
+.note-title {
+  display: inline-block;
+  padding: 1%;
+  margin-top: 1vh;
+  margin-bottom: 3vh;
+  /* border: 1px solid tomato; */
+}
+
+.note-title-edit {
+  visibility: hidden;
+}
+
+.note-title:hover .note-title-edit {
+  visibility: visible;
+  cursor: pointer;
+}
+
+.bullet-point {
+
+}
+
+.bullet-point-cross {
+  visibility: hidden;
+}
+
+.bullet-point:hover .bullet-point-cross {
+  visibility: visible;
+  cursor: pointer;
+}
+
+.note-input {
+  display: block;
+  width: 76%;
+  height: 100%;
+  border-bottom: 1px solid #BCA37F;
+  outline: none;
+  margin-bottom: 3vh;
+  font-size: 1.1em;
+  font-weight: 600;
+  font-family: inherit;
+  color: #0F2C59;
+  background-color: transparent;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.note-input:focus {
+  border-bottom: 1px solid #54432C;
+}
+
+.sidebar header {
+  font-size: 30px;
+  color: white;
+  text-align: center;
+  font-weight: 600;
+  line-height: 70px;
+  background: #54432C;
+  user-select: none;
+}
+
+.sidebar footer {
+  position: absolute;
+  bottom: 2%;
+  left: 35%;
+}
+
+.sidebar > ul {
+  list-style: none;
+  padding: 1%;
+  margin: 0;
+}
+
+.note-ui > ul {
+  padding-left: 1vw;
+} 
+
+.sidebar ul a {
+  display: block;
+  height: 100%;
+  width: 100%;
+  line-height: 65px;
+  font-size: 18px;
+  color: white;
+  font-weight: 600;
+  box-sizing: border-box;
+  /* cursor: pointer; */
+  margin-bottom: 0.3vh;
+  /* border-top: 1px solid #54432C; */
+  border-bottom: 1px solid #96774f;
+  transition: 0.4s;
+}
+
+.note-del-icon {
+  visibility: visible;
+}
+
+.sidebar ul a:hover {
+  background: #96774f;
+  border-radius: 15px;
+}
+
+.sidebar-option {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.active-tab {
+  background: #96774f;
+  border-radius: 15px;
+}
+
+.sidebar ul a:hover ~ note-del-icon {
+  visibility: hidden;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+p {
+  color: #0F2C59;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+._container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #748E63;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+input[type="file"] {
+  padding: 10px;
+  color: #113946;
+  background-color: #EAD7BB;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  font-size: 1em;
+  font-family: 'Inter', system-ui;
+  cursor: pointer;
+}
+
+.audioInput::-webkit-file-upload-button {
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:hover {
+  border-color: #645035;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
