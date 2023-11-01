@@ -1,9 +1,17 @@
 import create from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
+export type NotePoint = {
+    point: string;
+    created_at: number;
+    // updated_at: number;
+}
+
 export type Note_t = {
     name: string;
-    content: string[];
+    content: NotePoint[];
+    created_at: number;
+    updated_at: number;
 };
 
 // type NoteStore = {
@@ -33,18 +41,18 @@ const NoteStore = (set: any, get: any) =>({
         return note ? note : null
     },
     checkUniqueName: (name: string) => {
-        const isUnique = get().notes.filter((note: Note_t) => note.name === name).length === 0;
-        return isUnique ? true : false;
+        const isUnique = get().notes.filter((note: Note_t) => note.name === name).length === 0
+        return isUnique ? true : false
     },
-    updateNote: (note: Note_t) => {
+    updateNote: (name: string, content: NotePoint[]) => {
         set((state: any) => {
             const updatedNotes = state.notes.map((n: Note_t) => {
-                if(n.name === note.name) {
-                    return {...n, content: note.content}
+                if(n.name === name) {
+                    return {...n, content: content}
                 }
                 return n
             })
-            return { notes: updatedNotes }
+            return { notes: updatedNotes, }
         })
     },
     updateNoteName: (oldName: string, newName: string) => {
@@ -55,10 +63,20 @@ const NoteStore = (set: any, get: any) =>({
                 }
                 return n
             })
-            return { notes: updatedNotes }
+            return { notes: updatedNotes, }
         })
     },
-    removeNote: (note: Note_t) => set((state: any) => ({ notes: state.notes.filter((n: Note_t) => n.name !== note.name) })),
+    removeNote: (note: Note_t) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === note.name) {
+                    return n
+                }
+            })
+
+            return { notes: updatedNotes, }
+        })
+    },
 })
 
 export const useNoteStore = create(devtools(persist(NoteStore, { name: 'note-store' })))

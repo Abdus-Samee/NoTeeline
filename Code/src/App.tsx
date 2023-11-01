@@ -68,6 +68,8 @@ function App() {
     addNote({
       name,
       content: [],
+      created_at: Date.now(),
+      updated_at: Date.now(),
     })
 
     setName('')
@@ -81,6 +83,7 @@ function App() {
 
   const handleOption = (tab : string) => {
     setActive(tab)
+    // console.log('active', tab)
   }
 
   const deleteNote = (note : Note_t) => {

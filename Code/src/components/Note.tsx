@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
 
-import { useNoteStore } from '../state/noteStore'
+import { NotePoint, useNoteStore } from '../state/noteStore'
 
 type NoteProps = {
   name: string;
@@ -10,6 +10,7 @@ type NoteProps = {
 
 type bulletObject = {
     point: string;
+    created_at: number;
     editable: boolean;
 }
 
@@ -26,8 +27,9 @@ const Note: React.FC<NoteProps> = ({ name }) => {
 
     useEffect(() => {
         const note = fetchNote(name)
-        const points = note.content.map((point: string) => ({ 
-            point: point, 
+        const points = note.content.map((cont: NotePoint) => ({ 
+            point: cont.point, 
+            created_at: cont.created_at,
             editable: false,
          }))
         setBulletPoints(points)
@@ -37,12 +39,23 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             event.preventDefault()
-            
-            updateNote({
-                name: newTitle,
-                content: [...bulletPoints.map((bulletPoint) => bulletPoint.point), newPoint],
+
+            const updatedPoints = bulletPoints.map((point: bulletObject) => {
+                return {
+                    point: point.point,
+                    created_at: point.created_at,
+                }
             })
-            setBulletPoints([...bulletPoints, { point: newPoint, editable: false }])
+
+            const np = {
+                point: newPoint,
+                created_at: Date.now(),
+            }
+
+            updatedPoints.push(np)
+            
+            updateNote(newTitle, updatedPoints)
+            setBulletPoints([...bulletPoints, { ...np, editable: false }])
             setNewPoint('')
         }
     }
@@ -65,10 +78,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
             const newPoints = [...bulletPoints]
             newPoints[index].editable = false
             setBulletPoints(newPoints)
-            updateNote({
-                name: newTitle,
-                content: bulletPoints.map((point: bulletObject) => point.point),
-            })
+            updateNote(newTitle, bulletPoints.map((point: bulletObject) => ({point: point.point, created_at: point.created_at})))
         }
     }
 
@@ -139,7 +149,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
             />
             <Button colorScheme='teal' style={{ marginBottom: '10vh', }}>Generate</Button>
         </div>
-    );
-};
+    )
+}
 
 export default Note
