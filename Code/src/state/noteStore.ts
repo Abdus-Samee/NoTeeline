@@ -68,12 +68,7 @@ const NoteStore = (set: any, get: any) =>({
     },
     removeNote: (note: Note_t) => {
         set((state: any) => {
-            const updatedNotes = state.notes.map((n: Note_t) => {
-                if(n.name === note.name) {
-                    return n
-                }
-            })
-
+            const updatedNotes = state.notes.filter((n: Note_t) => n.name !== note.name)
             return { notes: updatedNotes, }
         })
     },

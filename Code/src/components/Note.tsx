@@ -14,6 +14,10 @@ type bulletObject = {
     editable: boolean;
 }
 
+let mediaRecorder : any
+let chunks : any[] = []
+let audioURL : string
+
 const Note: React.FC<NoteProps> = ({ name }) => {
     const { updateNote, fetchNote, updateNoteName } = useNoteStore((state) => ({
         updateNote: state.updateNote,
@@ -24,6 +28,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const [newPoint, setNewPoint] = useState<string>('')
     const [newTitle, setNewTitle] = useState<string>(name)
     const [editTitle, setEditTitle] = useState<boolean>(false)
+    const [recording, setRecording] = useState<any>(null)
 
     useEffect(() => {
         const note = fetchNote(name)
@@ -34,6 +39,34 @@ const Note: React.FC<NoteProps> = ({ name }) => {
          }))
         setBulletPoints(points)
         // console.log(points)
+
+        // mediaRecorder setup for audio
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+            console.log('mediaDevices supported..')
+
+            navigator.mediaDevices.getUserMedia({
+                audio: true
+            }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream)
+
+                mediaRecorder.ondataavailable = (e: any) => {
+                    chunks.push(e.data)
+                }
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'})
+                    chunks = []
+                    audioURL = window.URL.createObjectURL(blob)
+                    setRecording(audioURL)
+                }
+
+                mediaRecorder.start()
+            }).catch(error => {
+                console.log('Following error has occured : ',error)
+            })
+        }else{
+            alert('Your browser does not support media devices')
+        }
     }, [name])
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -88,6 +121,11 @@ const Note: React.FC<NoteProps> = ({ name }) => {
             setEditTitle(false)
             updateNoteName(name, newTitle)
         }
+    }
+
+    const stopRecording = () => {
+        mediaRecorder.stop()
+        console.log(recording)
     }
 
     return (
@@ -147,7 +185,8 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                 onChange={(e) => setNewPoint(e.target.value)}
                 onKeyDown={event => handleKeyDown(event)}
             />
-            <Button colorScheme='teal' style={{ marginBottom: '10vh', }}>Generate</Button>
+            <Button colorScheme='teal' onClick={stopRecording} style={{ marginBottom: '10vh', }}>Generate</Button>
+            <audio src={recording} controls />
         </div>
     )
 }

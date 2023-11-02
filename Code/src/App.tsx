@@ -65,6 +65,7 @@ function App() {
       return
     }
 
+    //adding a new note for the first time in the state
     addNote({
       name,
       content: [],
