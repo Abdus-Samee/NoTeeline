@@ -71,6 +71,7 @@ function App() {
       content: [],
       created_at: Date.now(),
       updated_at: Date.now(),
+      recording_start: 0,
     })
 
     setName('')
@@ -122,7 +123,7 @@ function App() {
               >
                 {note.name}
               </li>
-              <DeleteIcon style={{ cursor: 'pointer', }} onClick={() => deleteNote(note)} />
+              <DeleteIcon style={{ cursor: 'pointer', }} onClick={(event) => {event.stopPropagation(); deleteNote(note)}} />
             </a>
           ))}
         </ul>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
+import axios from 'axios'
+import OpenAI from 'openai'
 
 import { NotePoint, useNoteStore } from '../state/noteStore'
 
@@ -19,10 +21,11 @@ let chunks : any[] = []
 let audioURL : string
 
 const Note: React.FC<NoteProps> = ({ name }) => {
-    const { updateNote, fetchNote, updateNoteName } = useNoteStore((state) => ({
+    const { updateNote, fetchNote, updateNoteName, startRecording } = useNoteStore((state) => ({
         updateNote: state.updateNote,
         fetchNote: state.fetchNote,
         updateNoteName: state.updateNoteName,
+        startRecording: state.startRecording
     }))
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
     const [newPoint, setNewPoint] = useState<string>('')
@@ -32,7 +35,13 @@ const Note: React.FC<NoteProps> = ({ name }) => {
 
     useEffect(() => {
         const note = fetchNote(name)
-        const points = note.content.map((cont: NotePoint) => ({ 
+
+        // if(note.recording_start === 0){
+            
+        // }
+        startRecording(name, Date.now())
+
+        const points = note.content?.map((cont: NotePoint) => ({ 
             point: cont.point, 
             created_at: cont.created_at,
             editable: false,
@@ -54,10 +63,21 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                 }
 
                 mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, {'type': 'audio/ogg; codecs=opus'})
+                    const blob = new Blob(chunks, {'type': 'audio/mp3; codecs=opus'})
                     chunks = []
                     audioURL = window.URL.createObjectURL(blob)
                     setRecording(audioURL)
+                    //convert blob to mp3 file
+                    const openai = new OpenAI({ apiKey: '...', dangerouslyAllowBrowser: true} )
+                    openai.audio.transcriptions.create({
+                        file: new File([blob], 'recording.mp3'),
+                        model: 'whisper-1',
+                        response_format: 'srt',
+                    }).then((res: any) => {
+                        console.log(res)
+                    }).catch((err: any) => {
+                        console.log(err)
+                    })
                 }
 
                 mediaRecorder.start()
@@ -126,6 +146,32 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const stopRecording = () => {
         mediaRecorder.stop()
         console.log(recording)
+        // transcribe()
+    }
+
+    const transcribe = (recording: any) => {
+        const OPENAI_KEY = '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'
+        const model = "whisper-1"
+
+        const formData = new FormData()
+        formData.append("model", model)
+        formData.append("file", recording)
+
+        axios
+        .post("https://api.openai.com/v1/audio/transcriptions", formData, {
+            headers: {
+            "Authorization": `Bearer ${OPENAI_KEY}`,
+            "Content-Type": "multipart/form-data"
+            },
+        })
+        .then((res) => {
+            console.log(res.data)
+            alert('Transcription complete!')
+        })
+        .catch((err) => {
+            console.error(err)
+            alert("Error transcribing the provided audio file.")
+        })
     }
 
     return (
@@ -186,7 +232,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                 onKeyDown={event => handleKeyDown(event)}
             />
             <Button colorScheme='teal' onClick={stopRecording} style={{ marginBottom: '10vh', }}>Generate</Button>
-            <audio src={recording} controls />
+            {recording && <audio src={recording} controls />}
         </div>
     )
 }

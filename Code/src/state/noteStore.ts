@@ -12,6 +12,7 @@ export type Note_t = {
     content: NotePoint[];
     created_at: number;
     updated_at: number;
+    recording_start: number;
 };
 
 // type NoteStore = {
@@ -69,6 +70,17 @@ const NoteStore = (set: any, get: any) =>({
     removeNote: (note: Note_t) => {
         set((state: any) => {
             const updatedNotes = state.notes.filter((n: Note_t) => n.name !== note.name)
+            return { notes: updatedNotes, }
+        })
+    },
+    startRecording: (name: string, time: number) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === name) {
+                    return {...n, recording_start: time}
+                }
+                return n
+            })
             return { notes: updatedNotes, }
         })
     },
