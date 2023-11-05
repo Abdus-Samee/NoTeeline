@@ -36,9 +36,11 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const [ytLink, setYtLink] = useState<string>('')
     const [embedId, setEmbedId] = useState<string>('')
     const [isLink, setIsLink] = useState<boolean>(false)
+    const [pause, setPause] = useState<boolean>(false)
 
     const ref = useRef(null)
     const toast = useToast()
+    let timeoutHandle : any
 
     useEffect(() => {
         const note = fetchNote(name)
@@ -50,6 +52,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
             editable: false,
          }))
         setBulletPoints(points)
+
         // console.log(points)
 
         // mediaRecorder setup for audio
@@ -216,7 +219,22 @@ const Note: React.FC<NoteProps> = ({ name }) => {
 
     const handleVideoStateChange = (e: any) => {
         const time = e.target.getCurrentTime()
-        console.log(time)
+        const playerState = e.target.getPlayerState()
+
+        if(playerState === 1){
+            console.log(time)
+        }else if(playerState === 2){
+            console.log('paused')
+        }
+        timeoutHandle = window.setTimeout(() => handleVideoStateChange(e), 1000)
+    }
+
+    const loop = (e: any) => {
+        timeoutHandle = window.setTimeout(() => handleVideoStateChange(e), 1000)
+    }
+
+    const stopVideo = () => {
+        window.clearTimeout(timeoutHandle)
     }
 
     return (
@@ -261,8 +279,12 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                     </InputGroup>
                     :
                     <YouTube 
+                        ref={ref}
                         videoId={embedId}
-                        onStateChange={(e) => handleVideoStateChange(e)}
+                        onReady={loop}
+                        onPlay={() => setPause(false)}
+                        onPause={() => setPause(true)}
+                        onEnd={stopVideo}
                         style={{ marginBottom: '5vh', }}
                     />
             }
