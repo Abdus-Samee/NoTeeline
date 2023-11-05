@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Button } from '@chakra-ui/react'
+import { Button, InputGroup, Input, InputRightElement, useToast } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
 import axios from 'axios'
 import OpenAI from 'openai'
+// import { YoutubeTranscript } from 'youtube-transcript'
+// var youtubeTranscript = require("youtube-transcript")
 
 import { NotePoint, useNoteStore } from '../state/noteStore'
 
@@ -32,13 +34,14 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const [newTitle, setNewTitle] = useState<string>(name)
     const [editTitle, setEditTitle] = useState<boolean>(false)
     const [recording, setRecording] = useState<any>(null)
+    const [ytLink, setYtLink] = useState<string>('')
+    const [embedId, setEmbedId] = useState<string>('')
+    const [isLink, setIsLink] = useState<boolean>(false)
+
+    const toast = useToast()
 
     useEffect(() => {
         const note = fetchNote(name)
-
-        // if(note.recording_start === 0){
-            
-        // }
         startRecording(name, Date.now())
 
         const points = note.content?.map((cont: NotePoint) => ({ 
@@ -50,43 +53,43 @@ const Note: React.FC<NoteProps> = ({ name }) => {
         // console.log(points)
 
         // mediaRecorder setup for audio
-        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-            console.log('mediaDevices supported..')
+        // if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+        //     console.log('mediaDevices supported..')
 
-            navigator.mediaDevices.getUserMedia({
-                audio: true
-            }).then(stream => {
-                mediaRecorder = new MediaRecorder(stream)
+        //     navigator.mediaDevices.getUserMedia({
+        //         audio: true
+        //     }).then(stream => {
+        //         mediaRecorder = new MediaRecorder(stream)
 
-                mediaRecorder.ondataavailable = (e: any) => {
-                    chunks.push(e.data)
-                }
+        //         mediaRecorder.ondataavailable = (e: any) => {
+        //             chunks.push(e.data)
+        //         }
 
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, {'type': 'audio/mp3; codecs=opus'})
-                    chunks = []
-                    audioURL = window.URL.createObjectURL(blob)
-                    setRecording(audioURL)
-                    //convert blob to mp3 file
-                    const openai = new OpenAI({ apiKey: '...', dangerouslyAllowBrowser: true} )
-                    openai.audio.transcriptions.create({
-                        file: new File([blob], 'recording.mp3'),
-                        model: 'whisper-1',
-                        response_format: 'srt',
-                    }).then((res: any) => {
-                        console.log(res)
-                    }).catch((err: any) => {
-                        console.log(err)
-                    })
-                }
+        //         mediaRecorder.onstop = () => {
+        //             const blob = new Blob(chunks, {'type': 'audio/mp3; codecs=opus'})
+        //             chunks = []
+        //             audioURL = window.URL.createObjectURL(blob)
+        //             setRecording(audioURL)
+        //             //convert blob to mp3 file
+        //             const openai = new OpenAI({ apiKey: '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', dangerouslyAllowBrowser: true} )
+        //             openai.audio.transcriptions.create({
+        //                 file: new File([blob], 'recording.mp3'),
+        //                 model: 'whisper-1',
+        //                 response_format: 'srt',
+        //             }).then((res: any) => {
+        //                 console.log(res)
+        //             }).catch((err: any) => {
+        //                 console.log(err)
+        //             })
+        //         }
 
-                mediaRecorder.start()
-            }).catch(error => {
-                console.log('Following error has occured : ',error)
-            })
-        }else{
-            alert('Your browser does not support media devices')
-        }
+        //         mediaRecorder.start()
+        //     }).catch(error => {
+        //         console.log('Following error has occured : ',error)
+        //     })
+        // }else{
+        //     alert('Your browser does not support media devices')
+        // }
     }, [name])
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -174,6 +177,43 @@ const Note: React.FC<NoteProps> = ({ name }) => {
         })
     }
 
+    const getYoutubeTranscription = () => {
+        let ytId = ''
+        if(ytLink.includes('watch')){
+            ytId = ytLink.split('v=')[1]
+            setEmbedId(ytId)
+            setIsLink(true)
+        }else if(ytLink.includes('youtu.be')){
+            ytId = ytLink.split('/')[3].split('?')[0]
+            setEmbedId(ytId)
+            setIsLink(true)
+        }else{
+            alert('Invalid YouTube link!')
+            // return
+        }
+
+        fetch('http://localhost:3000/youtube-transcript', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ytLink: ytLink,
+            }),
+        }).then(res => res.json()).then(data => {
+            console.log(data)
+            toast({
+                title: 'Transcription complete!',
+                description: 'Your transcription is ready!',
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+            })
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
     return (
         <div className='note-ui'>
             <h1 className='note-title'>
@@ -198,6 +238,33 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                 }
                 {/* <hr style={{ width: '90%', border: '1px dashed #566949' }} /> */}
             </h1>
+            {
+                !isLink ?
+                    <InputGroup
+                        style={{ marginBottom: '5vh', width: '50%', }}    
+                    >
+                        <Input
+                            placeholder='Enter a YouTube link...'
+                            style={{ background: 'white', }}
+                            onChange={(e) => setYtLink(e.target.value)}
+                        />
+                        <InputRightElement width='4.5rem' style={{ padding: '0.5vw', }}>
+                            <Button h='1.75rem' size='sm' color='white' colorScheme='red' onClick={getYoutubeTranscription}>
+                                Submit
+                            </Button>
+                        </InputRightElement>
+                    </InputGroup>
+                    :
+                    <iframe
+                        width="560"
+                        height="315"
+                        src={`https://www.youtube.com/embed/${embedId}`}
+                        title="YouTube video player"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ marginBottom: '5vh', }}
+                    />
+            }
             <ul style={{ fontSize: '1.1em', marginBottom: '2vh', }}>
                 {bulletPoints.map((bulletPoint, index) => (
                     !bulletPoint.editable ?
