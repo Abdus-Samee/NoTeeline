@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button, InputGroup, Input, InputRightElement, useToast } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
 import axios from 'axios'
 import OpenAI from 'openai'
-// import { YoutubeTranscript } from 'youtube-transcript'
-// var youtubeTranscript = require("youtube-transcript")
+import YouTube from 'react-youtube'
 
 import { NotePoint, useNoteStore } from '../state/noteStore'
 
@@ -38,6 +37,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const [embedId, setEmbedId] = useState<string>('')
     const [isLink, setIsLink] = useState<boolean>(false)
 
+    const ref = useRef(null)
     const toast = useToast()
 
     useEffect(() => {
@@ -214,6 +214,11 @@ const Note: React.FC<NoteProps> = ({ name }) => {
         })
     }
 
+    const handleVideoStateChange = (e: any) => {
+        const time = e.target.getCurrentTime()
+        console.log(time)
+    }
+
     return (
         <div className='note-ui'>
             <h1 className='note-title'>
@@ -255,13 +260,9 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                         </InputRightElement>
                     </InputGroup>
                     :
-                    <iframe
-                        width="560"
-                        height="315"
-                        src={`https://www.youtube.com/embed/${embedId}`}
-                        title="YouTube video player"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                    <YouTube 
+                        videoId={embedId}
+                        onStateChange={(e) => handleVideoStateChange(e)}
                         style={{ marginBottom: '5vh', }}
                     />
             }
