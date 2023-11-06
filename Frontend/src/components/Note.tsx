@@ -4,9 +4,9 @@ import { EditIcon } from '@chakra-ui/icons'
 import axios from 'axios'
 import OpenAI from 'openai'
 import YouTube from 'react-youtube'
-import { expandPoint } from '../utils/helper'
 
 import { NotePoint, TranscriptLine, useNoteStore } from '../state/noteStore'
+import { expandPoint, callGPT } from '../utils/helper'
 
 type NoteProps = {
   name: string;
@@ -229,7 +229,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
             setPlayerTime(time)
             // console.log(time)
         }else if(playerState === 2){
-            console.log('paused')
+            // console.log('paused')
         }
         timeoutHandle = window.setTimeout(() => handleVideoStateChange(e), 1000)
     }
@@ -253,8 +253,9 @@ const Note: React.FC<NoteProps> = ({ name }) => {
         // console.log(points)
 
         points.forEach(point => {
-            const expandedPoints = expandPoint(point, transcription)
-            console.log(expandedPoints)
+            const expandedPoint = expandPoint(point, transcription)
+            console.log(expandedPoint)
+            callGPT(expandedPoint)
         })
     }
 
