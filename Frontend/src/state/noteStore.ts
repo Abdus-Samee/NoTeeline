@@ -7,6 +7,12 @@ export type NotePoint = {
     // updated_at: number;
 }
 
+export type TranscriptLine = {
+    offset: number;
+    duration: number;
+    text: string;
+}
+
 export type Note_t = {
     name: string;
     content: NotePoint[];

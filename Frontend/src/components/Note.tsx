@@ -4,8 +4,9 @@ import { EditIcon } from '@chakra-ui/icons'
 import axios from 'axios'
 import OpenAI from 'openai'
 import YouTube from 'react-youtube'
+import { expandPoint } from '../utils/helper'
 
-import { NotePoint, useNoteStore } from '../state/noteStore'
+import { NotePoint, TranscriptLine, useNoteStore } from '../state/noteStore'
 
 type NoteProps = {
   name: string;
@@ -36,6 +37,8 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const [ytLink, setYtLink] = useState<string>('')
     const [embedId, setEmbedId] = useState<string>('')
     const [isLink, setIsLink] = useState<boolean>(false)
+    const [transcription, setTranscription] = useState<TranscriptLine[]>([]) //yt transcription
+    const [playerTime, setPlayerTime] = useState<number>(0) //time of the yt player at any instant
     const [pause, setPause] = useState<boolean>(false)
 
     const ref = useRef(null)
@@ -108,7 +111,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
 
             const np = {
                 point: newPoint,
-                created_at: Date.now(),
+                created_at: playerTime, //time of the yt player at the moment of pressing enter
             }
 
             updatedPoints.push(np)
@@ -204,7 +207,8 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                 ytLink: ytLink,
             }),
         }).then(res => res.json()).then(data => {
-            console.log(data)
+            // console.log(data)
+            setTranscription(data.response) //each transctiption => {offset, duration, text}
             toast({
                 title: 'Transcription complete!',
                 description: 'Your transcription is ready!',
@@ -218,11 +222,12 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     }
 
     const handleVideoStateChange = (e: any) => {
-        const time = e.target.getCurrentTime()
-        const playerState = e.target.getPlayerState()
+        const time = e.target.getCurrentTime() // time: number
+        const playerState = e.target.getPlayerState() //playerState: number
 
         if(playerState === 1){
-            console.log(time)
+            setPlayerTime(time)
+            // console.log(time)
         }else if(playerState === 2){
             console.log('paused')
         }
@@ -235,6 +240,22 @@ const Note: React.FC<NoteProps> = ({ name }) => {
 
     const stopVideo = () => {
         window.clearTimeout(timeoutHandle)
+    }
+
+    const expandNote = () => {
+        // console.log('expand note')
+        // console.log(transcription)
+
+        const points = bulletPoints.map((point: bulletObject) => ({
+            point: point.point,
+            created_at: point.created_at,
+        }))
+        // console.log(points)
+
+        points.forEach(point => {
+            const expandedPoints = expandPoint(point, transcription)
+            console.log(expandedPoints)
+        })
     }
 
     return (
@@ -321,7 +342,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                 onChange={(e) => setNewPoint(e.target.value)}
                 onKeyDown={event => handleKeyDown(event)}
             />
-            <Button colorScheme='teal' onClick={stopRecording} style={{ marginBottom: '10vh', }}>Generate</Button>
+            <Button colorScheme='teal' onClick={expandNote} style={{ marginBottom: '10vh', }}>Expand Note</Button>
             {recording && <audio src={recording} controls />}
         </div>
     )
