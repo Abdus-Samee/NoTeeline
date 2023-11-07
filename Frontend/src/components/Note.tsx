@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Button, InputGroup, Input, InputRightElement, useToast } from '@chakra-ui/react'
+import { Button, InputGroup, Input, InputRightElement, useToast, Spinner } from '@chakra-ui/react'
 import { EditIcon } from '@chakra-ui/icons'
 import axios from 'axios'
 import OpenAI from 'openai'
 import YouTube from 'react-youtube'
+import Typed from 'react-typed'
 
-import { NotePoint, TranscriptLine, useNoteStore } from '../state/noteStore'
+import { NotePoint, ExpandedNote, TranscriptLine, useNoteStore } from '../state/noteStore'
 import { expandPoint, callGPT } from '../utils/helper'
 
 type NoteProps = {
@@ -39,6 +40,8 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     const [isLink, setIsLink] = useState<boolean>(false)
     const [transcription, setTranscription] = useState<TranscriptLine[]>([]) //yt transcription
     const [playerTime, setPlayerTime] = useState<number>(0) //time of the yt player at any instant
+    const [expandedNotes, setExpandedNotes] = useState<ExpandedNote[]>([]) //expanded notes [{point, expansion}]
+    const [expanding, setExpanding] = useState<number>(-1) //-1: not expanding, 0: expanding, 1: expanded
     const [pause, setPause] = useState<boolean>(false)
 
     const ref = useRef(null)
@@ -242,21 +245,18 @@ const Note: React.FC<NoteProps> = ({ name }) => {
         window.clearTimeout(timeoutHandle)
     }
 
-    const expandNote = () => {
-        // console.log('expand note')
-        // console.log(transcription)
+    const expandNote = async () => {
+        setExpanding(0)
 
         const points = bulletPoints.map((point: bulletObject) => ({
             point: point.point,
             created_at: point.created_at,
         }))
-        // console.log(points)
 
-        points.forEach(point => {
-            const expandedPoint = expandPoint(point, transcription)
-            console.log(expandedPoint)
-            callGPT(expandedPoint)
-        })
+        const res = await callGPT(points, transcription)
+        console.log(res)
+        setExpandedNotes(res)
+        setExpanding(1)
     }
 
     return (
@@ -343,7 +343,35 @@ const Note: React.FC<NoteProps> = ({ name }) => {
                 onChange={(e) => setNewPoint(e.target.value)}
                 onKeyDown={event => handleKeyDown(event)}
             />
-            <Button colorScheme='teal' onClick={expandNote} style={{ marginBottom: '10vh', }}>Expand Note</Button>
+            <Button disabled={expanding == 0} colorScheme='teal' onClick={expandNote} style={{ marginBottom: '5vh', }}>Expand Note</Button>
+            {
+                expanding === 0 && 
+                <div
+                    style={{ textAlign: 'center', }}
+                >
+                    <Spinner 
+                        emptyColor='gray.200'
+                        color='blue.500'
+                    />
+                    <p>Expanding Notes...</p>
+                </div>
+            }
+            {
+                expanding === 1 &&
+                expandedNotes.map((exp, i) => (
+                    <div key={i} style={{ marginBottom: '2vh', }}>
+                        <h3
+                            style={{ fontWeight: 'bold', }}
+                        >
+                            {exp.point}
+                        </h3>
+                        <Typed
+                            strings={[exp.expansion]}
+                            typeSpeed={40}
+                        />
+                    </div>
+                ))
+            }
             {recording && <audio src={recording} controls />}
         </div>
     )

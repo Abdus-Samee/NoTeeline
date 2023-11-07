@@ -16,10 +16,16 @@ export type TranscriptLine = {
 export type Note_t = {
     name: string;
     content: NotePoint[];
+    expansion: ExpandedNote[];
     created_at: number;
     updated_at: number;
     recording_start: number;
-};
+}
+
+export type ExpandedNote = {
+    point: string;
+    expansion: string;
+}
 
 // type NoteStore = {
 //     notes: Note[];
@@ -46,6 +52,17 @@ const NoteStore = (set: any, get: any) =>({
     fetchNote: (name: string) => {
         const note = get().notes.find((note: Note_t) => note.name === name)
         return note ? note : null
+    },
+    addExpansion: (name: string, expandedNote: ExpandedNote) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === name) {
+                    return {...n, expansion: [...n.expansion, expandedNote]}
+                }
+                return n
+            })
+            return { notes: updatedNotes, }
+        })
     },
     checkUniqueName: (name: string) => {
         const isUnique = get().notes.filter((note: Note_t) => note.name === name).length === 0

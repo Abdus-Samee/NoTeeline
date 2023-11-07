@@ -69,6 +69,7 @@ function App() {
     addNote({
       name,
       content: [],
+      expansion: [],
       created_at: Date.now(),
       updated_at: Date.now(),
       recording_start: 0,
