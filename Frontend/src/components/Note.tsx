@@ -7,7 +7,8 @@ import YouTube from 'react-youtube'
 import Typed from 'react-typed'
 
 import { NotePoint, ExpandedNote, TranscriptLine, useNoteStore } from '../state/noteStore'
-import { expandPoint, callGPT } from '../utils/helper'
+import { expandPoint, callGPT, callGPTForSinglePoint } from '../utils/helper'
+import BulletPoint from './BulletPoint'
 
 type NoteProps = {
   name: string;
@@ -59,7 +60,16 @@ const Note: React.FC<NoteProps> = ({ name }) => {
          }))
         setBulletPoints(points)
 
-        // console.log(points)
+        const handler = (e: Event) => e.preventDefault()
+        document.addEventListener('gesturestart', handler)
+        document.addEventListener('gesturechange', handler)
+        document.addEventListener('gestureend', handler)
+
+        return () => {
+            document.removeEventListener('gesturestart', handler)
+            document.removeEventListener('gesturechange', handler)
+            document.removeEventListener('gestureend', handler)
+        }
 
         // mediaRecorder setup for audio
         // if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
@@ -259,6 +269,25 @@ const Note: React.FC<NoteProps> = ({ name }) => {
         setExpanding(1)
     }
 
+    const expandSinglePoint = async (point: string, created_at: number) => {
+        // toast({
+        //     title: 'Expanding...',
+        //     description: 'Please wait!',
+        //     status: 'info',
+        //     duration: 2000,
+        //     isClosable: true,
+            
+        // })
+
+        const obj = {
+            point: point,
+            created_at: created_at,
+        }
+
+        const res = await callGPTForSinglePoint(obj, transcription)
+        return res
+    }
+
     return (
         <div className='note-ui'>
             <h1 className='note-title'>
@@ -313,18 +342,14 @@ const Note: React.FC<NoteProps> = ({ name }) => {
             <ul style={{ fontSize: '1.1em', marginBottom: '2vh', }}>
                 {bulletPoints.map((bulletPoint, index) => (
                     !bulletPoint.editable ?
-                    <li 
+                    <BulletPoint
                         key={index}
-                        className='bullet-point' 
-                    >
-                        {bulletPoint.point} 
-                        <EditIcon 
-                            className='bullet-point-cross' 
-                            w={4} 
-                            color='green.500' 
-                            onClick={() => editPoint(index, bulletPoint.point)} 
-                        />
-                    </li>
+                        index={index}
+                        point={bulletPoint.point}
+                        created_at={bulletPoint.created_at}
+                        expandSinglePoint={expandSinglePoint}
+                        editPoint={editPoint}
+                    />
                     :
                     <input
                         type='text'
