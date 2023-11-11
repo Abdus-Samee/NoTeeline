@@ -56,24 +56,25 @@ const BulletPoint = ({index, point, created_at, expandSinglePoint, editPoint}: B
             // api.start({ scale: s, rotateZ: a, x, y })
             return memo
           },
-          onPinchEnd: async (state) => {
+        onPinchEnd: async (state) => {
             console.log('pinch end')
             toast({
-                title: 'Expanding...',
-                description: 'Please wait while we expand the bullet point',
-                status: 'info',
-                duration: 2000,
-                position: 'top-right',
-                isClosable: true,
+                    title: 'Expanding...',
+                    description: 'Please wait while we expand the bullet point',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                    isClosable: true,
             })
 
             const res = await expandSinglePoint(point, created_at)
 
             if (res) {
-                setExpanded(true)
-                setPointToShow(res)
+                    setExpanded(true)
+                    setPointToShow(res)
+                    api.start({ display: 'block' })
             }            
-          },
+        },
         },
         {
           target: ref,
@@ -89,12 +90,15 @@ const BulletPoint = ({index, point, created_at, expandSinglePoint, editPoint}: B
             >
                 {pointToShow}
             </animated.div>
-            <EditIcon 
-                className='bullet-point-cross' 
-                w={4} 
-                color='green.500' 
-                onClick={() => editPoint(index, point)} 
-            />
+            {
+                !expanded &&
+                <EditIcon 
+                    className='bullet-point-cross' 
+                    w={4} 
+                    color='green.500' 
+                    onClick={() => editPoint(index, point)} 
+                />
+            }
         </li>
     )
 }

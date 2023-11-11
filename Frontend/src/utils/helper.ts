@@ -95,16 +95,16 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
             "Summary: "+expandedPoint.point+"\n"+
             "Note:"
 
-    // const res = await openai.chat.completions.create({
-    //     messages: [{ role: "system", content: PROMPT }],
-    //     model: "gpt-4",
-    // })
+    const res = await openai.chat.completions.create({
+        messages: [{ role: "system", content: PROMPT }],
+        model: "gpt-4",
+    })
 
-    // if(res?.choices[0]?.message?.content !== null) return res.choices[0].message.content
-    // else return null
+    if(res?.choices[0]?.message?.content !== null) return res.choices[0].message.content
+    else return null
 
-    const res = await simulateAPICall()
-    return res
+    // const res = await simulateAPICall()
+    // return res
 }
 
 const simulateAPICall = async () => {
