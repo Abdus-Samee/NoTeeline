@@ -68,6 +68,7 @@ function App() {
     //adding a new note for the first time in the state
     addNote({
       name,
+      ytId: '',
       content: [],
       expansion: [],
       created_at: Date.now(),

@@ -25,8 +25,9 @@ let chunks : any[] = []
 let audioURL : string
 
 const Note: React.FC<NoteProps> = ({ name }) => {
-    const { updateNote, fetchNote, updateNoteName, startRecording } = useNoteStore((state) => ({
+    const { updateNote, addYouTubeId, fetchNote, updateNoteName, startRecording } = useNoteStore((state) => ({
         updateNote: state.updateNote,
+        addYouTubeId: state.addYouTubeId,
         fetchNote: state.fetchNote,
         updateNoteName: state.updateNoteName,
         startRecording: state.startRecording
@@ -51,6 +52,11 @@ const Note: React.FC<NoteProps> = ({ name }) => {
 
     useEffect(() => {
         const note = fetchNote(name)
+
+        if(note.ytId !== ''){
+            setEmbedId(note.ytId)
+            setIsLink(true)
+        }
         startRecording(name, Date.now())
 
         const points = note.content?.map((cont: NotePoint) => ({ 
@@ -210,6 +216,8 @@ const Note: React.FC<NoteProps> = ({ name }) => {
             alert('Invalid YouTube link!')
             // return
         }
+
+        addYouTubeId(name, ytId)
 
         fetch('http://localhost:3000/youtube-transcript', {
             method: 'POST',

@@ -15,6 +15,7 @@ export type TranscriptLine = {
 
 export type Note_t = {
     name: string;
+    ytId: string;
     content: NotePoint[];
     expansion: ExpandedNote[];
     created_at: number;
@@ -52,6 +53,17 @@ const NoteStore = (set: any, get: any) =>({
     fetchNote: (name: string) => {
         const note = get().notes.find((note: Note_t) => note.name === name)
         return note ? note : null
+    },
+    addYouTubeId: (name: string, ytId: string) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === name) {
+                    return {...n, ytId: ytId}
+                }
+                return n
+            })
+            return { notes: updatedNotes, }
+        })
     },
     addExpansion: (name: string, expandedNote: ExpandedNote) => {
         set((state: any) => {
