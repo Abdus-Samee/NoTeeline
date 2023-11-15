@@ -6,12 +6,13 @@ import OpenAI from 'openai'
 import YouTube from 'react-youtube'
 import Typed from 'react-typed'
 
-import { NotePoint, ExpandedNote, TranscriptLine, useNoteStore } from '../state/noteStore'
+import { NotePoint, ExpandedNote, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
 import { expandPoint, callGPT, callGPTForSinglePoint } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 
 type NoteProps = {
   name: string;
+  note: Note_t;
 }
 
 type bulletObject = {
@@ -24,17 +25,18 @@ let mediaRecorder : any
 let chunks : any[] = []
 let audioURL : string
 
-const Note: React.FC<NoteProps> = ({ name }) => {
-    const { updateNote, addYouTubeId, fetchNote, updateNoteName, startRecording } = useNoteStore((state) => ({
+const Note: React.FC<NoteProps> = ({ name, note }) => {
+    const { updateNote, addYouTubeId, fetchNote, updateNoteName, startRecording, addTranscription } = useNoteStore((state) => ({
         updateNote: state.updateNote,
         addYouTubeId: state.addYouTubeId,
         fetchNote: state.fetchNote,
         updateNoteName: state.updateNoteName,
-        startRecording: state.startRecording
+        startRecording: state.startRecording,
+        addTranscription: state.addTranscription,
     }))
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
     const [newPoint, setNewPoint] = useState<string>('')
-    const [newTitle, setNewTitle] = useState<string>(name)
+    const [newTitle, setNewTitle] = useState<string>('')
     const [editTitle, setEditTitle] = useState<boolean>(false)
     const [recording, setRecording] = useState<any>(null)
     const [ytLink, setYtLink] = useState<string>('')
@@ -51,19 +53,27 @@ const Note: React.FC<NoteProps> = ({ name }) => {
     let timeoutHandle : any
 
     useEffect(() => {
-        const note = fetchNote(name)
+        setNewTitle(name)
 
-        if(note.ytId !== ''){
+        if (note?.ytId !== '') {
             setEmbedId(note.ytId)
             setIsLink(true)
+        }else{
+            setEmbedId('')
+            setIsLink(false)
         }
+
+        if(note?.transcription){
+            setTranscription(note.transcription)
+        }
+
         startRecording(name, Date.now())
 
-        const points = note.content?.map((cont: NotePoint) => ({ 
-            point: cont.point, 
-            created_at: cont.created_at,
+        const points = note.content?.map((cont: NotePoint) => ({
+            ...cont,
             editable: false,
-         }))
+        }))
+
         setBulletPoints(points)
 
         const handler = (e: Event) => e.preventDefault()
@@ -230,6 +240,7 @@ const Note: React.FC<NoteProps> = ({ name }) => {
         }).then(res => res.json()).then(data => {
             // console.log(data)
             setTranscription(data.response) //each transctiption => {offset, duration, text}
+            addTranscription(name, data.response)
             toast({
                 title: 'Transcription complete!',
                 description: 'Your transcription is ready!',

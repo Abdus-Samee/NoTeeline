@@ -14,10 +14,12 @@ type BulletPointProps = {
 
 const BulletPoint = ({index, point, created_at, expandSinglePoint, editPoint}: BulletPointProps) => {
     const [expanded, setExpanded] = useState(false)
-    const [pointToShow, setPointToShow] = useState(point)
+    const [pointToShow, setPointToShow] = useState<string | null>(null)
     const toast = useToast()
 
     useEffect(() => {
+        setPointToShow(point)
+
         const handler = (e: Event) => e.preventDefault()
         document.addEventListener('gesturestart', handler)
         document.addEventListener('gesturechange', handler)
@@ -28,7 +30,7 @@ const BulletPoint = ({index, point, created_at, expandSinglePoint, editPoint}: B
             document.removeEventListener('gesturechange', handler)
             document.removeEventListener('gestureend', handler)
         }
-    }, [])
+    }, [point])
 
     const ref = useRef<HTMLDivElement>(null)
     const useGesture = createUseGesture([pinchAction])

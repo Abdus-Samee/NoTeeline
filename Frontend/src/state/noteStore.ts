@@ -17,6 +17,7 @@ export type Note_t = {
     name: string;
     ytId: string;
     content: NotePoint[];
+    transcription: TranscriptLine[];
     expansion: ExpandedNote[];
     created_at: number;
     updated_at: number;
@@ -59,6 +60,17 @@ const NoteStore = (set: any, get: any) =>({
             const updatedNotes = state.notes.map((n: Note_t) => {
                 if(n.name === name) {
                     return {...n, ytId: ytId}
+                }
+                return n
+            })
+            return { notes: updatedNotes, }
+        })
+    },
+    addTranscription: (name: string, transcription: TranscriptLine[]) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === name) {
+                    return {...n, transcription: transcription}
                 }
                 return n
             })

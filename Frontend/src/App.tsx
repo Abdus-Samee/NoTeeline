@@ -24,17 +24,28 @@ import Onboarding from './components/Onboarding'
 import { Note_t, useNoteStore } from './state/noteStore'
 import './App.css'
 
-function App() {
-  const { notes, addNote, checkUniqueName, removeNote} = useNoteStore((state) => ({
+const App = () => {
+  const { notes, addNote, checkUniqueName, removeNote, fetchNote} = useNoteStore((state) => ({
     notes: state.notes,
     addNote: state.addNote,
     checkUniqueName: state.checkUniqueName,
     removeNote: state.removeNote,
+    fetchNote: state.fetchNote
   }))
 
   
   const [name, setName] = useState<string>('')
   const [active, setActive] = useState<string>('')
+  const [selectedNote, setSelectedNote] = useState<Note_t>({
+    name: '',
+    ytId: '',
+    content: [],
+    transcription: [],
+    expansion: [],
+    created_at: 0,
+    updated_at: 0,
+    recording_start: 0,
+  })
   
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
@@ -70,6 +81,7 @@ function App() {
       name,
       ytId: '',
       content: [],
+      transcription: [],
       expansion: [],
       created_at: Date.now(),
       updated_at: Date.now(),
@@ -87,7 +99,10 @@ function App() {
 
   const handleOption = (tab : string) => {
     setActive(tab)
-    // console.log('active', tab)
+    if(tab !== 'onboarding'){
+      const note: Note_t = fetchNote(tab)
+      setSelectedNote({...note})
+    }
   }
 
   const deleteNote = (note : Note_t) => {
@@ -158,7 +173,7 @@ function App() {
       </div>
       <div className='note-content'>
         {active === 'onboarding' && <Onboarding />}
-        {active !== '' && active !== 'onboarding' && <Note name={active} />}
+        {active !== '' && active !== 'onboarding' && <Note name={active} note={selectedNote} />}
       </div>
     </div>
   )
