@@ -240,16 +240,34 @@ const Note: React.FC<NoteProps> = ({ name, note }) => {
         }).then(res => res.json()).then(data => {
             // console.log(data)
             setTranscription(data.response) //each transctiption => {offset, duration, text}
-            addTranscription(name, data.response)
+            if(!data.response){
+                toast({
+                    title: 'Warning',
+                    description: 'The provided YouTube video does not have a transcription or has it disabled!',
+                    status: 'warning',
+                    duration: 5000,
+                    isClosable: true,
+                })
+            }else{
+                addTranscription(name, data.response)
+                toast({
+                    title: 'Transcription complete!',
+                    description: 'Your transcription is ready!',
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                })
+            }
+            // console.log(data.response)
+        }).catch(err => {
+            console.log(err)
             toast({
-                title: 'Transcription complete!',
-                description: 'Your transcription is ready!',
-                status: 'success',
+                title: 'Error',
+                description: 'Error in transcribing your YouTube video!',
+                status: 'error',
                 duration: 5000,
                 isClosable: true,
             })
-        }).catch(err => {
-            console.log(err)
         })
     }
 

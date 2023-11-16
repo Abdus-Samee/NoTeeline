@@ -98,6 +98,7 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: PROMPT }],
         model: "gpt-4",
+        temperature: 0.2,
     })
 
     if(res?.choices[0]?.message?.content !== null) return res.choices[0].message.content
