@@ -5,12 +5,14 @@ import YouTube from 'react-youtube'
 type OnboardingHelperProps = {
     index: number,
     embedId: string,
+    opts: any,
+    handleNoteChange: (count: number, input: string) => void,
     setInput: (count: number, input: string) => void,
     handleKeyDown: (count: number, event: React.KeyboardEvent<HTMLInputElement>) => void,
     updateInput: (count: number, index: number, input: string) => void,
 }
 
-const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, setInput, handleKeyDown, updateInput}: OnboardingHelperProps) => {
+const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts, handleNoteChange, setInput, handleKeyDown, updateInput}: OnboardingHelperProps) => {
     const [newPoint, setNewPoint] = useState<string>('')
     const [note, setNote] = useState<string>('')
     const [inputList, setInputList] = useState<string[]>([])
@@ -18,6 +20,7 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, setI
     const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value
         setNote(value)
+        handleNoteChange(index, value)
     }
 
     const handleOldInputChange = (e: React.ChangeEvent<HTMLInputElement>, i: number) => {
@@ -36,6 +39,18 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, setI
         setNewPoint(e.target.value)
     }
 
+    const handleKeyDownPress = (count: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault()
+            const input = newPoint
+            const newInputList = [...inputList]
+            newInputList.push(input)
+            setInputList(newInputList)
+            handleKeyDown(count, e)
+            setNewPoint('')
+        }
+    }
+
     return (
         <Card style={{ marginBottom: '1vh', }}>
             <CardBody>
@@ -43,6 +58,7 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, setI
                     <Box>
                         <YouTube 
                             videoId={embedId}
+                            opts={opts}
                             style={{ marginBottom: '5vh', }}
                         />
                     </Box>
@@ -52,6 +68,7 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, setI
                             placeholder='Enter your note here...'
                             size='sm'
                             resize='vertical'
+                            value={note}
                             onChange={handleTextAreaChange}
                         />
                     </Box>
@@ -73,7 +90,7 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, setI
                             className='note-input'
                             value={newPoint}
                             onChange={(e) => handleNewInputChange(e)}
-                            onKeyDown={event => handleKeyDown(index, event)}
+                            onKeyDown={event => handleKeyDownPress(index, event)}
                         />
                     </Box>
                 </Stack>
