@@ -20,6 +20,7 @@ import { PulseLoader } from 'react-spinners'
 
 import Note from './components/Note'
 import Onboarding from './components/Onboarding'
+import CornellNote from './components/CornellNote'
 
 import { Note_t, useNoteStore } from './state/noteStore'
 import './App.css'
@@ -173,7 +174,7 @@ const App = () => {
       </div>
       <div className='note-content'>
         {active === 'onboarding' && <Onboarding />}
-        {active !== '' && active !== 'onboarding' && <Note name={active} note={selectedNote} />}
+        {active !== '' && active !== 'onboarding' && <CornellNote name={active} note={selectedNote} />}
       </div>
     </div>
   )
