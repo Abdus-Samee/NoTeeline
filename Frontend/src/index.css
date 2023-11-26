@@ -114,6 +114,7 @@
   display: block;
   width: 76%;
   /* height: 3%; */
+  margin-left: 1vw;
   border-bottom: 1px solid #BCA37F;
   outline: none;
   margin-top: 3vh;

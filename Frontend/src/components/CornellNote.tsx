@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Grid, GridItem, Box, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, Spinner } from '@chakra-ui/react'
-import { SunIcon, ChevronRightIcon, ChevronLeftIcon } from '@chakra-ui/icons'
+import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, CalendarIcon, ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons'
 import axios from 'axios'
 import OpenAI from 'openai'
 import YouTube from 'react-youtube'
@@ -406,15 +406,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
                     <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
                         <TagLabel>Expand</TagLabel>
-                        <TagRightIcon as={SunIcon} />
+                        <TagRightIcon w={3} as={ArrowBackIcon} />
+                        <TagRightIcon w={3} as={ArrowForwardIcon} />
                     </Tag>
                     <Tag size='lg' variant='solid' colorScheme='teal' sx={{ marginLeft: '1px', }}>
                         <TagLabel>Order by Theme</TagLabel>
-                        <TagRightIcon as={SunIcon} />
+                        <TagRightIcon as={DragHandleIcon} />
                     </Tag>
                     <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
                         <TagLabel>Order by Time</TagLabel>
-                        <TagRightIcon as={SunIcon} />
+                        <TagRightIcon as={TimeIcon} />
                     </Tag>
                     <ul style={{ fontSize: '1em', paddingLeft: '30px', paddingTop: '2vh', marginBottom: '2vh', }}>
                         {bulletPoints.map((bulletPoint, index) => (
@@ -463,15 +464,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
                         <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
                             <TagLabel>Expand</TagLabel>
-                            <TagRightIcon as={SunIcon} />
+                            <TagRightIcon w={3} as={ArrowBackIcon} />
+                            <TagRightIcon w={3} as={ArrowForwardIcon} />
                         </Tag>
                         <Tag size='lg' variant='solid' colorScheme='teal' sx={{ marginLeft: '1px', }}>
                             <TagLabel>Order by Theme</TagLabel>
-                            <TagRightIcon as={SunIcon} />
+                            <TagRightIcon as={DragHandleIcon} />
                         </Tag>
                         <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
                             <TagLabel>Order by Time</TagLabel>
-                            <TagRightIcon as={SunIcon} />
+                            <TagRightIcon as={TimeIcon} />
                         </Tag>
                         <ul style={{ fontSize: '1em', paddingLeft: '20px', paddingTop: '1vh', }}>
                             {bulletPoints.map((bulletPoint, index) => (
@@ -508,7 +510,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             <GridItem rowSpan={4} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
                 <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
                     <TagLabel>Summary</TagLabel>
-                    <TagRightIcon as={SunIcon} />
+                    <TagRightIcon as={CalendarIcon} />
                 </Tag>
             </GridItem>
         </Grid>
