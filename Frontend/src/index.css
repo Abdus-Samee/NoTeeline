@@ -11,7 +11,8 @@
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   /* background-color: #242424; */
-  background-color: #FFF2D8;
+  /* background-color: #FFF2D8; */
+  background-color: #fff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -43,6 +44,49 @@
   width: 20%;
   background-color: #BCA37F;
   overflow-y: auto;
+}
+
+.sidebar header {
+  font-size: 30px;
+  color: white;
+  text-align: center;
+  font-weight: 600;
+  line-height: 70px;
+  background: #54432C;
+  user-select: none;
+}
+
+.sidebar footer {
+  position: absolute;
+  bottom: 2%;
+  left: 35%;
+}
+
+.sidebar > ul {
+  list-style: none;
+  padding: 1%;
+  margin: 0;
+}
+
+.sidebar ul a:hover {
+  background: #96774f;
+  border-radius: 15px;
+}
+
+.sidebar-option {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.active-tab {
+  background: #96774f;
+  border-radius: 15px;
+}
+
+.sidebar ul a:hover ~ note-del-icon {
+  visibility: hidden;
 }
 
 .note-content {
@@ -112,12 +156,13 @@
 
 .note-input {
   display: block;
-  width: 76%;
+  width: 90%;
   /* height: 3%; */
   margin-left: 1vw;
   border-bottom: 1px solid #BCA37F;
   outline: none;
   margin-top: 3vh;
+  margin-bottom: 3vh;
   font-size: 0.9em;
   font-weight: 600;
   font-family: inherit;
@@ -129,28 +174,6 @@
 
 .note-input:focus {
   border-bottom: 1px solid #54432C;
-}
-
-.sidebar header {
-  font-size: 30px;
-  color: white;
-  text-align: center;
-  font-weight: 600;
-  line-height: 70px;
-  background: #54432C;
-  user-select: none;
-}
-
-.sidebar footer {
-  position: absolute;
-  bottom: 2%;
-  left: 35%;
-}
-
-.sidebar > ul {
-  list-style: none;
-  padding: 1%;
-  margin: 0;
 }
 
 .note-ui > ul {
@@ -175,27 +198,6 @@
 
 .note-del-icon {
   visibility: visible;
-}
-
-.sidebar ul a:hover {
-  background: #96774f;
-  border-radius: 15px;
-}
-
-.sidebar-option {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.active-tab {
-  background: #96774f;
-  border-radius: 15px;
-}
-
-.sidebar ul a:hover ~ note-del-icon {
-  visibility: hidden;
 }
 
 a {

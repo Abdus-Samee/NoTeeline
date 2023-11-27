@@ -4,7 +4,7 @@ import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, C
 import axios from 'axios'
 import OpenAI from 'openai'
 import YouTube from 'react-youtube'
-import Typed from 'react-typed'
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, ExpandedNote, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
 import { expandPoint, callGPT, callGPTForSinglePoint } from '../utils/helper'
@@ -19,6 +19,7 @@ type bulletObject = {
     point: string;
     created_at: number;
     editable: boolean;
+    id: string;
 }
 
 let mediaRecorder : any
@@ -77,9 +78,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         startRecording(name, Date.now())
 
-        const points = note.content?.map((cont: NotePoint) => ({
+        const points = note.content?.map((cont: NotePoint, idx: number) => ({
             ...cont,
             editable: false,
+            id: `bullet-${idx}`,
         }))
 
         setBulletPoints(points)
@@ -336,11 +338,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [expandSection, setExpandSection] = useState<boolean>(false)
     const [expandQuizSection, setExpandQuizSection] = useState<boolean>(false)
 
-    const superToggle = () => {
-        setExpandSection(!expandSection)
-        setExpandQuizSection(!expandQuizSection)
-    }
-
     const toggleExpandSection = () => {
         setExpandSection(!expandSection)
     }
@@ -348,6 +345,45 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const toggleExpandQuizSection = () => {
         setExpandQuizSection(!expandQuizSection)
     }
+
+    const reorder = (list: bulletObject[], startIndex: number, endIndex: number) => {
+        const result = Array.from(list)
+        const [removed] = result.splice(startIndex, 1)
+        result.splice(endIndex, 0, removed)
+      
+        return result
+    }
+
+    const onDragEnd = (result: any) => {
+        console.log('Result ', result)
+
+        // dropped outside the list
+        if (!result.destination) {
+          return
+        }
+    
+        const items = reorder(
+          bulletPoints,
+          result.source.index,
+          result.destination.index
+        )
+    
+        setBulletPoints(items)
+    }
+
+    const getBulletPointStyle = (isDragging: any, draggableStyle: any) => ({
+        // some basic styles to make the items look a bit nicer
+        userSelect: "none",
+        padding: '1vw',
+        margin: `0 0 1vh 0`,
+        border: '1px solid #000',
+        borderRadius: '10px',
+        // change background colour if dragging
+        background: isDragging ? "lightgreen" : "#F5F7F8",
+      
+        // styles we need to apply on draggables
+        ...draggableStyle
+      })
     
     return (
         <Grid
@@ -402,7 +438,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </GridItem>
                 :
                 expandSection ?
-                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '2px', overflowY: 'auto', background: '#FFF2D8', }}>
+                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '2px', overflowY: 'auto', }}>
                     <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
                     <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
                         <TagLabel>Expand</TagLabel>
@@ -413,31 +449,58 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <TagLabel>Order by Theme</TagLabel>
                         <TagRightIcon as={DragHandleIcon} />
                     </Tag>
-                    <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
+                    <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px',marginBottom: '1vh', }}>
                         <TagLabel>Order by Time</TagLabel>
                         <TagRightIcon as={TimeIcon} />
                     </Tag>
-                    <ul style={{ fontSize: '1em', paddingLeft: '30px', paddingTop: '2vh', marginBottom: '2vh', }}>
-                        {bulletPoints.map((bulletPoint, index) => (
-                            !bulletPoint.editable ?
-                            <BulletPoint
-                                key={index}
-                                index={index}
-                                point={bulletPoint.point}
-                                created_at={bulletPoint.created_at}
-                                expandSinglePoint={expandSinglePoint}
-                                editPoint={editPoint}
-                            />
-                            :
-                            <input
-                                type='text'
-                                value={bulletPoint.point}
-                                className='note-input'
-                                onChange={(e) => changeEditPoint(index, e.target.value)}
-                                onKeyDown={event => updateEditPoint(index, event)}
-                            />
-                        ))}
-                    </ul>
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <Droppable droppableId="droppable">
+                        {(provided: any, snapshot: any) => (
+                            <div
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                            // style={getListStyle(snapshot.isDraggingOver)}
+                            >
+                            {bulletPoints.map((bulletPoint, index) => (
+                                <Draggable key={bulletPoint.id} draggableId={bulletPoint.id} index={index}>
+                                {(provided: any, snapshot: any) => (
+                                    <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        style={getBulletPointStyle(
+                                            snapshot.isDragging,
+                                            provided.draggableProps.style
+                                        )}
+                                    >
+                                        {
+                                            !bulletPoint.editable ?
+                                            <BulletPoint
+                                                key={index}
+                                                index={index}
+                                                point={bulletPoint.point}
+                                                created_at={bulletPoint.created_at}
+                                                expandSinglePoint={expandSinglePoint}
+                                                editPoint={editPoint}
+                                            />
+                                            :
+                                            <input
+                                                type='text'
+                                                value={bulletPoint.point}
+                                                className='note-input'
+                                                onChange={(e) => changeEditPoint(index, e.target.value)}
+                                                onKeyDown={event => updateEditPoint(index, event)}
+                                            />
+                                        }
+                                    </div>
+                                )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                            </div>
+                        )}
+                        </Droppable>
+                    </DragDropContext>
                     <input
                         type='text'
                         placeholder='Write a point...'
@@ -471,31 +534,58 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             <TagLabel>Order by Theme</TagLabel>
                             <TagRightIcon as={DragHandleIcon} />
                         </Tag>
-                        <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
+                        <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', marginBottom: '1vh', }}>
                             <TagLabel>Order by Time</TagLabel>
                             <TagRightIcon as={TimeIcon} />
                         </Tag>
-                        <ul style={{ fontSize: '1em', paddingLeft: '20px', paddingTop: '1vh', }}>
-                            {bulletPoints.map((bulletPoint, index) => (
-                                !bulletPoint.editable ?
-                                <BulletPoint
-                                    key={index}
-                                    index={index}
-                                    point={bulletPoint.point}
-                                    created_at={bulletPoint.created_at}
-                                    expandSinglePoint={expandSinglePoint}
-                                    editPoint={editPoint}
-                                />
-                                :
-                                <input
-                                    type='text'
-                                    value={bulletPoint.point}
-                                    className='note-input'
-                                    onChange={(e) => changeEditPoint(index, e.target.value)}
-                                    onKeyDown={event => updateEditPoint(index, event)}
-                                />
-                            ))}
-                        </ul>
+                        <DragDropContext onDragEnd={onDragEnd}>
+                            <Droppable droppableId="droppable">
+                            {(provided: any, snapshot: any) => (
+                                <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                // style={getListStyle(snapshot.isDraggingOver)}
+                                >
+                                {bulletPoints.map((bulletPoint, index) => (
+                                    <Draggable key={bulletPoint.id} draggableId={bulletPoint.id} index={index}>
+                                    {(provided: any, snapshot: any) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            style={getBulletPointStyle(
+                                                snapshot.isDragging,
+                                                provided.draggableProps.style
+                                            )}
+                                        >
+                                            {
+                                                !bulletPoint.editable ?
+                                                <BulletPoint
+                                                    key={index}
+                                                    index={index}
+                                                    point={bulletPoint.point}
+                                                    created_at={bulletPoint.created_at}
+                                                    expandSinglePoint={expandSinglePoint}
+                                                    editPoint={editPoint}
+                                                />
+                                                :
+                                                <input
+                                                    type='text'
+                                                    value={bulletPoint.point}
+                                                    className='note-input'
+                                                    onChange={(e) => changeEditPoint(index, e.target.value)}
+                                                    onKeyDown={event => updateEditPoint(index, event)}
+                                                />
+                                            }
+                                        </div>
+                                    )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
+                                </div>
+                            )}
+                            </Droppable>
+                        </DragDropContext>
                         <input
                             type='text'
                             placeholder='Write a point...'

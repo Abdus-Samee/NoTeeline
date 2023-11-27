@@ -85,7 +85,7 @@ const BulletPoint = ({index, point, created_at, expandSinglePoint, editPoint}: B
     )
     
     return (
-        <li className='bullet-point'>
+        <div className='bullet-point'>
             <animated.div
                 ref={ref}
                 style={style}
@@ -101,7 +101,7 @@ const BulletPoint = ({index, point, created_at, expandSinglePoint, editPoint}: B
                     onClick={() => editPoint(index, point)} 
                 />
             }
-        </li>
+        </div>
     )
 }
 

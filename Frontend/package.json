@@ -23,6 +23,7 @@
     "fs": "^0.0.1-security",
     "openai": "^4.14.2",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-spinners": "^0.13.8",
     "react-typed": "^1.2.0",
