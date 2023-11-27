@@ -20,6 +20,9 @@ type bulletObject = {
     created_at: number;
     editable: boolean;
     id: string;
+    expand: number;
+    compress: number;
+    history: string[];
 }
 
 let mediaRecorder : any
@@ -48,6 +51,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [expandedNotes, setExpandedNotes] = useState<ExpandedNote[]>([]) //expanded notes [{point, expansion}]
     const [expanding, setExpanding] = useState<number>(-1) //-1: not expanding, 0: expanding, 1: expanded
     const [pause, setPause] = useState<boolean>(false)
+    const [expandSection, setExpandSection] = useState<boolean>(false)
+    const [expandQuizSection, setExpandQuizSection] = useState<boolean>(false)
+    const [dragging, setDragging] = useState(false)
+    const [draggingIndex, setDraggingIndex] = useState<number>(-1)
+    const [initialY, setInitialY] = useState(0)
 
     const ref = useRef(null)
     const toast = useToast()
@@ -82,6 +90,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             ...cont,
             editable: false,
             id: `bullet-${idx}`,
+            expand: 0,
+            compress: 0,
+            history: [cont.point],
         }))
 
         setBulletPoints(points)
@@ -153,10 +164,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 created_at: playerTime, //time of the yt player at the moment of pressing enter
             }
 
+            const maxId = Math.max(...bulletPoints.map((point: bulletObject) => parseInt(point.id.split('-')[1])))
+
             updatedPoints.push(np)
             
             updateNote(newTitle, updatedPoints)
-            setBulletPoints([...bulletPoints, { ...np, editable: false }])
+            setBulletPoints([...bulletPoints, { ...np, editable: false, id:`bullet-${maxId}`, expand: 0, compress: 0, history: [] }])
             setNewPoint('')
         }
     }
@@ -317,15 +330,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const expandSinglePoint = async (point: string, created_at: number) => {
-        // toast({
-        //     title: 'Expanding...',
-        //     description: 'Please wait!',
-        //     status: 'info',
-        //     duration: 2000,
-        //     isClosable: true,
-            
-        // })
-
         const obj = {
             point: point,
             created_at: created_at,
@@ -334,9 +338,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const res = await callGPTForSinglePoint(obj, transcription)
         return res
     }
-
-    const [expandSection, setExpandSection] = useState<boolean>(false)
-    const [expandQuizSection, setExpandQuizSection] = useState<boolean>(false)
 
     const toggleExpandSection = () => {
         setExpandSection(!expandSection)
@@ -383,7 +384,107 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
       
         // styles we need to apply on draggables
         ...draggableStyle
-      })
+    })
+
+    const handleContextMenu = (e: any) => {
+        e.preventDefault()
+        e.stopPropagation()
+    }
+
+    const handleMouseDown = (e: any, index: number) => {
+        if (e.button === 2) {
+            // Detect right mouse button (2)
+            setDragging(true)
+            setDraggingIndex(index)
+            setInitialY(e.clientY)
+        }
+    }
+
+    const openAIHelper = (newPoints: bulletObject[]) => {
+        const pointToBeUpdated = newPoints[draggingIndex]
+
+        expandSinglePoint(pointToBeUpdated.point, pointToBeUpdated.created_at).then(res => {
+            if(res){
+                toast({
+                    title: 'Done',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                })
+                newPoints = bulletPoints.map((bp, idx) => {
+                    if(idx === draggingIndex){
+                        return {
+                            ...bp,
+                            history: [...bp.history, res],
+                        }
+                    }else{
+                        return bp
+                    }
+                
+                })
+                setDraggingIndex(-1)
+                setInitialY(0)
+                setBulletPoints(() => newPoints)
+            }else{
+                toast({
+                    title: 'Error',
+                    description: 'Error in expanding the bullet point',
+                    status: 'error',
+                    duration: 5000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+            }
+        }).catch(e => alert('Error calling GPT-4...'))
+    }
+
+    const handleMouseUp = (e: any) => {
+        if (dragging) {
+            setDragging(false)
+            const finalY = e.clientY
+
+            //too short displacement
+            if(Math.abs(finalY - initialY) < 30) return
+
+            const isUpwards: boolean = finalY < initialY
+            
+            const newPoints = [...bulletPoints]
+            if(isUpwards) newPoints[draggingIndex].expand = newPoints[draggingIndex].expand + 1
+            else newPoints[draggingIndex].expand = Math.max(0, newPoints[draggingIndex].expand -1)
+
+            if(!isUpwards){
+                toast({
+                    title: 'Compressing...',
+                    description: 'Please wait while we compress the bullet point',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+
+                setDraggingIndex(-1)
+                setInitialY(0)
+                setBulletPoints(newPoints)
+            }else{
+                toast({
+                    title: 'Expanding...',
+                    description: 'Please wait while we expand the bullet point',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+
+                if(newPoints[draggingIndex].history.length > newPoints[draggingIndex].expand){
+                    setDraggingIndex(-1)
+                    setInitialY(0)
+                    setBulletPoints(newPoints)
+                }else{
+                    openAIHelper(newPoints)
+                }
+            }
+        }
+    }
     
     return (
         <Grid
@@ -457,9 +558,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <Droppable droppableId="droppable">
                         {(provided: any, snapshot: any) => (
                             <div
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                            // style={getListStyle(snapshot.isDraggingOver)}
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                // style={getListStyle(snapshot.isDraggingOver)}
                             >
                             {bulletPoints.map((bulletPoint, index) => (
                                 <Draggable key={bulletPoint.id} draggableId={bulletPoint.id} index={index}>
@@ -472,14 +573,17 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                             snapshot.isDragging,
                                             provided.draggableProps.style
                                         )}
+                                        onContextMenu={handleContextMenu}
+                                        onMouseDown={(e) => handleMouseDown(e, index)}
+                                        onMouseUp={handleMouseUp}
                                     >
                                         {
                                             !bulletPoint.editable ?
                                             <BulletPoint
                                                 key={index}
                                                 index={index}
-                                                point={bulletPoint.point}
-                                                created_at={bulletPoint.created_at}
+                                                expand={bulletPoint.expand}
+                                                history={bulletPoint.history}
                                                 expandSinglePoint={expandSinglePoint}
                                                 editPoint={editPoint}
                                             />
@@ -557,14 +661,17 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                 snapshot.isDragging,
                                                 provided.draggableProps.style
                                             )}
+                                            onContextMenu={handleContextMenu}
+                                            onMouseDown={(e) => handleMouseDown(e, index)}
+                                            onMouseUp={handleMouseUp}
                                         >
                                             {
                                                 !bulletPoint.editable ?
                                                 <BulletPoint
                                                     key={index}
                                                     index={index}
-                                                    point={bulletPoint.point}
-                                                    created_at={bulletPoint.created_at}
+                                                    expand={bulletPoint.expand}
+                                                    history={bulletPoint.history}
                                                     expandSinglePoint={expandSinglePoint}
                                                     editPoint={editPoint}
                                                 />
