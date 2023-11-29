@@ -1,8 +1,13 @@
 import React, { useState } from 'react'
-import { Card, CardBody, Heading, Stack, StackDivider, Box, Text, Button } from '@chakra-ui/react'
-import OnboardingHelper from './OnboardingHelper';
+import { Button } from '@chakra-ui/react'
+
+import { useNoteStore, OnboardingSection } from '../state/noteStore'
+import OnboardingHelper from './OnboardingHelper'
 
 const Onboarding: React.FC = () => {
+    const { addOnboarding } = useNoteStore((state) => ({
+        addOnboarding: state.addOnboarding,
+    }))
     const [notes, setNotes] = useState<string[]>(['', '', ''])
     const [currentInput, setCurrentInput] = useState<string[]>(['', '', ''])
     const [inputList, setInputList] = useState<string[][]>([[], [], []])
@@ -36,7 +41,7 @@ const Onboarding: React.FC = () => {
                     end: 2773, //46:13
                 },
             },
-            transciprt: "it's not like there can be just one singular AI that can answer all the questions"+
+            transcript: "it's not like there can be just one singular AI that can answer all the questions"+
                 "for a person because that AI might not actually be aligned with you as a business to really just do"+
                 "the best job providing support for your product. So I think that there's gonna be a clear need in the market"+
                 "and in people's lives for there to be a bunch of these. ",
@@ -70,6 +75,7 @@ const Onboarding: React.FC = () => {
         }))
     }
 
+    //keep track of the current editting input
     const setInput = (count: number, input: string) => {
         setCurrentInput(currentInput.map((inp, i) => {
             if (i === count) {
@@ -87,7 +93,7 @@ const Onboarding: React.FC = () => {
             const newInputList = [...inputList[count]]
             newInputList.push(input)
             const updatedList = inputList.map((list, i) => {
-                if (i === (count-1)) {
+                if (i === (count)) {
                     return newInputList
                 }
                 return list
@@ -95,7 +101,7 @@ const Onboarding: React.FC = () => {
             setInputList(updatedList)
 
             setCurrentInput(currentInput.map((inp, i) => {
-                if (i === (count-1)) {
+                if (i === count) {
                     return ''
                 }
                 return inp
@@ -115,12 +121,49 @@ const Onboarding: React.FC = () => {
         setInputList(updatedList)
     }
 
+    const checkForRemainingInputs = () => {
+        let updatedList: string[][] = [...inputList]
+
+        for(let i = 0; i < currentInput.length; i++) {
+            const input = currentInput[i]
+            if (input !== '') {
+                updatedList = updatedList.map((list, idx) => {
+                    if (i === idx) {
+                        return [...list, input]
+                    }else return list
+                })
+                // setInputList(updatedList)
+            }
+        }
+
+        return updatedList
+    }
+
+    const handleOnboardingSubmit = () => {
+        const updatedList = checkForRemainingInputs()
+
+        console.log('notes:', notes)
+        console.log('inputList:', updatedList)
+
+        onboardingSections.forEach((onboardingSection, index) => {
+            const note = notes[index]
+            const inputList = updatedList[index]
+            const onboardingSectionObj: OnboardingSection = {
+                id: index,
+                note: note,
+                keypoints: inputList,
+                transcript: onboardingSection.transcript,
+            }
+            addOnboarding(onboardingSectionObj)
+        })
+    }
+
     return (
         <div className='onboarding-ui'>
-            <h1 className='note-title'>
+            {/*<h1 className='note-title'>
                 Onboarding Session
-                {/* <hr style={{ width: '75%', border: '1px dashed #566949' }} /> */}
-            </h1>
+                <hr style={{ width: '75%', border: '1px dashed #566949' }} />
+            </h1>*/}
             {onboardingSections.map((onboardingSection, index) => (
                 <OnboardingHelper 
                     key={index}
@@ -133,7 +176,13 @@ const Onboarding: React.FC = () => {
                     updateInput={updateInput}
                 />
             ))}
-            <Button colorScheme='teal' style={{ marginBottom: '2vh', }}>Submit</Button>
+            <Button 
+                colorScheme='teal' 
+                style={{ marginBottom: '2vh', }}
+                onClick={handleOnboardingSubmit}
+            >
+                Submit
+            </Button>
         </div>
     );
 };

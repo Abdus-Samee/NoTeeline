@@ -560,6 +560,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             }
         }
     }
+
+    const handleSort = () => {
+        const sortedBulletPoints = [...bulletPoints].sort((a, b) => a.created_at - b.created_at)
+        setBulletPoints(sortedBulletPoints)
+    }
     
     return (
         <Grid
@@ -616,16 +621,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 expandSection ?
                 <GridItem rowSpan={4} colSpan={4} sx={{ padding: '3px', overflowY: 'auto', }}>
                     <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
-                    <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                    <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
                         <TagLabel>Expand</TagLabel>
                         <TagRightIcon w={3} as={ArrowBackIcon} />
                         <TagRightIcon w={3} as={ArrowForwardIcon} />
                     </Tag>
-                    <Tag size='lg' variant='solid' colorScheme='teal' sx={{ marginLeft: '1px', }}>
+                    <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', }}>
                         <TagLabel>Order by Theme</TagLabel>
                         <TagRightIcon as={DragHandleIcon} />
                     </Tag>
-                    <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px',marginBottom: '1vh', }}>
+                    <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px',marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
                         <TagLabel>Order by Time</TagLabel>
                         <TagRightIcon as={TimeIcon} />
                     </Tag>
@@ -704,16 +709,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     </GridItem>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', }}>
                         <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
-                        <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                        <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
                             <TagLabel>Expand</TagLabel>
                             <TagRightIcon w={3} as={ArrowBackIcon} />
                             <TagRightIcon w={3} as={ArrowForwardIcon} />
                         </Tag>
-                        <Tag size='lg' variant='solid' colorScheme='teal' sx={{ marginLeft: '1px', }}>
+                        <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', }}>
                             <TagLabel>Order by Theme</TagLabel>
                             <TagRightIcon as={DragHandleIcon} />
                         </Tag>
-                        <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', marginBottom: '1vh', }}>
+                        <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
                             <TagLabel>Order by Time</TagLabel>
                             <TagRightIcon as={TimeIcon} />
                         </Tag>

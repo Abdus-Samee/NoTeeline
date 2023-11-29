@@ -29,6 +29,13 @@ export type ExpandedNote = {
     expansion: string;
 }
 
+export type OnboardingSection = {
+    id: number;
+    note: string;
+    keypoints: string[];
+    transcript: string;
+}
+
 // type NoteStore = {
 //     notes: Note[];
 //     addNote: (note: Note) => void;
@@ -50,6 +57,18 @@ export type ExpandedNote = {
 
 const NoteStore = (set: any, get: any) =>({
     notes: [] as Note_t[],
+    onboardings: [] as OnboardingSection[],
+    addOnboarding: (onboarding: OnboardingSection) => {
+        set((state: any) => {
+            const updatedOnboardings = state.onboardings.map((ob: OnboardingSection) => {
+                if(ob.id === onboarding.id) {
+                    return onboarding
+                }
+                return ob
+            })
+            return { onboardings: updatedOnboardings, }
+        })
+    },
     addNote: (note: Note_t) => set((state: any) => ({ notes: [...state.notes, note] })),
     fetchNote: (name: string) => {
         const note = get().notes.find((note: Note_t) => note.name === name)
