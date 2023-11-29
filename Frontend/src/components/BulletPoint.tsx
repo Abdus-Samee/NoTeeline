@@ -9,7 +9,7 @@ type BulletPointProps = {
     expand: number,
     history: string[],
     expandSinglePoint: (point: string, created_at: number) => Promise<string | null>,
-    editPoint: (id: number, point: string) => void
+    editPoint: (id: number) => void
 }
 
 const BulletPoint = ({index, expand, history, expandSinglePoint, editPoint}: BulletPointProps) => {
@@ -44,7 +44,7 @@ const BulletPoint = ({index, expand, history, expandSinglePoint, editPoint}: Bul
                 className='bullet-point-cross' 
                 w={4}
                 color='green.500' 
-                onClick={() => editPoint(index, point)}
+                onClick={() => editPoint(index)}
             />
         </div>
     )

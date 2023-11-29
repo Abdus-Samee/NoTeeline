@@ -66,22 +66,29 @@ export const expandPoint = (point: NotePoint, transcript: TranscriptLine[]) => {
 //     })
 // }
 
-export const callGPT = async (points: NotePoint[], transcription: TranscriptLine[]) => {
-    let expansion = [] as ExpandedNote[]
-    for(const point of points){
-        const expandedPoint = expandPoint(point, transcription)
-        const transcript = expandedPoint.transcript.join(".")
-        const PROMPT = template +
-               "Transcript: ..."+transcript+"...\n"+
-               "Summary: "+expandedPoint.point+"\n"+
-               "Note:"
+export const callGPT = async (points: {point: string, history: string[], expand: number, created_at: number}[], transcription: TranscriptLine[]) => {
+    let expansion = [] as any[]
+    for(let i = 0; i < points.length; i++){
+        const point = points[i]
 
-        const res = await openai.chat.completions.create({
-            messages: [{ role: "system", content: PROMPT }],
-            model: "gpt-4",
-        })
+        if(point.history.length > point.expand){
+            expansion.push({point: point.point, expansion: point.history[point.expand], old: true})
+        }else{
+            const pointToBeExpanded = point.history[point.expand]
+            const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at}, transcription)
+            const transcript = expandedPoint.transcript.join(".")
+            const PROMPT = template +
+                "Transcript: ..."+transcript+"...\n"+
+                "Summary: "+expandedPoint.point+"\n"+
+                "Note:"
 
-        if(res?.choices[0]?.message?.content !== null) expansion.push({point: point.point, expansion: res.choices[0].message.content})
+            const res = await openai.chat.completions.create({
+                messages: [{ role: "system", content: PROMPT }],
+                model: "gpt-4",
+            })
+
+            if(res?.choices[0]?.message?.content !== null) expansion.push({point: point.point, expansion: res.choices[0].message.content, old: false})
+        }
     }
 
     return expansion

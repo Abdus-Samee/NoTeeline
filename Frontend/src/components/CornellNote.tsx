@@ -174,15 +174,30 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
-    const editPoint = (id: number, point : string) => {
+    const editPoint = (id: number) => {
         const newPoints = [...bulletPoints]
         newPoints[id].editable = true
         setBulletPoints(newPoints)
     }
 
     const changeEditPoint = (index : number, val : string) => {
-        const newPoints = [...bulletPoints]
-        newPoints[index].point = val
+        // const newPoints = [...bulletPoints]
+        // newPoints[index].point = val
+        const newPoints = bulletPoints.map((bulletPoint, idx) => {
+            if(idx === index){
+                const history = [...bulletPoint.history]
+                history[bulletPoint.expand] = val
+
+                return {
+                    ...bulletPoint,
+                    history: history,
+                }
+            }else{
+                return bulletPoint
+            }
+        
+        })
+
         setBulletPoints(newPoints)
     }
 
@@ -316,17 +331,76 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const expandNote = async () => {
-        setExpanding(0)
+        toast({
+            title: 'Expanding all the points...',
+            description: 'Please wait while we expand the bullet points',
+            status: 'info',
+            duration: 5000,
+            position: 'top-right',
+            isClosable: true,
+        })
 
+        // setExpanding(0)
+
+        const newPoints = [...bulletPoints]
+        newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
+        
         const points = bulletPoints.map((point: bulletObject) => ({
             point: point.point,
+            history: point.history,
+            expand: point.expand,
             created_at: point.created_at,
         }))
 
-        const res = await callGPT(points, transcription)
-        console.log(res)
-        setExpandedNotes(res)
-        setExpanding(1)
+        setBulletPoints(newPoints)
+
+        callGPT(points, transcription).then(res => {
+            if(res){
+                toast({
+                    title: 'Done',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+
+                const ret = newPoints.map((newPoint, idx) => {
+                    if(res[idx].old){
+                        return newPoint
+                    }else{
+                        return {
+                            ...newPoint,
+                            history: [...newPoint.history, res[idx].expansion],
+                        }
+                    }
+                })
+                
+                setBulletPoints(ret)
+                // console.log(res)
+            }else{
+                toast({
+                    title: 'Error...',
+                    description: 'Error in expanding the bullet point',
+                    status: 'error',
+                    duration: 5000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+            }
+        }).catch(e => {
+            toast({
+                title: 'Error...',
+                description: 'Problem calling GPT-4...',
+                status: 'error',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true,
+            })
+        })
+
+        // console.log(res)
+        // setExpandedNotes(res)
+        // setExpanding(1)
     }
 
     const expandSinglePoint = async (point: string, created_at: number) => {
@@ -403,13 +477,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const openAIHelper = (newPoints: bulletObject[]) => {
         const pointToBeUpdated = newPoints[draggingIndex]
 
-        expandSinglePoint(pointToBeUpdated.point, pointToBeUpdated.created_at).then(res => {
+        expandSinglePoint(pointToBeUpdated.history[pointToBeUpdated.expand], pointToBeUpdated.created_at).then(res => {
             if(res){
                 toast({
                     title: 'Done',
                     status: 'info',
                     duration: 2000,
                     position: 'top-right',
+                    isClosable: true,
                 })
                 newPoints = bulletPoints.map((bp, idx) => {
                     if(idx === draggingIndex){
@@ -427,7 +502,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 setBulletPoints(() => newPoints)
             }else{
                 toast({
-                    title: 'Error',
+                    title: 'Error...',
                     description: 'Error in expanding the bullet point',
                     status: 'error',
                     duration: 5000,
@@ -539,9 +614,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </GridItem>
                 :
                 expandSection ?
-                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '2px', overflowY: 'auto', }}>
+                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '3px', overflowY: 'auto', }}>
                     <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
-                    <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
+                    <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
                         <TagLabel>Expand</TagLabel>
                         <TagRightIcon w={3} as={ArrowBackIcon} />
                         <TagRightIcon w={3} as={ArrowForwardIcon} />
@@ -629,7 +704,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     </GridItem>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', }}>
                         <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
-                        <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
+                        <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
                             <TagLabel>Expand</TagLabel>
                             <TagRightIcon w={3} as={ArrowBackIcon} />
                             <TagRightIcon w={3} as={ArrowForwardIcon} />
@@ -678,7 +753,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                 :
                                                 <input
                                                     type='text'
-                                                    value={bulletPoint.point}
+                                                    value={bulletPoint.history[bulletPoint.expand]}
                                                     className='note-input'
                                                     onChange={(e) => changeEditPoint(index, e.target.value)}
                                                     onKeyDown={event => updateEditPoint(index, event)}
