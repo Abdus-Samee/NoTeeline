@@ -169,7 +169,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             updatedPoints.push(np)
             
             updateNote(newTitle, updatedPoints)
-            setBulletPoints([...bulletPoints, { ...np, editable: false, id:`bullet-${maxId}`, expand: 0, compress: 0, history: [] }])
+            setBulletPoints([...bulletPoints, { ...np, editable: false, id:`bullet-${maxId}`, expand: 0, compress: 0, history: [newPoint] }])
             setNewPoint('')
         }
     }
@@ -608,7 +608,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 expandQuizSection ?
                 <GridItem rowSpan={4} colSpan={4} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                        <Tag size='lg' variant='solid' colorScheme='teal'>
+                        <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }}>
                             <TagLabel>Quiz</TagLabel>
                             <TagRightIcon as={SunIcon} />
                         </Tag>
@@ -626,7 +626,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <TagRightIcon w={3} as={ArrowBackIcon} />
                         <TagRightIcon w={3} as={ArrowForwardIcon} />
                     </Tag>
-                    <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', }}>
+                    <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }}>
                         <TagLabel>Order by Theme</TagLabel>
                         <TagRightIcon as={DragHandleIcon} />
                     </Tag>
@@ -698,7 +698,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 <>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                            <Tag size='lg' variant='solid' colorScheme='teal'>
+                            <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }}>
                                 <TagLabel>Quiz</TagLabel>
                                 <TagRightIcon as={SunIcon} />
                             </Tag>
@@ -714,7 +714,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             <TagRightIcon w={3} as={ArrowBackIcon} />
                             <TagRightIcon w={3} as={ArrowForwardIcon} />
                         </Tag>
-                        <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', }}>
+                        <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }}>
                             <TagLabel>Order by Theme</TagLabel>
                             <TagRightIcon as={DragHandleIcon} />
                         </Tag>
@@ -785,7 +785,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </>
             }
             <GridItem rowSpan={4} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
-                <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', }}>
+                <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }}>
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
