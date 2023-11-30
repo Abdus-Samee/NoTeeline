@@ -56,6 +56,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [dragging, setDragging] = useState(false)
     const [draggingIndex, setDraggingIndex] = useState<number>(-1)
     const [initialY, setInitialY] = useState(0)
+    const [expandButtonToggle, setExpandButtonToggle] = useState<boolean>(false)
 
     const ref = useRef(null)
     const toast = useToast()
@@ -331,19 +332,32 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const expandNote = async () => {
-        toast({
-            title: 'Expanding all the points...',
-            description: 'Please wait while we expand the bullet points',
-            status: 'info',
-            duration: 5000,
-            position: 'top-right',
-            isClosable: true,
-        })
+        if(!expandButtonToggle){
+            toast({
+                title: 'Expanding all the points...',
+                description: 'Please wait while we expand the bullet points',
+                status: 'info',
+                duration: 5000,
+                position: 'top-right',
+                isClosable: true,
+            })
+        }else{
+            toast({
+                title: 'Reducing all the points...',
+                description: 'Please wait while we reduce the bullet points',
+                status: 'info',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true,
+            })
+        }
 
         // setExpanding(0)
 
         const newPoints = [...bulletPoints]
-        newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
+        
+        if(!expandButtonToggle) newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
+        else newPoints.map((point: bulletObject) => point.expand = point.expand - 1)
         
         const points = bulletPoints.map((point: bulletObject) => ({
             point: point.point,
@@ -354,49 +368,54 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         setBulletPoints(newPoints)
 
-        callGPT(points, transcription).then(res => {
-            if(res){
+        if(!expandButtonToggle){
+            callGPT(points, transcription).then(res => {
+                if(res){
+                    toast({
+                        title: 'Done',
+                        status: 'info',
+                        duration: 2000,
+                        position: 'top-right',
+                        isClosable: true,
+                    })
+    
+                    const ret = newPoints.map((newPoint, idx) => {
+                        if(res[idx].old){
+                            return newPoint
+                        }else{
+                            return {
+                                ...newPoint,
+                                history: [...newPoint.history, res[idx].expansion],
+                            }
+                        }
+                    })
+                    
+                    setExpandButtonToggle(!expandButtonToggle)
+                    setBulletPoints(ret)
+                    // console.log(res)
+                }else{
+                    toast({
+                        title: 'Error...',
+                        description: 'Error in expanding the bullet point',
+                        status: 'error',
+                        duration: 5000,
+                        position: 'top-right',
+                        isClosable: true,
+                    })
+                }
+            }).catch(e => {
                 toast({
-                    title: 'Done',
-                    status: 'info',
+                    title: 'Error...',
+                    description: 'Problem calling GPT-4...',
+                    status: 'error',
                     duration: 2000,
                     position: 'top-right',
                     isClosable: true,
                 })
-
-                const ret = newPoints.map((newPoint, idx) => {
-                    if(res[idx].old){
-                        return newPoint
-                    }else{
-                        return {
-                            ...newPoint,
-                            history: [...newPoint.history, res[idx].expansion],
-                        }
-                    }
-                })
-                
-                setBulletPoints(ret)
-                // console.log(res)
-            }else{
-                toast({
-                    title: 'Error...',
-                    description: 'Error in expanding the bullet point',
-                    status: 'error',
-                    duration: 5000,
-                    position: 'top-right',
-                    isClosable: true,
-                })
-            }
-        }).catch(e => {
-            toast({
-                title: 'Error...',
-                description: 'Problem calling GPT-4...',
-                status: 'error',
-                duration: 2000,
-                position: 'top-right',
-                isClosable: true,
             })
-        })
+        }else{
+            setExpandButtonToggle(!expandButtonToggle)
+        }
 
         // console.log(res)
         // setExpandedNotes(res)
@@ -622,7 +641,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 <GridItem rowSpan={4} colSpan={4} sx={{ padding: '3px', overflowY: 'auto', }}>
                     <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
                     <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                        <TagLabel>Expand</TagLabel>
+                        <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
                         <TagRightIcon w={3} as={ArrowBackIcon} />
                         <TagRightIcon w={3} as={ArrowForwardIcon} />
                     </Tag>
@@ -710,7 +729,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', }}>
                         <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
                         <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                            <TagLabel>Expand</TagLabel>
+                            <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
                             <TagRightIcon w={3} as={ArrowBackIcon} />
                             <TagRightIcon w={3} as={ArrowForwardIcon} />
                         </Tag>

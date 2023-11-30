@@ -1,9 +1,5 @@
 import OpenAI from 'openai'
-import { ExpandedNote, NotePoint, TranscriptLine, OnboardingSection, useNoteStore } from "../state/noteStore"
-
-const { fetchAllOnboardings } = useNoteStore((state) => ({
-    fetchAllOnboardings: state.fetchAllOnboardings
-}))
+import { ExpandedNote, NotePoint, TranscriptLine, OnboardingSection } from "../state/noteStore"
 
 const SEED = 1
 const WINDOW_SIZE = 20000 //20000ms
@@ -72,7 +68,8 @@ export const expandPoint = (point: NotePoint, transcript: TranscriptLine[]) => {
 // }
 
 export const getFormattedPromptString = () => {
-    const onboardings = fetchAllOnboardings()
+    const noteStore = localStorage.getItem('note-store')
+    const onboardings = noteStore ? JSON.parse(noteStore).state.onboardings : []
 
     let promptString = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
                          "You have to expand it to 2-3 full sentences in simple english.\nHere are three examples:\n"
