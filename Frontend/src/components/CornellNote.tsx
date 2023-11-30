@@ -635,6 +635,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     </div>
                     <br/>
                     No quizzes to show !
+                    {/* HARDCODE QUIZ */}
                 </GridItem>
                 :
                 expandSection ?
@@ -725,6 +726,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         </div>
                         <br/>
                         No quizzes to show !
+                        {/* HARDCODE QUIZ */}
                     </GridItem>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', }}>
                         <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
@@ -807,6 +809,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }}>
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
+                    {/* HARDCODE SUMMARY */}
                 </Tag>
             </GridItem>
         </Grid>
