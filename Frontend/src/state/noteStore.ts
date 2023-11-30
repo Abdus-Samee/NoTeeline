@@ -74,6 +74,9 @@ const NoteStore = (set: any, get: any) =>({
             }
         })
     },
+    fetchAllOnboardings: () => {
+        return get().onboardings
+    },
     addNote: (note: Note_t) => set((state: any) => ({ notes: [...state.notes, note] })),
     fetchNote: (name: string) => {
         const note = get().notes.find((note: Note_t) => note.name === name)

@@ -1,6 +1,11 @@
 import OpenAI from 'openai'
-import { ExpandedNote, NotePoint, TranscriptLine } from "../state/noteStore"
+import { ExpandedNote, NotePoint, TranscriptLine, OnboardingSection, useNoteStore } from "../state/noteStore"
 
+const { fetchAllOnboardings } = useNoteStore((state) => ({
+    fetchAllOnboardings: state.fetchAllOnboardings
+}))
+
+const SEED = 1
 const WINDOW_SIZE = 20000 //20000ms
 const OPEN_AI_KEY = import.meta.env.VITE_OPEN_AI_KEY
 const openai = new OpenAI({ apiKey: OPEN_AI_KEY, dangerouslyAllowBrowser: true })
@@ -66,7 +71,23 @@ export const expandPoint = (point: NotePoint, transcript: TranscriptLine[]) => {
 //     })
 // }
 
+export const getFormattedPromptString = () => {
+    const onboardings = fetchAllOnboardings()
+
+    let promptString = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
+                         "You have to expand it to 2-3 full sentences in simple english.\nHere are three examples:\n"
+    for(let i = 0; i < onboardings.length; i++){
+        promptString += "Transcript: ..."+onboardings[i].transcript+"...\n"+
+                        "Summary: "+onboardings[i].keypoints.join(", ")+"\n"+
+                        "Note: "+onboardings[i].note+"\n\n"
+    }
+
+    return promptString
+}
+
 export const callGPT = async (points: {point: string, history: string[], expand: number, created_at: number}[], transcription: TranscriptLine[]) => {
+    const promptString = getFormattedPromptString()
+    
     let expansion = [] as any[]
     for(let i = 0; i < points.length; i++){
         const point = points[i]
@@ -77,7 +98,7 @@ export const callGPT = async (points: {point: string, history: string[], expand:
             const pointToBeExpanded = point.history[point.expand]
             const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at}, transcription)
             const transcript = expandedPoint.transcript.join(".")
-            const PROMPT = template +
+            const PROMPT = promptString +
                 "Transcript: ..."+transcript+"...\n"+
                 "Summary: "+expandedPoint.point+"\n"+
                 "Note:"
@@ -97,14 +118,18 @@ export const callGPT = async (points: {point: string, history: string[], expand:
 export const callGPTForSinglePoint = async (point: NotePoint, transcription: TranscriptLine[]) => {
     const expandedPoint = expandPoint(point, transcription)
     const transcript = expandedPoint.transcript.join(".")
-    const PROMPT = template +
+    
+    const promptString = getFormattedPromptString()
+
+    const PROMPT = promptString +
             "Transcript: ..."+transcript+"...\n"+
             "Summary: "+expandedPoint.point+"\n"+
             "Note:"
 
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: PROMPT }],
-        model: "gpt-4",
+        model: "gpt-4-1106-preview",
+        seed: SEED,
         temperature: 0.2,
     })
 
