@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button } from '@chakra-ui/react'
+import { Button, useToast } from '@chakra-ui/react'
 
 import { useNoteStore, OnboardingSection } from '../state/noteStore'
 import OnboardingHelper from './OnboardingHelper'
@@ -11,6 +11,8 @@ const Onboarding: React.FC = () => {
     const [notes, setNotes] = useState<string[]>(['', '', ''])
     const [currentInput, setCurrentInput] = useState<string[]>(['', '', ''])
     const [inputList, setInputList] = useState<string[][]>([[], [], []])
+
+    const toast = useToast()
 
     const onboardingSections = [
         {
@@ -156,6 +158,14 @@ const Onboarding: React.FC = () => {
             }
             addOnboarding(onboardingSectionObj)
         })
+
+        toast({
+            title: 'Onboarding Session Saved',
+            description: 'Your onboarding session has been saved successfully',
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+        })        
     }
 
     return (

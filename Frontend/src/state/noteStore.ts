@@ -60,13 +60,18 @@ const NoteStore = (set: any, get: any) =>({
     onboardings: [] as OnboardingSection[],
     addOnboarding: (onboarding: OnboardingSection) => {
         set((state: any) => {
-            const updatedOnboardings = state.onboardings.map((ob: OnboardingSection) => {
-                if(ob.id === onboarding.id) {
-                    return onboarding
-                }
-                return ob
-            })
-            return { onboardings: updatedOnboardings, }
+            if(state.onboardings.length < 3) {
+                return { onboardings: [...state.onboardings, onboarding] }
+            }else{
+                const updatedOnboardings = state.onboardings.map((ob: OnboardingSection) => {
+                    if(ob.id === onboarding.id) {
+                        return onboarding
+                    }else{
+                        return ob
+                    }
+                })
+                return { onboardings: updatedOnboardings, }
+            }
         })
     },
     addNote: (note: Note_t) => set((state: any) => ({ notes: [...state.notes, note] })),
