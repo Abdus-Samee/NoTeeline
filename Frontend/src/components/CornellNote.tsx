@@ -57,6 +57,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [draggingIndex, setDraggingIndex] = useState<number>(-1)
     const [initialY, setInitialY] = useState(0)
     const [expandButtonToggle, setExpandButtonToggle] = useState<boolean>(false)
+    const [showQuiz, setShowQuiz] = useState<boolean>(false)
+    const [showSummary, setShowSummary] = useState<boolean>(false)
 
     const ref = useRef(null)
     const toast = useToast()
@@ -584,6 +586,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const sortedBulletPoints = [...bulletPoints].sort((a, b) => a.created_at - b.created_at)
         setBulletPoints(sortedBulletPoints)
     }
+
+    const handleQuiz = () => {
+        setShowQuiz(!showQuiz)
+    }
+
+    const handleSummary = () => {
+        setShowSummary(!showSummary)
+    }
     
     return (
         <Grid
@@ -627,15 +637,19 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 expandQuizSection ?
                 <GridItem rowSpan={4} colSpan={4} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                        <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }}>
+                        <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
                             <TagLabel>Quiz</TagLabel>
                             <TagRightIcon as={SunIcon} />
                         </Tag>
                         <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
                     </div>
                     <br/>
-                    No quizzes to show !
-                    {/* HARDCODE QUIZ */}
+                    {
+                        showQuiz ?
+                        <p>HARDCODE QUIZ</p>
+                        :
+                        <p>No quizzes to show !</p>
+                    }
                 </GridItem>
                 :
                 expandSection ?
@@ -718,15 +732,19 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 <>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                            <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }}>
+                            <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
                                 <TagLabel>Quiz</TagLabel>
                                 <TagRightIcon as={SunIcon} />
                             </Tag>
                             <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
                         </div>
                         <br/>
-                        No quizzes to show !
-                        {/* HARDCODE QUIZ */}
+                        {
+                            showQuiz ?
+                            <p>HARDCODE QUIZ</p>
+                            :
+                            <p>No quizzes to show !</p>
+                        }
                     </GridItem>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', }}>
                         <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
@@ -806,11 +824,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </>
             }
             <GridItem rowSpan={4} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
-                <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }}>
+                <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleSummary}>
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
-                    {/* HARDCODE SUMMARY */}
                 </Tag>
+                {
+                    showSummary ?
+                    <p>HARDCODE SUMMARY</p>
+                    :
+                    <p>No summary...</p>
+                }
             </GridItem>
         </Grid>
     )
