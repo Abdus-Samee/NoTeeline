@@ -74,6 +74,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     useEffect(() => {
         setNewTitle(name)
+        setExpandButtonToggle(false)
 
         if (note?.ytId !== '') {
             setEmbedId(note.ytId)
