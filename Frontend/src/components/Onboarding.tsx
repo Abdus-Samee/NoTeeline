@@ -1,20 +1,27 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button, useToast } from '@chakra-ui/react'
 
 import { useNoteStore, OnboardingSection } from '../state/noteStore'
 import OnboardingHelper from './OnboardingHelper'
 
 const Onboarding: React.FC = () => {
-    const { addOnboarding } = useNoteStore((state) => ({
+    const { addOnboarding, fetchAllOnboardings } = useNoteStore((state) => ({
         addOnboarding: state.addOnboarding,
+        fetchAllOnboardings: state.fetchAllOnboardings,
     }))
     const [notes, setNotes] = useState<string[]>(['', '', ''])
     const [currentInput, setCurrentInput] = useState<string[]>(['', '', ''])
     const [inputList, setInputList] = useState<string[][]>([[], [], []])
+    const [storedOnboardings, setStoredOnboardings] = useState<any>(null)
 
     const toast = useToast()
 
-    const onboardingSections = [
+    useEffect(() => {
+      const onboardings = fetchAllOnboardings()
+      setStoredOnboardings(() => onboardings)
+    }, [])
+
+    let onboardingSections = [
         {
             embedId: 'Ff4fRgnuFgQ',
             opts: {
@@ -67,6 +74,10 @@ const Onboarding: React.FC = () => {
                 "forgiving yourself, and making a plan to do better next time.",
         },
     ]
+
+    const getSpecificOnboarding = (idx: number) => {
+      return storedOnboardings[idx]
+    }
     
     const handleNoteChange = (count: number, input: string) => {
         setNotes(notes.map((note, i) => {
@@ -174,18 +185,24 @@ const Onboarding: React.FC = () => {
                 Onboarding Session
                 <hr style={{ width: '75%', border: '1px dashed #566949' }} />
             </h1>*/}
-            {onboardingSections.map((onboardingSection, index) => (
-                <OnboardingHelper 
-                    key={index}
-                    index={index}
-                    embedId={onboardingSection.embedId}
-                    opts={onboardingSection.opts}
-                    handleNoteChange={handleNoteChange}
-                    setInput={setInput}
-                    handleKeyDown={handleKeyDown}
-                    updateInput={updateInput}
-                />
-            ))}
+            {
+              storedOnboardings !== null ?
+              onboardingSections.map((onboardingSection, index) => (
+                  <OnboardingHelper 
+                      key={index}
+                      index={index}
+                      embedId={onboardingSection.embedId}
+                      opts={onboardingSection.opts}
+                      handleNoteChange={handleNoteChange}
+                      setInput={setInput}
+                      handleKeyDown={handleKeyDown}
+                      updateInput={updateInput}
+                      getSpecificOnboarding={getSpecificOnboarding}
+                  />
+              ))
+              :
+              <h3>Loading onboarding data...</h3>
+            }
             <Button 
                 colorScheme='teal' 
                 style={{ marginBottom: '2vh', }}

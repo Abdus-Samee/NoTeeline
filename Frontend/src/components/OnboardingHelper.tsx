@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardBody, Heading, Stack, StackDivider, Box, Textarea, Text, Button } from '@chakra-ui/react'
 import YouTube from 'react-youtube'
 
@@ -10,12 +10,20 @@ type OnboardingHelperProps = {
     setInput: (count: number, input: string) => void,
     handleKeyDown: (count: number, event: React.KeyboardEvent<HTMLInputElement>) => void,
     updateInput: (count: number, index: number, input: string) => void,
+    getSpecificOnboarding: any,
 }
 
-const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts, handleNoteChange, setInput, handleKeyDown, updateInput}: OnboardingHelperProps) => {
+const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts, handleNoteChange, setInput, handleKeyDown, updateInput, getSpecificOnboarding}: OnboardingHelperProps) => {
     const [newPoint, setNewPoint] = useState<string>('')
     const [note, setNote] = useState<string>('')
     const [inputList, setInputList] = useState<string[]>([])
+
+    useEffect(() => {
+        // console.log(storedOnboarding)
+        const obj = getSpecificOnboarding(index)
+        setNote(obj.note)
+        setInputList(obj.keypoints)
+    }, [])
 
     const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value
