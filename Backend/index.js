@@ -32,6 +32,11 @@ app.post('/youtube-transcript', (req, res) => {
     }
 })
 
+app.post('/fetch-summary', (req, res) => {
+    console.log('testing successful');
+    res.json({ response: 'testing successful' })
+})
+
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server listening at http://localhost:${process.env.PORT || 3000}`)
 })
