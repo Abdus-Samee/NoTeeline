@@ -1,3 +1,4 @@
+const Langchainsummarization = require('./summarization.js');
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -33,8 +34,13 @@ app.post('/youtube-transcript', (req, res) => {
 })
 
 app.post('/fetch-summary', (req, res) => {
-    console.log('testing successful');
-    res.json({ response: 'testing successful' })
+    Langchainsummarization().then((result) => {
+        console.log(result); 
+        res.json({ response: result });
+    }).catch((error) => {
+        console.error(error); // Handle errors if any
+        res.status(400).json({ error: error })
+    });
 })
 
 app.listen(process.env.PORT || 3000, () => {
