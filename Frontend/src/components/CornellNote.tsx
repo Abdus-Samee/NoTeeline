@@ -594,6 +594,24 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     const handleSummary = () => {
         setShowSummary(!showSummary)
+
+        let tr = ''
+        for(let i = 0; i < transcription.length; i++){
+          tr += transcription[i].text
+        }
+
+        fetch('http://localhost:3000/fetch-summary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            transcript: tr
+          }),
+        }).then(res => res.json()).then(data => {
+            console.log('Summary:')
+            console.log(data)
+        }).catch(e => console.log(e))
     }
     
     return (

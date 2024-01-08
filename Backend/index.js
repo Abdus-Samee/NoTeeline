@@ -34,13 +34,21 @@ app.post('/youtube-transcript', (req, res) => {
 })
 
 app.post('/fetch-summary', (req, res) => {
-    Langchainsummarization().then((result) => {
-        console.log(result); 
-        res.json({ response: result });
-    }).catch((error) => {
-        console.error(error); // Handle errors if any
-        res.status(400).json({ error: error })
-    });
+     const requestData = req.body
+
+     if (!requestData || typeof requestData !== 'object') {
+       res.status(400).json({ error: 'Bad Request: Please provide a JSON object in the request body.' })
+    }else{
+       const transcript = requestData.transcript
+      
+       Langchainsummarization(transcript).then((result) => {
+         console.log(result)
+         res.json({ response: result })
+       }).catch((error) => {
+         console.log(error)
+         res.status(400).json({ error: error })
+       })
+    }
 })
 
 app.listen(process.env.PORT || 3000, () => {

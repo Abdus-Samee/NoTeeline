@@ -9,14 +9,18 @@ const { loadSummarizationChain } = require("langchain/chains");
 const { SearchApiLoader } = require("langchain/document_loaders/web/searchapi");
 const { PromptTemplate } = require("langchain/prompts");
 const { TokenTextSplitter } = require("langchain/text_splitter");
+const { Document } = require("langchain/document");
 
-async function Langchainsummarization() {
-    console.log('called inside lanchain file');
+async function Langchainsummarization(transcript) {
+    console.log('called inside langchain file');
+    console.log('Transcript:')
+    console.log(transcript)
 
     // added dependency as shown in https://js.langchain.com/docs/get_started/installation
     // code taken from https://js.langchain.com/docs/use_cases/summarization and 
     // https://js.langchain.com/docs/modules/chains/document/refine
-
+    
+    /*
     const loader = new SearchApiLoader({
       apiKey: "dey5LrRJU6J97LTiCiugBPqZ",
       engine: "youtube_transcripts",
@@ -24,14 +28,20 @@ async function Langchainsummarization() {
     });
 
     const docs = await loader.load();
+    */
+
+    const doc = new Document({ pageContent: transcript })
+  
+    console.log(doc)
 
     const splitter = new TokenTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 50,
     });
 
-    const docsSummary = await splitter.splitDocuments(docs);
-
+    //const docsSummary = await splitter.splitDocuments(doc);
+    const docsSummary = await splitter.createDocuments([doc]);
+  
     const llmSummary = new OpenAI({ 
       modelName: "gpt-4-1106-preview",
       temperature: 0.3,
