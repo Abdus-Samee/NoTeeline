@@ -42,7 +42,7 @@ app.post('/fetch-summary', (req, res) => {
        const transcript = requestData.transcript
       
        Langchainsummarization(transcript).then((result) => {
-         console.log(result)
+         console.log('Received summary at index.js')
          res.json({ response: result })
        }).catch((error) => {
          console.log(error)

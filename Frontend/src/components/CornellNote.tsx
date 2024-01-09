@@ -611,6 +611,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }).then(res => res.json()).then(data => {
             console.log('Summary:')
             console.log(data)
+            toast({
+              title: 'Summarization completed',
+              status: 'info',
+              duration: '2000',
+              position: 'top-right',
+              isClosable: true
+            })
         }).catch(e => console.log(e))
     }
     

@@ -13,8 +13,8 @@ const { Document } = require("langchain/document");
 
 async function Langchainsummarization(transcript) {
     console.log('called inside langchain file');
-    console.log('Transcript:')
-    console.log(transcript)
+    //console.log('Transcript:')
+    //console.log(transcript)
 
     // added dependency as shown in https://js.langchain.com/docs/get_started/installation
     // code taken from https://js.langchain.com/docs/use_cases/summarization and 
@@ -30,9 +30,9 @@ async function Langchainsummarization(transcript) {
     const docs = await loader.load();
     */
 
-    const doc = new Document({ pageContent: transcript })
+    //const doc = new Document({ pageContent: transcript })
   
-    console.log(doc)
+    //console.log(doc)
 
     const splitter = new TokenTextSplitter({
       chunkSize: 1000,
@@ -40,7 +40,7 @@ async function Langchainsummarization(transcript) {
     });
 
     //const docsSummary = await splitter.splitDocuments(doc);
-    const docsSummary = await splitter.createDocuments([doc]);
+    const docsSummary = await splitter.createDocuments([transcript]);
   
     const llmSummary = new OpenAI({ 
       modelName: "gpt-4-1106-preview",
@@ -71,13 +71,13 @@ async function Langchainsummarization(transcript) {
     const summary = await summarizeChain.run(docsSummary);
 
     console.log(summary);
+    return summary;
 
-
-    return new Promise((resolve) => {
+    /*return new Promise((resolve) => {
         setTimeout(() => {
             resolve(summary); 
         }, 1000);
-    });
+    });*/
 }
 
 module.exports = Langchainsummarization;
