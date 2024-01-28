@@ -179,6 +179,31 @@ const Onboarding: React.FC = () => {
         })        
     }
 
+    const handleDownload = () => {
+        // Convert the state to a JSON string
+        const onboardings = fetchAllOnboardings()
+        const stateJson = JSON.stringify(onboardings)
+    
+        // Create a Blob with the JSON data
+        const blob = new Blob([stateJson], { type: 'application/json' })
+    
+        // Create a temporary link element
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+    
+        // Set the download attribute with the desired file name
+        link.download = 'onboarding.json'
+    
+        // Append the link to the document
+        document.body.appendChild(link)
+    
+        // Trigger a click on the link to start the download
+        link.click();
+    
+        // Remove the link from the document
+        document.body.removeChild(link);
+    }
+
     return (
         <div className='onboarding-ui'>
             {/*<h1 className='note-title'>
@@ -209,6 +234,13 @@ const Onboarding: React.FC = () => {
                 onClick={handleOnboardingSubmit}
             >
                 Submit
+            </Button>
+            <Button 
+                colorScheme='orange' 
+                style={{ marginBottom: '2vh', marginLeft: '1vw', }}
+                onClick={handleDownload}
+            >
+                Download Data
             </Button>
         </div>
     );
