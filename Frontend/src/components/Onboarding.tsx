@@ -79,7 +79,7 @@ const Onboarding: React.FC = () => {
     ]
 
     const getSpecificOnboarding = (idx: number) => {
-      return storedOnboardings[idx]
+      return storedOnboardings.length > 0 ? storedOnboardings[idx] : null
     }
     
     const handleNoteChange = (count: number, input: string) => {

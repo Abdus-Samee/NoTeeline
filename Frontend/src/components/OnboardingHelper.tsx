@@ -21,8 +21,10 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts
     useEffect(() => {
         // console.log(storedOnboarding)
         const obj = getSpecificOnboarding(index)
-        setNote(obj.note)
-        setInputList(obj.keypoints)
+        if(obj !== null){
+            setNote(obj.note)
+            setInputList(obj.keypoints)
+        }
     }, [])
 
     const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
