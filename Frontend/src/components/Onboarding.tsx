@@ -21,6 +21,7 @@ const Onboarding: React.FC = () => {
     useEffect(() => {
       const onboardings = fetchAllOnboardings()
       setStoredOnboardings(() => onboardings)
+      console.log('Fetched stored onboardings...')
     }, [])
 
     let onboardingSections = [

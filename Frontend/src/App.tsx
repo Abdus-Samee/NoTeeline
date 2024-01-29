@@ -97,6 +97,7 @@ const App = () => {
 
   const handleOption = (tab : string) => {
     setActive(tab)
+    console.log('Selected ' + tab)
     if(tab !== 'onboarding'){
       const note: Note_t = fetchNote(tab)
       setSelectedNote({...note})
