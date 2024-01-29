@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { useState, useEffect } from 'react'
 import { Button, useToast } from '@chakra-ui/react'
 

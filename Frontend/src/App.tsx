@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { 
   Button, 
   useDisclosure,
@@ -15,10 +15,7 @@ import {
   useToast,
  } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
-import Typed from 'react-typed'
-import { PulseLoader } from 'react-spinners'
 
-import Note from './components/Note'
 import Onboarding from './components/Onboarding'
 import CornellNote from './components/CornellNote'
 

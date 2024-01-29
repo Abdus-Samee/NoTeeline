@@ -1507,6 +1507,13 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.9.tgz#b6f785caa7ea1fe4414d9df42ee0ab67f23d8a6d"
   integrity sha512-n1yyPsugYNSmHgxDFjicaI2+gCNjsBck8UX9kuofAKlc0h1bL+20oSF72KeNaW2DUlesbEVCFgyV2dPGTiY42g==
 
+"@types/react-beautiful-dnd@^13.1.8":
+  version "13.1.8"
+  resolved "https://registry.yarnpkg.com/@types/react-beautiful-dnd/-/react-beautiful-dnd-13.1.8.tgz#f52d3ea07e1e19159d6c3c4a48c8da3d855e60b4"
+  integrity sha512-E3TyFsro9pQuK4r8S/OL6G99eq7p8v29sX0PM7oT8Z+PJfZvSQTx4zTQbUJ+QZXioAF0e7TGBEcA1XhYhCweyQ==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-dom@^18.2.7":
   version "18.2.14"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.2.14.tgz#c01ba40e5bb57fc1dc41569bb3ccdb19eab1c539"

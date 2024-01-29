@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Card, CardBody, Heading, Stack, StackDivider, Box, Textarea, Text, Button } from '@chakra-ui/react'
+import { Card, CardBody, Heading, Stack, StackDivider, Box, Textarea } from '@chakra-ui/react'
 import YouTube from 'react-youtube'
 
 type OnboardingHelperProps = {

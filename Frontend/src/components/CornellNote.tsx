@@ -1,13 +1,13 @@
+/* eslint-disable */
+
 import React, { useState, useEffect, useRef } from 'react'
-import { Grid, GridItem, Box, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, Spinner } from '@chakra-ui/react'
+import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast } from '@chakra-ui/react'
 import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, CalendarIcon, ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons'
-import axios from 'axios'
-import OpenAI from 'openai'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
-import { NotePoint, ExpandedNote, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { expandPoint, callGPT, callGPTForSinglePoint } from '../utils/helper'
+import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
+import { callGPT, callGPTForSinglePoint } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 
 type NoteProps = {
@@ -25,32 +25,29 @@ type bulletObject = {
     history: string[];
 }
 
-let mediaRecorder : any
-let chunks : any[] = []
-let audioURL : string
+// let chunks : any[] = []
+// let audioURL : string
 
 const CornellNote: React.FC<NoteProps> = ({name, note }) => {
-    const { updateNote, addYouTubeId, fetchNote, updateNoteName, startRecording, addTranscription } = useNoteStore((state) => ({
+    const { updateNote, addYouTubeId, startRecording, addTranscription } = useNoteStore((state) => ({
         updateNote: state.updateNote,
         addYouTubeId: state.addYouTubeId,
-        fetchNote: state.fetchNote,
-        updateNoteName: state.updateNoteName,
         startRecording: state.startRecording,
         addTranscription: state.addTranscription,
     }))
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
     const [newPoint, setNewPoint] = useState<string>('')
     const [newTitle, setNewTitle] = useState<string>('')
-    const [editTitle, setEditTitle] = useState<boolean>(false)
-    const [recording, setRecording] = useState<any>(null)
+    // const [editTitle, setEditTitle] = useState<boolean>(false)
+    // const [recording, setRecording] = useState<any>(null)
     const [ytLink, setYtLink] = useState<string>('')
     const [embedId, setEmbedId] = useState<string>('')
     const [isLink, setIsLink] = useState<boolean>(false)
     const [transcription, setTranscription] = useState<TranscriptLine[]>([]) //yt transcription
     const [playerTime, setPlayerTime] = useState<number>(0) //time of the yt player at any instant
-    const [expandedNotes, setExpandedNotes] = useState<ExpandedNote[]>([]) //expanded notes [{point, expansion}]
-    const [expanding, setExpanding] = useState<number>(-1) //-1: not expanding, 0: expanding, 1: expanded
-    const [pause, setPause] = useState<boolean>(false)
+    // const [expandedNotes, setExpandedNotes] = useState<ExpandedNote[]>([]) //expanded notes [{point, expansion}]
+    // const [expanding, setExpanding] = useState<number>(-1) //-1: not expanding, 0: expanding, 1: expanded
+    const [, setPause] = useState<boolean>(false)
     const [expandSection, setExpandSection] = useState<boolean>(false)
     const [expandQuizSection, setExpandQuizSection] = useState<boolean>(false)
     const [dragging, setDragging] = useState(false)
@@ -215,44 +212,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
-    const updateTitle = (event : React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            event.preventDefault()
-            setEditTitle(false)
-            updateNoteName(name, newTitle)
-        }
-    }
 
-    const stopRecording = () => {
-        mediaRecorder.stop()
-        console.log(recording)
-        // transcribe()
-    }
 
-    const transcribe = (recording: any) => {
-        const OPENAI_KEY = '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'
-        const model = "whisper-1"
-
-        const formData = new FormData()
-        formData.append("model", model)
-        formData.append("file", recording)
-
-        axios
-        .post("https://api.openai.com/v1/audio/transcriptions", formData, {
-            headers: {
-            "Authorization": `Bearer ${OPENAI_KEY}`,
-            "Content-Type": "multipart/form-data"
-            },
-        })
-        .then((res) => {
-            console.log(res.data)
-            alert('Transcription complete!')
-        })
-        .catch((err) => {
-            console.error(err)
-            alert("Error transcribing the provided audio file.")
-        })
-    }
 
     const getYoutubeTranscription = () => {
         let ytId = ''
@@ -406,7 +367,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         isClosable: true,
                     })
                 }
-            }).catch(e => {
+            }).catch(() => {
                 toast({
                     title: 'Error...',
                     description: 'Problem calling GPT-4...',
@@ -532,7 +493,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     isClosable: true,
                 })
             }
-        }).catch(e => alert('Error calling GPT-4...'))
+        }).catch(() => alert('Error calling GPT-4...'))
     }
 
     const handleMouseUp = (e: any) => {
@@ -614,7 +575,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             toast({
               title: 'Summarization completed',
               status: 'info',
-              duration: '2000',
+              duration: 2000,
               position: 'top-right',
               isClosable: true
             })
@@ -696,7 +657,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     </Tag>
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId="droppable">
-                        {(provided: any, snapshot: any) => (
+                        {(provided: any) => (
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
@@ -724,7 +685,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                 index={index}
                                                 expand={bulletPoint.expand}
                                                 history={bulletPoint.history}
-                                                expandSinglePoint={expandSinglePoint}
                                                 editPoint={editPoint}
                                             />
                                             :
@@ -789,7 +749,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         </Tag>
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable">
-                            {(provided: any, snapshot: any) => (
+                            {(provided: any) => (
                                 <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
@@ -817,7 +777,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                     index={index}
                                                     expand={bulletPoint.expand}
                                                     history={bulletPoint.history}
-                                                    expandSinglePoint={expandSinglePoint}
                                                     editPoint={editPoint}
                                                 />
                                                 :

@@ -1,22 +1,18 @@
-import { useState, useEffect, useRef } from 'react'
-import { useSpring, animated } from '@react-spring/web'
-import { createUseGesture, pinchAction } from '@use-gesture/react'
-import { useToast } from '@chakra-ui/react'
+import { useState, useEffect } from 'react'
 import { EditIcon } from '@chakra-ui/icons'
 
 type BulletPointProps = {
     index: number,
     expand: number,
     history: string[],
-    expandSinglePoint: (point: string, created_at: number) => Promise<string | null>,
     editPoint: (id: number) => void
 }
 
-const BulletPoint = ({index, expand, history, expandSinglePoint, editPoint}: BulletPointProps) => {
-    const [expanded, setExpanded] = useState<number>(expand)
+const BulletPoint = ({index, expand, history, editPoint}: BulletPointProps) => {
+    const [, setExpanded] = useState<number>(expand)
     const [pointToShow, setPointToShow] = useState<string | null>(null)
 
-    const toast = useToast()
+    // const toast = useToast()
 
     useEffect(() => {
         if(history.length > expand){

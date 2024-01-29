@@ -36,11 +36,22 @@ export type OnboardingSection = {
     transcript: string;
 }
 
-// type NoteStore = {
-//     notes: Note[];
-//     addNote: (note: Note) => void;
-//     removeNote: (note: Note) => void;
-// }
+type NoteStore_t = {
+    notes: Note_t[];
+    onboardings: OnboardingSection[];
+    addOnboarding: (onboarding: OnboardingSection) => void;
+    fetchAllOnboardings: () => void;
+    addNote: (note: Note_t) => void;
+    fetchNote: (name: string) => Note_t;
+    addYouTubeId: (name: string, ytId: string) => void;
+    addTranscription: (name: string, transcription: TranscriptLine[]) => void;
+    addExpansion: (name: string, expandedNote: ExpandedNote) => void;
+    checkUniqueName: (name: string) => boolean;
+    updateNote: (name: string, content: NotePoint[]) => void;
+    updateNoteName: (oldName: string, newName: string) => void;
+    removeNote: (note: Note_t) => void;
+    startRecording: (name: string, time: number) => void;
+}
 
 /**
  * Zustand store for notes
@@ -160,4 +171,4 @@ const NoteStore = (set: any, get: any) =>({
     },
 })
 
-export const useNoteStore = create(devtools(persist(NoteStore, { name: 'note-store' })))
+export const useNoteStore = create<NoteStore_t>(devtools(persist(NoteStore, { name: 'note-store' })))

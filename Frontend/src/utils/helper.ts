@@ -1,21 +1,21 @@
 import OpenAI from 'openai'
-import { ExpandedNote, NotePoint, TranscriptLine, OnboardingSection } from "../state/noteStore"
+import { NotePoint, TranscriptLine } from "../state/noteStore"
 
-const SEED = 1
+// const SEED = 1
 const WINDOW_SIZE = 20000 //20000ms
 const OPEN_AI_KEY = import.meta.env.VITE_OPEN_AI_KEY
 const openai = new OpenAI({ apiKey: OPEN_AI_KEY, dangerouslyAllowBrowser: true })
-const template = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
-                 "You have to expand it to 2-3 full sentences in simple english.\nHere is one example:\n"+
-                 "Transcript: .. Yeah. So, for background, we both did these scans for this research project that we have at Meta called"+
-                 "Kodak Avatars. And the idea is that instead of our avatars being cartoony and instead of actually transmitting a video, "+
-                 "what it does is we’ve scanned ourselves and a lot of different expressions, and we’ve built a computer model of each of "+
-                 "our faces and bodies and the different expressions that we make and collapsed that into a Kodak that then when you have the "+
-                 "headset on your head, it sees your face, it sees your expression, and it can basically send an encoded version of what you’re "+
-                 "supposed to look like over the wire. So, in addition to being photorealistic, it’s also actually much more bandwidth efficient than "+
-                 "transmitting a full video or especially a 3D immersive video of a whole scene like this...\n"+
-                 "Summary: kodak, encode face, efficient\n"+
-                 "Note: Kodak is a compressed format of the facial expression. So, besides being photorealistic, it is highly efficient for transmission as well.\n\n"
+// const template = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
+//                  "You have to expand it to 2-3 full sentences in simple english.\nHere is one example:\n"+
+//                  "Transcript: .. Yeah. So, for background, we both did these scans for this research project that we have at Meta called"+
+//                  "Kodak Avatars. And the idea is that instead of our avatars being cartoony and instead of actually transmitting a video, "+
+//                  "what it does is we’ve scanned ourselves and a lot of different expressions, and we’ve built a computer model of each of "+
+//                  "our faces and bodies and the different expressions that we make and collapsed that into a Kodak that then when you have the "+
+//                  "headset on your head, it sees your face, it sees your expression, and it can basically send an encoded version of what you’re "+
+//                  "supposed to look like over the wire. So, in addition to being photorealistic, it’s also actually much more bandwidth efficient than "+
+//                  "transmitting a full video or especially a 3D immersive video of a whole scene like this...\n"+
+//                  "Summary: kodak, encode face, efficient\n"+
+//                  "Note: Kodak is a compressed format of the facial expression. So, besides being photorealistic, it is highly efficient for transmission as well.\n\n"
 
 export type GPTRequest = {
     point: string;
@@ -126,7 +126,7 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: PROMPT }],
         model: "gpt-4-1106-preview",
-        seed: SEED,
+        // seed: SEED,
         temperature: 0.2,
     })
 
@@ -137,12 +137,12 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
     // return res
 }
 
-const simulateAPICall = async () => {
-    return new Promise<string | null>((resolve) => {
-        setTimeout(() => {
-            // Simulate API response
-            const simulatedResponse = 'ChatGPT API is experiencing problem for now! Stay with us :)'
-            resolve(simulatedResponse)
-        }, 3000); // Simulate a delay of 2 seconds
-    });
-};
+// const simulateAPICall = async () => {
+//     return new Promise<string | null>((resolve) => {
+//         setTimeout(() => {
+//             // Simulate API response
+//             const simulatedResponse = 'ChatGPT API is experiencing problem for now! Stay with us :)'
+//             resolve(simulatedResponse)
+//         }, 3000); // Simulate a delay of 2 seconds
+//     });
+// };
