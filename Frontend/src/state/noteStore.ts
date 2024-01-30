@@ -19,6 +19,9 @@ export type Note_t = {
     content: NotePoint[];
     transcription: TranscriptLine[];
     expansion: ExpandedNote[];
+    theme_count: number; //how many times theme-order button is clicked
+    time_count: number; //how many times time-order button is clicked
+    expand_count: number; //how many times expand-all button is clicked
     created_at: number;
     updated_at: number;
     recording_start: number;
@@ -51,6 +54,8 @@ type NoteStore_t = {
     updateNoteName: (oldName: string, newName: string) => void;
     removeNote: (note: Note_t) => void;
     startRecording: (name: string, time: number) => void;
+    computeButtonClick: (name: string, type: string) => void;
+    fetchButtonStats: (name: string) => { theme_count: number, expand_count: number, time_count: number };
 }
 
 /**
@@ -169,6 +174,30 @@ const NoteStore = (set: any, get: any) =>({
             return { notes: updatedNotes, }
         })
     },
+    computeButtonClick: (name: string, type: string) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === name) {
+                    if(type === 'theme'){
+                        let c = n.theme_count
+                        return {...n, theme_count: c+1}
+                    }else if(type === 'expand'){
+                        let c = n.expand_count
+                        return {...n, expand_count: c+1}
+                    }else if(type === 'time'){
+                        let c = n.time_count
+                        return {...n, time_count: c+1}
+                    }
+                }
+                return n
+            })
+            return { notes: updatedNotes, }
+        })
+    },
+    fetchButtonStats: (name: string) => {
+        const note = get().notes.find((note: Note_t) => note.name === name)
+        return note ? { theme_count: note.theme_count, expand_count: note.expand_count, time_count: note.time_count } : null
+    }
 })
 
 export const useNoteStore = create<NoteStore_t>(devtools(persist(NoteStore, { name: 'note-store' })))

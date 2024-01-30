@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast } from '@chakra-ui/react'
-import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, CalendarIcon, ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons'
+import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, CalendarIcon, ArrowBackIcon, ArrowForwardIcon, DownloadIcon } from '@chakra-ui/icons'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
@@ -23,17 +23,20 @@ type bulletObject = {
     expand: number;
     compress: number;
     history: string[];
+    edit: any[];
 }
 
 // let chunks : any[] = []
 // let audioURL : string
 
 const CornellNote: React.FC<NoteProps> = ({name, note }) => {
-    const { updateNote, addYouTubeId, startRecording, addTranscription } = useNoteStore((state) => ({
+    const { updateNote, addYouTubeId, startRecording, addTranscription, computeButtonClick, fetchButtonStats } = useNoteStore((state) => ({
         updateNote: state.updateNote,
         addYouTubeId: state.addYouTubeId,
         startRecording: state.startRecording,
         addTranscription: state.addTranscription,
+        computeButtonClick: state.computeButtonClick,
+        fetchButtonStats: state.fetchButtonStats,
     }))
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
     const [newPoint, setNewPoint] = useState<string>('')
@@ -94,6 +97,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             expand: 0,
             compress: 0,
             history: [cont.point],
+            edit: [[cont.point]],
         }))
 
         setBulletPoints(points)
@@ -108,47 +112,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             document.removeEventListener('gesturechange', handler)
             document.removeEventListener('gestureend', handler)
         }
-
-        // mediaRecorder setup for audio
-        // if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-        //     console.log('mediaDevices supported..')
-
-        //     navigator.mediaDevices.getUserMedia({
-        //         audio: true
-        //     }).then(stream => {
-        //         mediaRecorder = new MediaRecorder(stream)
-
-        //         mediaRecorder.ondataavailable = (e: any) => {
-        //             chunks.push(e.data)
-        //         }
-
-        //         mediaRecorder.onstop = () => {
-        //             const blob = new Blob(chunks, {'type': 'audio/mp3; codecs=opus'})
-        //             chunks = []
-        //             audioURL = window.URL.createObjectURL(blob)
-        //             setRecording(audioURL)
-        //             //convert blob to mp3 file
-        //             const openai = new OpenAI({ apiKey: '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', dangerouslyAllowBrowser: true} )
-        //             openai.audio.transcriptions.create({
-        //                 file: new File([blob], 'recording.mp3'),
-        //                 model: 'whisper-1',
-        //                 response_format: 'srt',
-        //             }).then((res: any) => {
-        //                 console.log(res)
-        //             }).catch((err: any) => {
-        //                 console.log(err)
-        //             })
-        //         }
-
-        //         mediaRecorder.start()
-        //     }).catch(error => {
-        //         console.log('Following error has occured : ',error)
-        //     })
-        // }else{
-        //     alert('Your browser does not support media devices')
-        // }
     }, [name])
 
+    //when a new point is typed and 'enter' is pressed
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             event.preventDefault()
@@ -170,23 +136,36 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             updatedPoints.push(np)
             
             updateNote(newTitle, updatedPoints)
-            setBulletPoints([...bulletPoints, { ...np, editable: false, id:`bullet-${maxId}`, expand: 0, compress: 0, history: [newPoint] }])
+            setBulletPoints([
+              ...bulletPoints,
+              {
+                ...np,
+                editable: false,
+                id: `bullet-${maxId}`,
+                expand: 0,
+                compress: 0,
+                history: [newPoint],
+                edit: [[newPoint]],
+              },
+            ])
             setNewPoint('')
         }
     }
 
+    //marks a bullet point as 'editable: true'
     const editPoint = (id: number) => {
         const newPoints = [...bulletPoints]
         newPoints[id].editable = true
         setBulletPoints(newPoints)
     }
 
+    //instantly changes an editable bullet point's state when typed on input
     const changeEditPoint = (index : number, val : string) => {
         // const newPoints = [...bulletPoints]
         // newPoints[index].point = val
         const newPoints = bulletPoints.map((bulletPoint, idx) => {
             if(idx === index){
-                const history = [...bulletPoint.history]
+                let history = [...bulletPoint.history]
                 history[bulletPoint.expand] = val
 
                 return {
@@ -196,24 +175,25 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             }else{
                 return bulletPoint
             }
-        
         })
 
         setBulletPoints(newPoints)
     }
 
+    //makes an editable bullet point to uneditable
     const updateEditPoint = (index : number, event : React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             event.preventDefault()
             const newPoints = [...bulletPoints]
             newPoints[index].editable = false
+            const latestEdit = newPoints[index].history[newPoints[index].expand]
+            // let edit = [...bulletPoint.edit]
+            // edit[bulletPoint.expand].push(val)
+            newPoints[index].edit[newPoints[index].expand].push(latestEdit)
             setBulletPoints(newPoints)
             updateNote(newTitle, bulletPoints.map((point: bulletObject) => ({point: point.point, created_at: point.created_at})))
         }
     }
-
-
-
 
     const getYoutubeTranscription = () => {
         let ytId = ''
@@ -296,6 +276,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         window.clearTimeout(timeoutHandle)
     }
 
+    //expand all points at a time
     const expandNote = async () => {
         if(!expandButtonToggle){
             toast({
@@ -348,15 +329,20 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         if(res[idx].old){
                             return newPoint
                         }else{
+                            let edit = [...newPoint.edit]
+                            edit.push([])
+                            edit[newPoint.expand].push(res[idx].expansion)
                             return {
                                 ...newPoint,
                                 history: [...newPoint.history, res[idx].expansion],
+                                edit: edit,
                             }
                         }
                     })
                     
                     setExpandButtonToggle(!expandButtonToggle)
                     setBulletPoints(ret)
+                    computeButtonClick(newTitle, 'expand')
                     // console.log(res)
                 }else{
                     toast({
@@ -380,6 +366,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             })
         }else{
             setExpandButtonToggle(!expandButtonToggle)
+            computeButtonClick(newTitle, 'expand')
         }
 
         // console.log(res)
@@ -458,6 +445,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
+    //call openai api for a single point expansion
     const openAIHelper = (newPoints: bulletObject[]) => {
         const pointToBeUpdated = newPoints[draggingIndex]
 
@@ -472,9 +460,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 })
                 newPoints = bulletPoints.map((bp, idx) => {
                     if(idx === draggingIndex){
+                        let edit = [...bp.edit]
+                        edit.push([])
+                        edit[bp.expand].push(res)
                         return {
                             ...bp,
                             history: [...bp.history, res],
+                            edit: edit,
                         }
                     }else{
                         return bp
@@ -545,9 +537,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
+    //time sorting
     const handleSort = () => {
         const sortedBulletPoints = [...bulletPoints].sort((a, b) => a.created_at - b.created_at)
         setBulletPoints(sortedBulletPoints)
+        computeButtonClick(newTitle, 'time')
     }
 
     const handleQuiz = () => {
@@ -582,6 +576,31 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
               isClosable: true
             })
         }).catch(e => console.log(e))
+    }
+
+    //download button-click stats
+    const handleDownload = () => {
+        const newPoints = bulletPoints.map((bulletPoint) => {
+            return {
+                point: bulletPoint.point,
+                edit: bulletPoint.edit
+            }
+        })
+
+        const obj = fetchButtonStats(newTitle)
+        let userLog: any = { buttonStats: obj }
+        userLog.editHistory = newPoints
+
+        const jsonString = JSON.stringify(userLog, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+
+        link.download = 'bulletPointsData.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
     
     return (
@@ -653,9 +672,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <TagLabel>Order by Theme</TagLabel>
                         <TagRightIcon as={DragHandleIcon} />
                     </Tag>
-                    <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px',marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
+                    <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
                         <TagLabel>Order by Time</TagLabel>
                         <TagRightIcon as={TimeIcon} />
+                    </Tag>
+                    <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
+                        <TagLabel>Download Stats</TagLabel>
+                        <TagRightIcon as={DownloadIcon} />
                     </Tag>
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId="droppable">
@@ -748,6 +771,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
                             <TagLabel>Order by Time</TagLabel>
                             <TagRightIcon as={TimeIcon} />
+                        </Tag>
+                        <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
+                            <TagLabel>Download Stats</TagLabel>
+                            <TagRightIcon as={DownloadIcon} />
                         </Tag>
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable">
