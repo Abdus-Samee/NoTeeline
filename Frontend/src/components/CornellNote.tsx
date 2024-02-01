@@ -616,6 +616,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     //store state of quiz while changing panels
     const changeQuizInfo = (info: any) => {
         setQuizInfo(info)
+        // if(info.qp === 100) setShowQuiz(!showQuiz)
+        // console.log(info)
     }
     
     return (

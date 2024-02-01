@@ -69,6 +69,14 @@ const Quiz: React.FC<any> = ({ quizInfo, changeQuizInfo }) => {
         setProgress(currentProgress)
     }
 
+    const handleRegenerate = () => {
+        setQuiz(0)
+        setProgress(0)
+        setColourGreen(-1)
+        setColourRed(-1)
+        changeQuizInfo({ quiz: 0, qp: 0, colourGreen: -1, colourRed: -1 })
+    }
+
     return(
         <div className='quiz-container'>
             <Progress value={progress} sx={{ marginTop: '-3.5vh', marginBottom: '0.5vh', borderRadius: '15px', }} />
@@ -88,7 +96,7 @@ const Quiz: React.FC<any> = ({ quizInfo, changeQuizInfo }) => {
                 </div>
             ))}
             </div>
-            <Button variant='outline' colorScheme='blue' onClick={handleNext}>Next</Button>
+            <Button variant='outline' colorScheme='green' onClick={progress === 100 ? handleRegenerate : handleNext}>{progress === 100 ? 'Regenerate quiz' : 'Next'}</Button>
         </div>
     )
 }
