@@ -273,6 +273,28 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.quiz-container {
+  padding: 1%;
+}
+
+.quiz-question {
+  padding: 10px;
+  border: 1px solid #000;
+  margin-bottom: 3px;
+}
+
+.quiz-options {
+  
+}
+
+.quiz-option {
+  padding: 1%;
+  margin-bottom: 2px;
+  border: 1px solid black;
+  border-radius: 15px;
+  /* cursor: pointer; */
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

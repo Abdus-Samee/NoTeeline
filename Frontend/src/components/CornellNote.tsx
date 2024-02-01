@@ -9,6 +9,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
 import { callGPT, callGPTForSinglePoint } from '../utils/helper'
 import BulletPoint from './BulletPoint'
+import Quiz from './Quiz'
 
 type NoteProps = {
     name: string;
@@ -51,7 +52,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     // const [expandedNotes, setExpandedNotes] = useState<ExpandedNote[]>([]) //expanded notes [{point, expansion}]
     // const [expanding, setExpanding] = useState<number>(-1) //-1: not expanding, 0: expanding, 1: expanded
     const [, setPause] = useState<boolean>(false)
-    const [expandSection, setExpandSection] = useState<boolean>(false)
+    const [expandSection, setExpandSection] = useState<boolean>(true) //show only note section by default
     const [expandQuizSection, setExpandQuizSection] = useState<boolean>(false)
     const [dragging, setDragging] = useState(false)
     const [draggingIndex, setDraggingIndex] = useState<number>(-1)
@@ -59,6 +60,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [expandButtonToggle, setExpandButtonToggle] = useState<boolean>(false)
     const [showQuiz, setShowQuiz] = useState<boolean>(false)
     const [showSummary, setShowSummary] = useState<boolean>(false)
+    const [themeOrTime, setThemeOrTime] = useState<string>('theme')
+    const [quizInfo, setQuizInfo] = useState<any>(null)
 
     const ref = useRef(null)
     const toast = useToast()
@@ -181,7 +184,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     //makes an editable bullet point to uneditable
-    const updateEditPoint = (index : number, event : React.KeyboardEvent<HTMLInputElement>) => {
+    const updateEditPoint = (index : number, event : React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter') {
             event.preventDefault()
             const newPoints = [...bulletPoints]
@@ -537,8 +540,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
+    //theme sorting
+    const handleTheme = () => {
+        setThemeOrTime('time')
+        // needs to be implemented
+    }
+
     //time sorting
     const handleSort = () => {
+        setThemeOrTime('theme')
         const sortedBulletPoints = [...bulletPoints].sort((a, b) => a.created_at - b.created_at)
         setBulletPoints(sortedBulletPoints)
         computeButtonClick(newTitle, 'time')
@@ -602,6 +612,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         link.click();
         document.body.removeChild(link);
     }
+
+    //store state of quiz while changing panels
+    const changeQuizInfo = (info: any) => {
+        setQuizInfo(info)
+    }
     
     return (
         <Grid
@@ -611,6 +626,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             templateColumns='repeat(4, 1fr)'
             sx={{ overflowX: 'hidden', }}
         >
+            {/* YouTube video player */}
             <GridItem rowSpan={3} colSpan={4} sx={{ borderBottom: '1px solid #000', }}>
                 {
                     !isLink ?
@@ -643,18 +659,21 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             </GridItem>
             {
                 expandQuizSection ?
-                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '1px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                        <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
-                            <TagLabel>Quiz</TagLabel>
-                            <TagRightIcon as={SunIcon} />
-                        </Tag>
+                        {showQuiz ?
+                            <div></div> :
+                            <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
+                                <TagLabel>Start quiz</TagLabel>
+                                <TagRightIcon as={SunIcon} />
+                            </Tag>
+                        }
                         <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
                     </div>
                     <br/>
                     {
                         showQuiz ?
-                        <p>HARDCODE QUIZ</p>
+                        <Quiz quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
                         :
                         <p>No quizzes to show !</p>
                     }
@@ -668,14 +687,18 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <TagRightIcon w={3} as={ArrowBackIcon} />
                         <TagRightIcon w={3} as={ArrowForwardIcon} />
                     </Tag>
-                    <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }}>
-                        <TagLabel>Order by Theme</TagLabel>
-                        <TagRightIcon as={DragHandleIcon} />
-                    </Tag>
-                    <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
-                        <TagLabel>Order by Time</TagLabel>
-                        <TagRightIcon as={TimeIcon} />
-                    </Tag>
+                    {
+                        themeOrTime === 'theme' ?
+                        <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
+                            <TagLabel>Order by Theme</TagLabel>
+                            <TagRightIcon as={DragHandleIcon} />
+                        </Tag>
+                        :
+                        <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
+                            <TagLabel>Order by Time</TagLabel>
+                            <TagRightIcon as={TimeIcon} />
+                        </Tag>
+                    }
                     <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
                         <TagLabel>Download Stats</TagLabel>
                         <TagRightIcon as={DownloadIcon} />
@@ -713,12 +736,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                 editPoint={editPoint}
                                             />
                                             :
-                                            <input
-                                                type='text'
+                                            <textarea
+                                                // type='text'
                                                 value={bulletPoint.point}
                                                 className='note-input'
                                                 onChange={(e) => changeEditPoint(index, e.target.value)}
                                                 onKeyDown={event => updateEditPoint(index, event)}
+                                                rows={Math.max(Math.ceil(bulletPoint.point.length / 200), 1)}
                                             />
                                         }
                                     </div>
@@ -743,16 +767,19 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 <>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                            <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
-                                <TagLabel>Quiz</TagLabel>
-                                <TagRightIcon as={SunIcon} />
-                            </Tag>
+                            {showQuiz ?
+                                <div></div> :
+                                <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
+                                    <TagLabel>Start quiz</TagLabel>
+                                    <TagRightIcon as={SunIcon} />
+                                </Tag>
+                            }
                             <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
                         </div>
                         <br/>
                         {
                             showQuiz ?
-                            <p>HARDCODE QUIZ</p>
+                            <Quiz quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
                             :
                             <p>No quizzes to show !</p>
                         }
@@ -764,14 +791,18 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             <TagRightIcon w={3} as={ArrowBackIcon} />
                             <TagRightIcon w={3} as={ArrowForwardIcon} />
                         </Tag>
-                        <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }}>
-                            <TagLabel>Order by Theme</TagLabel>
-                            <TagRightIcon as={DragHandleIcon} />
-                        </Tag>
-                        <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
-                            <TagLabel>Order by Time</TagLabel>
-                            <TagRightIcon as={TimeIcon} />
-                        </Tag>
+                        {
+                            themeOrTime === 'theme'?
+                            <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
+                                <TagLabel>Order by Theme</TagLabel>
+                                <TagRightIcon as={DragHandleIcon} />
+                            </Tag>
+                            :
+                            <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
+                                <TagLabel>Order by Time</TagLabel>
+                                <TagRightIcon as={TimeIcon} />
+                            </Tag>
+                        }
                         <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
                             <TagLabel>Download Stats</TagLabel>
                             <TagRightIcon as={DownloadIcon} />
@@ -809,12 +840,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                     editPoint={editPoint}
                                                 />
                                                 :
-                                                <input
-                                                    type='text'
+                                                <textarea
+                                                    // type='text'
                                                     value={bulletPoint.history[bulletPoint.expand]}
                                                     className='note-input'
                                                     onChange={(e) => changeEditPoint(index, e.target.value)}
                                                     onKeyDown={event => updateEditPoint(index, event)}
+                                                    rows={Math.max(Math.ceil(bulletPoint.point.length / 100), 1)}
                                                 />
                                             }
                                         </div>
@@ -837,6 +869,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     </GridItem>
                 </>
             }
+            {/* Summarization */}
             <GridItem rowSpan={4} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
                 <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleSummary}>
                     <TagLabel>Summary</TagLabel>
