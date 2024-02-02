@@ -1,13 +1,13 @@
 /* eslint-disable */
 
-import React, { useState, useEffect, useRef, } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast } from '@chakra-ui/react'
 import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, CalendarIcon, ArrowBackIcon, ArrowForwardIcon, DownloadIcon } from '@chakra-ui/icons'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, callGPTForSinglePoint } from '../utils/helper'
+import { callGPT, callGPTForSinglePoint } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz from './Quiz'
 
@@ -62,7 +62,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [themeOrTime, setThemeOrTime] = useState<string>('theme')
     const [quizInfo, setQuizInfo] = useState<any>(null)
-    const [pointStreams, setPointStreams] = useState<string[]>([])
 
     const ref = useRef(null)
     const toast = useToast()
@@ -103,8 +102,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             history: [cont.point],
             edit: [[cont.point]],
         }))
-
-        points.map(() => setPointStreams([...pointStreams, '']))
 
         setBulletPoints(points)
 
@@ -154,7 +151,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 edit: [[newPoint]],
               },
             ])
-            setPointStreams([...pointStreams, '']) //adding a stream tracker for a new point
             setNewPoint('')
         }
     }
@@ -382,15 +378,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     //calling openai api when expanding a single point from another function
-    // const expandSinglePoint = async (point: string, created_at: number) => {
-    //     const obj = {
-    //         point: point,
-    //         created_at: created_at,
-    //     }
+    const expandSinglePoint = async (point: string, created_at: number) => {
+        const obj = {
+            point: point,
+            created_at: created_at,
+        }
 
-    //     // const res = await callGPTForSinglePoint(obj, transcription)
-    //     // return res
-    // }
+        const res = await callGPTForSinglePoint(obj, transcription)
+        return res
+    }
 
     const toggleExpandSection = () => {
         setExpandSection(!expandSection)
@@ -454,128 +450,47 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     //call openai api for a single point expansion
-    // const openAIHelper = async (newPoints: bulletObject[]) => {
-    //     const pointToBeUpdated = newPoints[0]
-
-    //     const obj = {
-    //         point: pointToBeUpdated.history[pointToBeUpdated.expand],
-    //         created_at: pointToBeUpdated.created_at,
-    //     }
-
-    //     await callGPTForSinglePoint(obj, transcription, 0)
-    // }
-
-    const callGPTForSinglePointFromComponent = async (point: NotePoint, transcription: TranscriptLine[], index: number) => {
-        const expandedPoint = expandPoint(point, transcription)
-        const transcript = expandedPoint.transcript.join(".")
-        
-        const promptString = getFormattedPromptString()
-    
-        const PROMPT = promptString +
-                "Transcript: ..."+transcript+"...\n"+
-                "Summary: "+expandedPoint.point+"\n"+
-                "Note:"
-    
-        const res = await openai.chat.completions.create({
-            messages: [{ role: "system", content: PROMPT }],
-            model: "gpt-3.5-turbo",
-            stream: true,
-            // seed: SEED,
-            temperature: 0.2,
-        })
-    
-        for await (const chunk of res) {
-            console.log(`Point ${index}: ${chunk.choices[0]?.delta?.content}` || "")
-            addToPointStream(index, chunk.choices[0]?.delta?.content || "")
-        }
-
-        return index
-    }
-
-    const addToPointStream = (index: number, chunk: any) => {
-        // console.log(pointStreams)
-        let pointStream = pointStreams[index]
-        if(pointStream === ''){
-            // console.log('empty stream for ' + index)
-            setDraggingIndex(-1)
-            setInitialY(0)
-        }
-
-        // pointStream += chunk
-        const newPointStreams = pointStreams.map((s: string, idx: number) => {
-            if(idx === index){
-                return s+chunk
-            }else{
-                return s
-            }
-        })
-        setPointStreams(() => newPointStreams)
-        console.log(newPointStreams)
-        
-        const newPoints = bulletPoints.map((bp, idx) => {
-            if(idx === index){
-                let hst = bp.history
-                if(pointStream === ''){
-                    hst.push(newPointStreams[idx])
-                }else{
-                    hst[idx] = newPointStreams[idx]
-                }
-
-                return {
-                    ...bp,
-                    history: hst,
-                }
-            }else{
-                return bp
-            }
-        
-        })
-        setBulletPoints(() => newPoints)
-
-        // const newPoints = bulletPoints.map((bp, idx) => {
-        //     if(idx === index){
-        //         let edit = [...bp.edit]
-        //         edit.push([])
-        //         edit[bp.expand].push(newPointStreams[idx])
-        //         return {
-        //             ...bp,
-        //             history: [...bp.history, newPointStreams[idx]],
-        //             edit: edit,
-        //         }
-        //     }else{
-        //         return bp
-        //     }
-        
-        // })
-        // setBulletPoints(() => newPoints)
-    }
-
-    const newOpenAIHelper = async (newPoints: bulletObject[]) => {
+    const openAIHelper = (newPoints: bulletObject[]) => {
         const pointToBeUpdated = newPoints[draggingIndex]
 
-        const obj = {
-            point: pointToBeUpdated.history[pointToBeUpdated.expand],
-            created_at: pointToBeUpdated.created_at,
-        }
-
-        const index = await callGPTForSinglePointFromComponent(obj, transcription, draggingIndex)
-
-        // const updatedPoints = bulletPoints.map((bp, idx) => {
-        //     if(idx === index){
-        //         let edit = [...bp.edit]
-        //         edit.push([])
-        //         edit[bp.expand].push(newPointStreams[idx])
-        //         return {
-        //             ...bp,
-        //             history: [...bp.history, newPointStreams[idx]],
-        //             edit: edit,
-        //         }
-        //     }else{
-        //         return bp
-        //     }
-        
-        // })
-        // setBulletPoints(() => updatedPoints)
+        expandSinglePoint(pointToBeUpdated.history[pointToBeUpdated.expand], pointToBeUpdated.created_at).then(res => {
+            if(res){
+                toast({
+                    title: 'Done',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+                newPoints = bulletPoints.map((bp, idx) => {
+                    if(idx === draggingIndex){
+                        let edit = [...bp.edit]
+                        edit.push([])
+                        edit[bp.expand].push(res)
+                        return {
+                            ...bp,
+                            history: [...bp.history, res],
+                            edit: edit,
+                        }
+                    }else{
+                        return bp
+                    }
+                
+                })
+                setDraggingIndex(-1)
+                setInitialY(0)
+                setBulletPoints(() => newPoints)
+            }else{
+                toast({
+                    title: 'Error...',
+                    description: 'Error in expanding the bullet point',
+                    status: 'error',
+                    duration: 5000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+            }
+        }).catch(() => alert('Error calling GPT-4...'))
     }
 
     const handleMouseUp = (e: any) => {
@@ -620,8 +535,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     setInitialY(0)
                     setBulletPoints(newPoints)
                 }else{
-                    // openAIHelper(newPoints)
-                    newOpenAIHelper(newPoints)
+                    openAIHelper(newPoints)
                 }
             }
         }

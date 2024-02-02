@@ -5,7 +5,7 @@ import { NotePoint, TranscriptLine } from "../state/noteStore"
 const WINDOW_SIZE = 20000 //20000ms
 // const OPEN_AI_KEY = import.meta.env.VITE_OPEN_AI_KEY
 const OPEN_AI_KEY = "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"
-export const openai = new OpenAI({ apiKey: OPEN_AI_KEY, dangerouslyAllowBrowser: true })
+const openai = new OpenAI({ apiKey: OPEN_AI_KEY, dangerouslyAllowBrowser: true })
 // const template = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
 //                  "You have to expand it to 2-3 full sentences in simple english.\nHere is one example:\n"+
 //                  "Transcript: .. Yeah. So, for background, we both did these scans for this research project that we have at Meta called"+
@@ -113,7 +113,7 @@ export const callGPT = async (points: {point: string, history: string[], expand:
     return expansion
 }
 
-export const callGPTForSinglePoint = async (point: NotePoint, transcription: TranscriptLine[], index: number) => {
+export const callGPTForSinglePoint = async (point: NotePoint, transcription: TranscriptLine[]) => {
     const expandedPoint = expandPoint(point, transcription)
     const transcript = expandedPoint.transcript.join(".")
     
@@ -126,13 +126,24 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
 
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: PROMPT }],
-        model: "gpt-3.5-turbo",
-        stream: true,
+        model: "gpt-4-1106-preview",
         // seed: SEED,
         temperature: 0.2,
     })
 
-    for await (const chunk of res) {
-        console.log(`Point ${index}: ${chunk.choices[0]?.delta?.content}` || "")
-    }
+    if(res?.choices[0]?.message?.content !== null) return res.choices[0].message.content
+    else return null
+
+    // const res = await simulateAPICall()
+    // return res
 }
+
+// const simulateAPICall = async () => {
+//     return new Promise<string | null>((resolve) => {
+//         setTimeout(() => {
+//             // Simulate API response
+//             const simulatedResponse = 'ChatGPT API is experiencing problem for now! Stay with us :)'
+//             resolve(simulatedResponse)
+//         }, 3000); // Simulate a delay of 2 seconds
+//     });
+// };

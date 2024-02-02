@@ -19,6 +19,7 @@
     "@use-gesture/react": "^10.3.0",
     "axios": "^1.6.0",
     "dotenv": "^16.3.1",
+    "eventsource-parser": "^1.1.1",
     "form-data": "^4.0.0",
     "framer-motion": "^10.16.4",
     "fs": "^0.0.1-security",
