@@ -7,7 +7,7 @@ import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, callGPTForSinglePoint } from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz from './Quiz'
 
@@ -19,12 +19,13 @@ type NoteProps = {
 type bulletObject = {
     point: string;
     created_at: number;
+    utc_time: number;
     editable: boolean;
     id: string;
     expand: number;
     compress: number;
     history: string[];
-    edit: any[];
+    edit: {e_point: string, e_time: number, }[][];
 }
 
 // let chunks : any[] = []
@@ -62,7 +63,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [themeOrTime, setThemeOrTime] = useState<string>('theme')
     const [quizInfo, setQuizInfo] = useState<any>(null)
-    const [pointStreams, setPointStreams] = useState<string[]>([])
+    // const [pointStreams, setPointStreams] = useState<string[]>([])
 
     const ref = useRef(null)
     const toast = useToast()
@@ -101,10 +102,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             expand: 0,
             compress: 0,
             history: [cont.point],
-            edit: [[cont.point]],
+            edit: [[{e_point: cont.point, e_time: cont.utc_time, }]],
         }))
 
-        points.map(() => setPointStreams([...pointStreams, '']))
+        let pointStreams: string[] = []
+        points.map(() => pointStreams.push(''))
+        localStorage.setItem('pointStreams', JSON.stringify(pointStreams))
 
         setBulletPoints(points)
 
@@ -125,16 +128,20 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         if (event.key === 'Enter') {
             event.preventDefault()
 
+            const time_now = Date.now()
+
             const updatedPoints = bulletPoints.map((point: bulletObject) => {
                 return {
                     point: point.point,
                     created_at: point.created_at,
+                    utc_time: point.utc_time,
                 }
             })
 
             const np = {
                 point: newPoint,
                 created_at: playerTime, //time of the yt player at the moment of pressing enter
+                utc_time: time_now,
             }
 
             const maxId = Math.max(...bulletPoints.map((point: bulletObject) => parseInt(point.id.split('-')[1])))
@@ -151,10 +158,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 expand: 0,
                 compress: 0,
                 history: [newPoint],
-                edit: [[newPoint]],
+                edit: [[{e_point: newPoint, e_time: playerTime, }]],
               },
             ])
-            setPointStreams([...pointStreams, '']) //adding a stream tracker for a new point
+            let pointStreams = JSON.parse(localStorage.getItem('pointStreams') ?? '""') //adding a stream tracker for a new point
+            pointStreams.push('')
+            localStorage.setItem('pointStreams', JSON.stringify(pointStreams))
             setNewPoint('')
         }
     }
@@ -194,11 +203,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             const newPoints = [...bulletPoints]
             newPoints[index].editable = false
             const latestEdit = newPoints[index].history[newPoints[index].expand]
-            // let edit = [...bulletPoint.edit]
-            // edit[bulletPoint.expand].push(val)
-            newPoints[index].edit[newPoints[index].expand].push(latestEdit)
+            newPoints[index].edit[newPoints[index].expand].push({e_point: latestEdit, e_time: Date.now()})
             setBulletPoints(newPoints)
-            updateNote(newTitle, bulletPoints.map((point: bulletObject) => ({point: point.point, created_at: point.created_at})))
+            updateNote(newTitle, bulletPoints.map((point: bulletObject) => ({point: point.point, created_at: point.created_at, utc_time: point.utc_time})))
         }
     }
 
@@ -494,53 +501,30 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     const addToPointStream = (index: number, chunk: any) => {
         // console.log(pointStreams)
-        let pointStream = pointStreams[index]
+        const pointStreams = JSON.parse(localStorage.getItem('pointStreams') ?? '""')
+        const pointStream = pointStreams[index]
         if(pointStream === ''){
             // console.log('empty stream for ' + index)
             setDraggingIndex(-1)
             setInitialY(0)
         }
 
-        // pointStream += chunk
-        const newPointStreams = pointStreams.map((s: string, idx: number) => {
-            if(idx === index){
-                return s+chunk
-            }else{
-                return s
-            }
-        })
-        setPointStreams(() => newPointStreams)
-        console.log(newPointStreams)
+        pointStreams[index] += chunk
+        localStorage.setItem('pointStreams', JSON.stringify(pointStreams))
+        console.log(pointStreams)
         
-        const newPoints = bulletPoints.map((bp, idx) => {
-            if(idx === index){
-                let hst = bp.history
-                if(pointStream === ''){
-                    hst.push(newPointStreams[idx])
-                }else{
-                    hst[idx] = newPointStreams[idx]
-                }
-
-                return {
-                    ...bp,
-                    history: hst,
-                }
-            }else{
-                return bp
-            }
-        
-        })
-        setBulletPoints(() => newPoints)
-
         // const newPoints = bulletPoints.map((bp, idx) => {
         //     if(idx === index){
-        //         let edit = [...bp.edit]
-        //         edit.push([])
-        //         edit[bp.expand].push(newPointStreams[idx])
+        //         let hst = [...bp.history]
+        //         if(pointStream === ''){
+        //             hst = [...hst, pointStreams[idx]]
+        //         }else{
+        //             hst[index] = pointStreams[idx]
+        //         }
+
         //         return {
         //             ...bp,
-        //             history: [...bp.history, newPointStreams[idx]],
-        //             edit: edit,
+        //             history: hst,
         //         }
         //     }else{
         //         return bp
@@ -548,6 +532,19 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         
         // })
         // setBulletPoints(() => newPoints)
+        
+        setBulletPoints(prevPoints => {
+            let newPoints = [...prevPoints]
+            let hst = [...newPoints[index].history]
+            if(pointStream === ''){
+                hst = [...hst, pointStreams[index]]
+            }else{
+                hst[index] = pointStreams[index]
+            }
+            newPoints[index].history = hst
+
+            return newPoints
+        })
     }
 
     const newOpenAIHelper = async (newPoints: bulletObject[]) => {
@@ -556,9 +553,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const obj = {
             point: pointToBeUpdated.history[pointToBeUpdated.expand],
             created_at: pointToBeUpdated.created_at,
+            utc_time: pointToBeUpdated.utc_time,
         }
 
-        const index = await callGPTForSinglePointFromComponent(obj, transcription, draggingIndex)
+        await callGPTForSinglePointFromComponent(obj, transcription, draggingIndex)
 
         // const updatedPoints = bulletPoints.map((bp, idx) => {
         //     if(idx === index){
@@ -677,9 +675,20 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     //download button-click stats
     const handleDownload = () => {
-        const newPoints = bulletPoints.map((bulletPoint) => {
+        const newPoints = bulletPoints.map((bulletPoint, idx) => {
+            let note_taking_time = -1
+
+            if(idx === 0){
+                note_taking_time = bulletPoint.created_at*1000.0
+            }else{
+                note_taking_time = bulletPoint.utc_time - bulletPoints[idx-1].utc_time
+            }
+
             return {
                 point: bulletPoint.point,
+                // created_at: bulletPoint.created_at,
+                utc_time: bulletPoint.utc_time,
+                note_taking_time: note_taking_time,
                 edit: bulletPoint.edit
             }
         })
@@ -720,7 +729,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 {
                     !isLink ?
                         <InputGroup
-                            style={{ marginBottom: '5vh', width: '50%', }}    
+                            style={{ marginBottom: '5vh', width: '50%', marginLeft: '25%', marginTop: '1%', }}    
                         >
                             <Input
                                 placeholder='Enter a YouTube link...'
@@ -827,7 +836,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                             :
                                             <textarea
                                                 // type='text'
-                                                value={bulletPoint.point}
+                                                defaultValue={bulletPoint.point}
                                                 className='note-input'
                                                 onChange={(e) => changeEditPoint(index, e.target.value)}
                                                 onKeyDown={event => updateEditPoint(index, event)}
@@ -931,7 +940,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                 :
                                                 <textarea
                                                     // type='text'
-                                                    value={bulletPoint.history[bulletPoint.expand]}
+                                                    defaultValue={bulletPoint.history[bulletPoint.expand]}
                                                     className='note-input'
                                                     onChange={(e) => changeEditPoint(index, e.target.value)}
                                                     onKeyDown={event => updateEditPoint(index, event)}

@@ -15,8 +15,8 @@ const BulletPoint = ({index, expand, history, editPoint}: BulletPointProps) => {
     // const toast = useToast()
 
     useEffect(() => {
-        if(history.length > expand){
-            const point = history[expand]               
+        if(history.length >= expand){
+            const point = history[expand]
             setPointToShow(point)
             setExpanded(expand)   
         }else{

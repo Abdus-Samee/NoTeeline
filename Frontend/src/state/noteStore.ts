@@ -4,6 +4,7 @@ import { devtools, persist } from 'zustand/middleware'
 export type NotePoint = {
     point: string;
     created_at: number;
+    utc_time: number;
     // updated_at: number;
 }
 
