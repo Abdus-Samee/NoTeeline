@@ -83,7 +83,7 @@ export const getFormattedPromptString = () => {
     return promptString
 }
 
-export const callGPT = async (points: {point: string, history: string[], expand: number, created_at: number}[], transcription: TranscriptLine[]) => {
+export const callGPT = async (points: {point: string, history: string[], expand: number, created_at: number, utc_time: number, }[], transcription: TranscriptLine[]) => {
     const promptString = getFormattedPromptString()
     
     let expansion = [] as any[]
@@ -94,7 +94,7 @@ export const callGPT = async (points: {point: string, history: string[], expand:
             expansion.push({point: point.point, expansion: point.history[point.expand], old: true})
         }else{
             const pointToBeExpanded = point.history[point.expand]
-            const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at}, transcription)
+            const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
             const transcript = expandedPoint.transcript.join(".")
             const PROMPT = promptString +
                 "Transcript: ..."+transcript+"...\n"+
@@ -135,4 +135,19 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
     for await (const chunk of res) {
         console.log(`Point ${index}: ${chunk.choices[0]?.delta?.content}` || "")
     }
+}
+
+export const generateQuiz = async (points: string[]) => {
+    const prompt = "Given a topic description, Your task is to generate five multichoice question with answer. " +
+                   "Please mark the question within <Question></Question> tags,  individual choices within <Choice></Choice> tags " +
+                   "and answer within <Answer></Answer> tags.\n" +
+                   "Topic: " + points
+    const res = await openai.chat.completions.create({
+        messages: [{ role: "system", content: prompt }],
+        model: "gpt-3.5-turbo",
+        // seed: SEED,
+        temperature: 0.2,
+    })
+
+    return res.choices[0].message.content || ""
 }

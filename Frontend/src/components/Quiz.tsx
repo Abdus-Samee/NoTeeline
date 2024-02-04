@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Progress } from '@chakra-ui/react'
 
-type Quiz_t = {
+export type Quiz_t = {
     question: string;
     answer: string;
     options: string[];
 }
 
-const Quiz: React.FC<any> = ({ quizInfo, changeQuizInfo }) => {
+const Quiz: React.FC<any> = ({ quizzes, quizInfo, changeQuizInfo }) => {
+    const [data, setData] = useState<Quiz_t[]>(quizzes)
     const [quiz, setQuiz] = useState<number>(0)
     const [progress, setProgress] = useState<number>(0)
     const [colourGreen, setColourGreen] = useState<number>(-1)
     const [colourRed, setColourRed] = useState<number>(-1)
 
     useEffect(() => {
+        console.log(quizzes)
+        setData(quizzes)
         if(quizInfo){
             setQuiz(quizInfo.quiz)
             setProgress(quizInfo.qp)
@@ -21,29 +24,6 @@ const Quiz: React.FC<any> = ({ quizInfo, changeQuizInfo }) => {
             setColourRed(quizInfo.colourRed)
         }
     }, [])
-
-    const data: Quiz_t[] = [
-        {
-            question: 'Question 1',
-            answer: 'C1',
-            options: ['W1', 'C1', 'W2', 'W3']
-        },
-        {
-            question: 'Question 2',
-            answer: 'C2',
-            options: ['C2', 'W1', 'W2', 'W3']
-        },
-        {
-            question: 'Question 3',
-            answer: 'C3',
-            options: ['W1', 'W2', 'W3', 'C3']
-        },
-        {
-            question: 'Question 4',
-            answer: 'C4',
-            options: ['W1', 'W2', 'C4', 'W3']
-        },
-    ]
 
     const checkQuizAnswer = (idx: number) => {
         console.log(data[quiz].options[idx], data[quiz].answer)
@@ -63,7 +43,7 @@ const Quiz: React.FC<any> = ({ quizInfo, changeQuizInfo }) => {
         setColourGreen(-1)
         setColourRed(-1)
         setQuiz(q)
-        const qp = (quiz == 3) ? 4 : q
+        const qp = (quiz == (data.length-1)) ? data.length : q
         const currentProgress = (qp / data.length) * 100
         changeQuizInfo({ quiz: q, qp: currentProgress, colourGreen: -1, colourRed: -1 })
         setProgress(currentProgress)

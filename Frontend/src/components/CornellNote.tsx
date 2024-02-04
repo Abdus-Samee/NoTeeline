@@ -7,9 +7,9 @@ import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, } from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz } from '../utils/helper'
 import BulletPoint from './BulletPoint'
-import Quiz from './Quiz'
+import Quiz, { Quiz_t } from './Quiz'
 
 type NoteProps = {
     name: string;
@@ -59,9 +59,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [draggingIndex, setDraggingIndex] = useState<number>(-1)
     const [initialY, setInitialY] = useState(0)
     const [expandButtonToggle, setExpandButtonToggle] = useState<boolean>(false)
-    const [showQuiz, setShowQuiz] = useState<boolean>(false)
+    const [showQuiz, setShowQuiz] = useState<number>(0) // 0->no quiz, 1->called openai, 2->quiz visible
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [themeOrTime, setThemeOrTime] = useState<string>('theme')
+    const [quizzes, setQuizzes] = useState<Quiz_t[]>([])
     const [quizInfo, setQuizInfo] = useState<any>(null)
     // const [pointStreams, setPointStreams] = useState<string[]>([])
 
@@ -324,6 +325,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             history: point.history,
             expand: point.expand,
             created_at: point.created_at,
+            utc_time: point.utc_time,
         }))
 
         setBulletPoints(newPoints)
@@ -639,8 +641,51 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         computeButtonClick(newTitle, 'time')
     }
 
+    const extractQuizzesInformation = (quizzesText: any) => {
+        const quizRegex = /<Question>(.*?)<\/Question>\s*<Choice>(.*?)<\/Choice>\s*<Choice>(.*?)<\/Choice>\s*<Choice>(.*?)<\/Choice>\s*<Choice>(.*?)<\/Choice>\s*<Answer>(.*?)<\/Answer>/gs
+      
+        const matches = Array.from(quizzesText.matchAll(quizRegex))
+      
+        const quizzes = matches.map((match: any) => {
+          const [, question, option1, option2, option3, option4, answer] = match as any
+          const options = [option1, option2, option3, option4]
+          return { question, answer, options }
+        })
+      
+        return quizzes
+    }
+
     const handleQuiz = () => {
-        setShowQuiz(!showQuiz)
+        toast({
+            title: 'Starting quiz. Please wait patiently...',
+            status: 'info',
+            duration: 2000,
+            position: 'top-right',
+            isClosable: true
+        })
+
+        setShowQuiz(1)
+
+        const newPoints: string[] = bulletPoints.map(bulletPoint => {
+            return bulletPoint.point
+        })
+
+        generateQuiz(newPoints).then(res => {
+            // console.log(res)
+            const qs = extractQuizzesInformation(res)
+            // console.log(qs)
+            setQuizzes(qs)
+            setShowQuiz(2)
+        }).catch(e => {
+            console.log(`Quiz error: ${e}`)
+            toast({
+                title: 'Error generating quiz. Please try again...',
+                status: 'info',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true
+            })
+        })
     }
 
     const handleSummary = () => {
@@ -759,7 +804,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 expandQuizSection ?
                 <GridItem rowSpan={4} colSpan={4} sx={{ padding: '1px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                        {showQuiz ?
+                        {showQuiz !== 0 ?
                             <div></div> :
                             <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
                                 <TagLabel>Start quiz</TagLabel>
@@ -770,8 +815,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     </div>
                     <br/>
                     {
-                        showQuiz ?
-                        <Quiz quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
+                        showQuiz === 2 ?
+                        quizzes && quizzes.length > 0 ?
+                            <Quiz quizzes={quizzes} quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
+                            :
+                            <p>No quizzes to show !</p>
+                        :
+                        showQuiz === 1 ?
+                        <p>Loading quizzes...</p>
                         :
                         <p>No quizzes to show !</p>
                     }
@@ -865,7 +916,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 <>
                     <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                            {showQuiz ?
+                            {showQuiz !== 0 ?
                                 <div></div> :
                                 <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
                                     <TagLabel>Start quiz</TagLabel>
@@ -876,8 +927,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         </div>
                         <br/>
                         {
-                            showQuiz ?
-                            <Quiz quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
+                            showQuiz === 2 ?
+                            quizzes && quizzes.length > 0 ?
+                                <Quiz quizzes={quizzes} quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
+                                :
+                                <p>No quizzes to show !</p>
+                            :
+                            showQuiz === 1 ?
+                            <p>Loading quizzes...</p>
                             :
                             <p>No quizzes to show !</p>
                         }
