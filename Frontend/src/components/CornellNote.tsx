@@ -1,13 +1,13 @@
 /* eslint-disable */
 
 import React, { useState, useEffect, useRef, } from 'react'
-import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast } from '@chakra-ui/react'
+import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, theme, keyframes } from '@chakra-ui/react'
 import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, CalendarIcon, ArrowBackIcon, ArrowForwardIcon, DownloadIcon } from '@chakra-ui/icons'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz } from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz, { Quiz_t } from './Quiz'
 
@@ -64,6 +64,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [themeOrTime, setThemeOrTime] = useState<string>('theme')
     const [quizzes, setQuizzes] = useState<Quiz_t[]>([])
     const [quizInfo, setQuizInfo] = useState<any>(null)
+    const [themes, setThemes] = useState<any>([])
     // const [pointStreams, setPointStreams] = useState<string[]>([])
 
     const ref = useRef(null)
@@ -627,10 +628,51 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
+    const extractThemes = (text: string) => {
+        const themeRegex = /<Topic>(.*?)<\/Topic>[\s\S]*?<p>(.*?)<\/p>/g
+        const matches = Array.from(text.matchAll(themeRegex))
+
+        const themes: any = {}
+        matches.forEach(match => {
+            const [, topic, points] = match
+            if (!themes[topic]) {
+                themes[topic] = []
+            }
+            themes[topic].push(points.trim())
+        });
+
+        return themes
+    }
+
     //theme sorting
     const handleTheme = () => {
-        setThemeOrTime('time')
-        // needs to be implemented
+        toast({
+            title: 'Generating themes. Please wait patiently...',
+            status: 'info',
+            duration: 2000,
+            position: 'top-right',
+            isClosable: true
+        })
+
+        const newPoints: string[] = bulletPoints.map(bulletPoint => {
+            return bulletPoint.history[bulletPoint.expand]
+        })
+
+        generateTheme(newPoints).then(res => {
+            // console.log(res)
+            const t = extractThemes(res)
+            setThemes(t)
+            setThemeOrTime('time')
+        }).catch(e => {
+            console.log(`Quiz error: ${e}`)
+            toast({
+                title: 'Error generating theme. Please try again...',
+                status: 'info',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true
+            })
+        })
     }
 
     //time sorting
@@ -852,6 +894,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         <TagLabel>Download Stats</TagLabel>
                         <TagRightIcon as={DownloadIcon} />
                     </Tag>
+                    {themeOrTime !== 'time' ?
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId="droppable">
                         {(provided: any) => (
@@ -897,12 +940,28 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                     </div>
                                 )}
                                 </Draggable>
-                            ))}
+                            ))}                            
                             {provided.placeholder}
                             </div>
                         )}
                         </Droppable>
                     </DragDropContext>
+                    :
+                    <>
+                    {Object.entries(themes).map(([topic, points]: [any, any]) => (
+                        <div key={topic}>
+                            <h2 style={{ fontWeight: 'bold', }}>{topic}</h2>
+                            <div>
+                                {points.map((point: any, index: number) => (
+                                    <div key={index} className='quiz-option'>
+                                        {point}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                    </>
+                    }
                     <input
                         type='text'
                         placeholder='Write a point...'
@@ -962,6 +1021,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             <TagLabel>Download Stats</TagLabel>
                             <TagRightIcon as={DownloadIcon} />
                         </Tag>
+                        {themeOrTime !== 'time' ?
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable">
                             {(provided: any) => (
@@ -1013,6 +1073,22 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             )}
                             </Droppable>
                         </DragDropContext>
+                        :
+                        <>
+                        {Object.entries(themes).map(([topic, points]: [any, any]) => (
+                            <div key={topic}>
+                                <h2 style={{ fontWeight: 'bold', }}>{topic}</h2>
+                                <div>
+                                    {points.map((point: any, index: number) => (
+                                        <div key={index} className='quiz-option'>
+                                            {point}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                        </>
+                        }
                         <input
                             type='text'
                             placeholder='Write a point...'

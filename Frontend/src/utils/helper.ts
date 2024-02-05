@@ -103,7 +103,7 @@ export const callGPT = async (points: {point: string, history: string[], expand:
 
             const res = await openai.chat.completions.create({
                 messages: [{ role: "system", content: PROMPT }],
-                model: "gpt-4",
+                model: "gpt-3.5-turbo",
             })
 
             if(res?.choices[0]?.message?.content !== null) expansion.push({point: point.point, expansion: res.choices[0].message.content, old: false})
@@ -142,6 +142,22 @@ export const generateQuiz = async (points: string[]) => {
                    "Please mark the question within <Question></Question> tags,  individual choices within <Choice></Choice> tags " +
                    "and answer within <Answer></Answer> tags.\n" +
                    "Topic: " + points
+    const res = await openai.chat.completions.create({
+        messages: [{ role: "system", content: prompt }],
+        model: "gpt-3.5-turbo",
+        // seed: SEED,
+        temperature: 0.2,
+    })
+
+    return res.choices[0].message.content || ""
+}
+
+export const generateTheme = async (expandedPoints: string[]) => {
+    const prompt = "Given a list of points, Your task is to perform topic modeling over them. Arrange the points into topics and " + 
+                   "provide a name to each individual topic.  Please mark the topic within <Topic></Topics> tags. the points are marked " +
+                   "with <p> tag as well.\n" + 
+                   "Input points: " + expandedPoints
+    
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: prompt }],
         model: "gpt-3.5-turbo",
