@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { NotePoint, TranscriptLine } from "../state/noteStore"
+import { NotePoint, TranscriptLine, OnboardingSection } from "../state/noteStore"
 
 // const SEED = 1
 const WINDOW_SIZE = 20000 //20000ms
@@ -72,12 +72,26 @@ export const getFormattedPromptString = () => {
     const noteStore = localStorage.getItem('note-store')
     const onboardings = noteStore ? JSON.parse(noteStore).state.onboardings : []
 
+    let takeOnboardingIntoPrompt = true
+
+    if(onboardings.length === 0) takeOnboardingIntoPrompt = false
+
+    const newOnboardings = onboardings.filter((onboarding: OnboardingSection) => 
+                    onboarding.note !== "" && onboarding.keypoints.every(keypoint => keypoint !== ""))
+
+    if(newOnboardings.length === 0) takeOnboardingIntoPrompt = false
+
     let promptString = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
-                         "You have to expand it to 2-3 full sentences in simple english.\nHere are three examples:\n"
-    for(let i = 0; i < onboardings.length; i++){
-        promptString += "Transcript: ..."+onboardings[i].transcript+"...\n"+
-                        "Summary: "+onboardings[i].keypoints.join(", ")+"\n"+
-                        "Note: "+onboardings[i].note+"\n\n"
+                         "You have to expand it to 2-3 full sentences in simple english."
+    
+    if(takeOnboardingIntoPrompt) promptString += "\nHere are three examples:\n"
+
+    if(takeOnboardingIntoPrompt){
+        for(let i = 0; i < newOnboardings.length; i++){
+            promptString += "Transcript: ..."+newOnboardings[i].transcript+"...\n"+
+                            "Summary: "+newOnboardings[i].keypoints.join(", ")+"\n"+
+                            "Note: "+newOnboardings[i].note+"\n\n"
+        }
     }
 
     return promptString

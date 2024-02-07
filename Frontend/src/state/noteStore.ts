@@ -44,7 +44,7 @@ type NoteStore_t = {
     notes: Note_t[];
     onboardings: OnboardingSection[];
     addOnboarding: (onboarding: OnboardingSection) => void;
-    fetchAllOnboardings: () => void;
+    fetchAllOnboardings: () => OnboardingSection[];
     addNote: (note: Note_t) => void;
     fetchNote: (name: string) => Note_t;
     addYouTubeId: (name: string, ytId: string) => void;

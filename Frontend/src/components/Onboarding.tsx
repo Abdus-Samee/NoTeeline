@@ -137,6 +137,7 @@ const Onboarding: React.FC = () => {
         setInputList(updatedList)
     }
 
+    // if user presses submit button without entering latest note-point
     const checkForRemainingInputs = () => {
         let updatedList: string[][] = [...inputList]
 
