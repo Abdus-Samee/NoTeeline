@@ -30,6 +30,9 @@ type bulletObject = {
 
 // let chunks : any[] = []
 // let audioURL : string
+let previousTime: number = 0
+let forwardCount: number = 0
+let reverseCount: number = 0
 
 const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const { updateNote, addYouTubeId, startRecording, addTranscription, computeButtonClick, fetchButtonStats } = useNoteStore((state) => ({
@@ -65,6 +68,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [quizzes, setQuizzes] = useState<Quiz_t[]>([])
     const [quizInfo, setQuizInfo] = useState<any>(null)
     const [themes, setThemes] = useState<any>([])
+    const [pauseCount, setPauseCount] = useState<number>(0)
+    // const [forwardCount, setForwardCount] = useState<number>(0)
+    // const [reverseCount, setReverseCount] = useState<number>(0)
     // const [pointStreams, setPointStreams] = useState<string[]>([])
 
     const ref = useRef(null)
@@ -276,7 +282,23 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const playerState = e.target.getPlayerState() //playerState: number
 
         if(playerState === 1){
+            // let diffTime = time - playerTime
             setPlayerTime(time)
+            // diffTime = parseFloat(diffTime.toFixed(2))
+            // console.log(diffTime)
+            const D = time - previousTime
+            previousTime = time
+            const epsilon = 2
+            if(Math.abs(D) > epsilon){
+                if(D > 0){
+                    forwardCount += 1
+                    // console.log(`forwardCount: ${forwardCount}, ${D}`)
+                }
+                else{
+                    reverseCount += 1
+                    // console.log(`reverseCount: ${reverseCount}, ${D}`)
+                }
+            }
             // console.log(time)
         }else if(playerState === 2){
             // console.log('paused')
@@ -290,6 +312,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     const stopVideo = () => {
         window.clearTimeout(timeoutHandle)
+    }
+
+    const countPause = () => {
+        setPauseCount((prevCount) => prevCount + 1)
+        setPause(true)
+        // console.log(`pause: ${pauseCount+1}`)
     }
 
     //expand all points at a time
@@ -781,7 +809,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         })
 
         const obj = fetchButtonStats(newTitle)
-        let userLog: any = { buttonStats: obj }
+        let userLog: any = { buttonStats: obj, pauseCount: pauseCount, forwardCount: forwardCount, reverseCount: reverseCount, }
         userLog.editHistory = newPoints
 
         const jsonString = JSON.stringify(userLog, null, 2);
@@ -836,7 +864,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             videoId={embedId}
                             onReady={loop}
                             onPlay={() => setPause(false)}
-                            onPause={() => setPause(true)}
+                            onPause={countPause}
                             onEnd={stopVideo}
                             style={{ marginTop: '0.5%',  marginLeft: '25%', }}
                         />
