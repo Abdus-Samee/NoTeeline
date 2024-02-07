@@ -871,29 +871,31 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </GridItem>
                 :
                 expandSection ?
-                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '3px', overflowY: 'auto', }}>
-                    <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
-                    <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                        <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
-                        <TagRightIcon w={3} as={ArrowBackIcon} />
-                        <TagRightIcon w={3} as={ArrowForwardIcon} />
-                    </Tag>
-                    {
-                        themeOrTime === 'theme' ?
-                        <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
-                            <TagLabel>Order by Theme</TagLabel>
-                            <TagRightIcon as={DragHandleIcon} />
+                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
+                    <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
+                        <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
+                        <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                            <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
+                            <TagRightIcon w={3} as={ArrowBackIcon} />
+                            <TagRightIcon w={3} as={ArrowForwardIcon} />
                         </Tag>
-                        :
-                        <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
-                            <TagLabel>Order by Time</TagLabel>
-                            <TagRightIcon as={TimeIcon} />
+                        {
+                            themeOrTime === 'theme' ?
+                            <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
+                                <TagLabel>Order by Theme</TagLabel>
+                                <TagRightIcon as={DragHandleIcon} />
+                            </Tag>
+                            :
+                            <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
+                                <TagLabel>Order by Time</TagLabel>
+                                <TagRightIcon as={TimeIcon} />
+                            </Tag>
+                        }
+                        <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
+                            <TagLabel>Download Stats</TagLabel>
+                            <TagRightIcon as={DownloadIcon} />
                         </Tag>
-                    }
-                    <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
-                        <TagLabel>Download Stats</TagLabel>
-                        <TagRightIcon as={DownloadIcon} />
-                    </Tag>
+                    </div>
                     {themeOrTime !== 'time' ?
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId="droppable">
@@ -998,29 +1000,31 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             <p>No quizzes to show !</p>
                         }
                     </GridItem>
-                    <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', }}>
-                        <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
-                        <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                            <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
-                            <TagRightIcon w={3} as={ArrowBackIcon} />
-                            <TagRightIcon w={3} as={ArrowForwardIcon} />
-                        </Tag>
-                        {
-                            themeOrTime === 'theme'?
-                            <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
-                                <TagLabel>Order by Theme</TagLabel>
-                                <TagRightIcon as={DragHandleIcon} />
+                    <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', paddingTop: '0', overflowY: 'auto', }}>
+                        <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
+                            <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
+                            <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                                <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
+                                <TagRightIcon w={3} as={ArrowBackIcon} />
+                                <TagRightIcon w={3} as={ArrowForwardIcon} />
                             </Tag>
-                            :
-                            <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
-                                <TagLabel>Order by Time</TagLabel>
-                                <TagRightIcon as={TimeIcon} />
+                            {
+                                themeOrTime === 'theme'?
+                                <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
+                                    <TagLabel>Order by Theme</TagLabel>
+                                    <TagRightIcon as={DragHandleIcon} />
+                                </Tag>
+                                :
+                                <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
+                                    <TagLabel>Order by Time</TagLabel>
+                                    <TagRightIcon as={TimeIcon} />
+                                </Tag>
+                            }
+                            <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
+                                <TagLabel>Download Stats</TagLabel>
+                                <TagRightIcon as={DownloadIcon} />
                             </Tag>
-                        }
-                        <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
-                            <TagLabel>Download Stats</TagLabel>
-                            <TagRightIcon as={DownloadIcon} />
-                        </Tag>
+                        </div>
                         {themeOrTime !== 'time' ?
                         <DragDropContext onDragEnd={onDragEnd}>
                             <Droppable droppableId="droppable">
