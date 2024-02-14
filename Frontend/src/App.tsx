@@ -13,6 +13,7 @@ import {
   FormLabel,
   Input,
   useToast,
+  Checkbox,
  } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
 
@@ -47,6 +48,7 @@ const App = () => {
     updated_at: 0,
     recording_start: 0,
   })
+  const [isChecked, setIsChecked] = useState(true)
   
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
@@ -122,6 +124,10 @@ const App = () => {
     })
   }
 
+  const handleCheckBoxChange = (event: any) => {
+    setIsChecked(event.target.checked)
+  }
+
   return (
     <div className='note-ui-root'>
       <div className='sidebar'>
@@ -165,8 +171,11 @@ const App = () => {
                       <FormLabel>Name</FormLabel>
                       <Input placeholder='Name of your note' onChange={(e) => setName(e.target.value)} />
                   </FormControl>
+                  <br />
+                  <Checkbox isChecked={isChecked} onChange={handleCheckBoxChange}>
+                    Enable micro note taking
+                  </Checkbox>
               </ModalBody>
-
               <ModalFooter>
                   <Button colorScheme='blue' mr={3} onClick={saveNote}>
                       Save
