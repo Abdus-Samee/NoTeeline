@@ -77,8 +77,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const toast = useToast()
     let timeoutHandle : any
     const opts = {
-        height: '270',
-        width: '62%',
+        height: '330',
+        width: '70%',
         frameborder: '0',
         playerVars: {
             autoplay: 0,
@@ -835,12 +835,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         <Grid
             h='137%'
             w='100%'
-            templateRows='repeat(11, 1fr)'
+            templateRows='repeat(15, 1fr)'
             templateColumns='repeat(4, 1fr)'
             sx={{ overflowX: 'hidden', }}
         >
             {/* YouTube video player */}
-            <GridItem rowSpan={3} colSpan={4} sx={{ borderBottom: '1px solid #000', }}>
+            <GridItem rowSpan={5} colSpan={4} sx={{ borderBottom: '1px solid #000', }}>
                 {
                     !isLink ?
                         <InputGroup
@@ -872,7 +872,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             </GridItem>
             {
                 expandQuizSection ?
-                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '1px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                <GridItem rowSpan={5} colSpan={4} sx={{ padding: '1px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', }}>
                         {showQuiz !== 0 ?
                             <div></div> :
@@ -899,7 +899,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </GridItem>
                 :
                 expandSection ?
-                <GridItem rowSpan={4} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
+                <GridItem rowSpan={5} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
                     <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
                         <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
                         <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
@@ -1003,7 +1003,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </GridItem>
                 :
                 <>
-                    <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                    <GridItem rowSpan={5} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', }}>
                             {showQuiz !== 0 ?
                                 <div></div> :
@@ -1028,7 +1028,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             <p>No quizzes to show !</p>
                         }
                     </GridItem>
-                    <GridItem rowSpan={4} colSpan={2} sx={{ padding: '2px', paddingTop: '0', overflowY: 'auto', }}>
+                    <GridItem rowSpan={5} colSpan={2} sx={{ padding: '2px', paddingTop: '0', overflowY: 'auto', }}>
                         <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
                             <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
                             <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
@@ -1133,17 +1133,17 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </>
             }
             {/* Summarization */}
-            <GridItem rowSpan={4} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
+            <GridItem rowSpan={5} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
                 <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleSummary}>
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
-                {
+                {/* {
                     showSummary ?
                     <p>HARDCODE SUMMARY</p>
                     :
                     <p>No summary...</p>
-                }
+                } */}
             </GridItem>
         </Grid>
     )

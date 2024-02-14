@@ -73,16 +73,6 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts
                         />
                     </Box>
                     <Box>
-                        <Heading size='md' textTransform='uppercase' color='#54432C'>User Full Note</Heading>
-                        <Textarea
-                            placeholder='Enter your note here...'
-                            size='sm'
-                            resize='vertical'
-                            value={note}
-                            onChange={handleTextAreaChange}
-                        />
-                    </Box>
-                    <Box>
                         <Heading size='md' textTransform='uppercase' color='#54432C'>Keypoints</Heading>
                         {
                             inputList.map((input, i) => (
@@ -101,6 +91,16 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts
                             value={newPoint}
                             onChange={(e) => handleNewInputChange(e)}
                             onKeyDown={event => handleKeyDownPress(index, event)}
+                        />
+                    </Box>
+                    <Box>
+                        <Heading size='md' textTransform='uppercase' color='#54432C'>User Full Note</Heading>
+                        <Textarea
+                            placeholder='Enter your note here...'
+                            size='sm'
+                            resize='vertical'
+                            value={note}
+                            onChange={handleTextAreaChange}
                         />
                     </Box>
                 </Stack>
