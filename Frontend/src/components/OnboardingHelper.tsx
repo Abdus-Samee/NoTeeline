@@ -4,8 +4,7 @@ import YouTube from 'react-youtube'
 
 type OnboardingHelperProps = {
     index: number,
-    embedId: string,
-    opts: any,
+    videoSrc: any,
     handleNoteChange: (count: number, input: string) => void,
     setInput: (count: number, input: string) => void,
     handleKeyDown: (count: number, event: React.KeyboardEvent<HTMLInputElement>) => void,
@@ -13,7 +12,7 @@ type OnboardingHelperProps = {
     getSpecificOnboarding: any,
 }
 
-const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts, handleNoteChange, setInput, handleKeyDown, updateInput, getSpecificOnboarding}: OnboardingHelperProps) => {
+const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, videoSrc, handleNoteChange, setInput, handleKeyDown, updateInput, getSpecificOnboarding}: OnboardingHelperProps) => {
     const [newPoint, setNewPoint] = useState<string>('')
     const [note, setNote] = useState<string>('')
     const [inputList, setInputList] = useState<string[]>([])
@@ -66,10 +65,11 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, embedId, opts
             <CardBody>
                 <Stack divider={<StackDivider />} spacing='4'>
                     <Box>
-                        <YouTube 
-                            videoId={embedId}
-                            opts={opts}
-                            style={{ marginBottom: '5vh', }}
+                        <video 
+                            src={videoSrc}
+                            width="600"
+                            height="300"
+                            controls
                         />
                     </Box>
                     <Box>
