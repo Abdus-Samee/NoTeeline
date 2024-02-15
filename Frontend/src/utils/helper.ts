@@ -127,7 +127,31 @@ export const callGPT = async (points: {point: string, history: string[], expand:
     return expansion
 }
 
-export const callGPTForSinglePoint = async (point: NotePoint, transcription: TranscriptLine[], index: number) => {
+// export const callGPTForSinglePoint = async (point: NotePoint, transcription: TranscriptLine[], index: number) => {
+//     const expandedPoint = expandPoint(point, transcription)
+//     const transcript = expandedPoint.transcript.join(".")
+    
+//     const promptString = getFormattedPromptString()
+
+//     const PROMPT = promptString +
+//             "Transcript: ..."+transcript+"...\n"+
+//             "Summary: "+expandedPoint.point+"\n"+
+//             "Note:"
+
+//     const res = await openai.chat.completions.create({
+//         messages: [{ role: "system", content: PROMPT }],
+//         model: "gpt-3.5-turbo",
+//         stream: true,
+//         // seed: SEED,
+//         temperature: 0.2,
+//     })
+
+//     for await (const chunk of res) {
+//         console.log(`Point ${index}: ${chunk.choices[0]?.delta?.content}` || "")
+//     }
+// }
+
+export const callGPTForSinglePoint = async (point: NotePoint, transcription: TranscriptLine[]) => {
     const expandedPoint = expandPoint(point, transcription)
     const transcript = expandedPoint.transcript.join(".")
     
@@ -140,15 +164,16 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
 
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: PROMPT }],
-        model: "gpt-3.5-turbo",
-        stream: true,
+        model: "gpt-4-1106-preview",
         // seed: SEED,
         temperature: 0.2,
     })
 
-    for await (const chunk of res) {
-        console.log(`Point ${index}: ${chunk.choices[0]?.delta?.content}` || "")
-    }
+    if(res?.choices[0]?.message?.content !== null) return res.choices[0].message.content
+    else return null
+
+    // const res = await simulateAPICall()
+    // return res
 }
 
 export const generateQuiz = async (points: string[]) => {

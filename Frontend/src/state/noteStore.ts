@@ -17,6 +17,7 @@ export type TranscriptLine = {
 export type Note_t = {
     name: string;
     ytId: string;
+    micronote: boolean;
     content: NotePoint[];
     transcription: TranscriptLine[];
     expansion: ExpandedNote[];

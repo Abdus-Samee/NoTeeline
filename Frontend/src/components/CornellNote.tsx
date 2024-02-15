@@ -7,7 +7,7 @@ import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme } from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz, { Quiz_t } from './Quiz'
 
@@ -43,6 +43,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         computeButtonClick: state.computeButtonClick,
         fetchButtonStats: state.fetchButtonStats,
     }))
+    const [micronote, setMicronote] = useState<boolean>(true)
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
     const [newPoint, setNewPoint] = useState<string>('')
     const [newTitle, setNewTitle] = useState<string>('')
@@ -87,6 +88,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     useEffect(() => {
         setNewTitle(name)
+        setMicronote(note.micronote)
         setExpandButtonToggle(false)
 
         if (note?.ytId !== '') {
@@ -478,12 +480,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     })
 
     const handleContextMenu = (e: any) => {
-        e.preventDefault()
-        e.stopPropagation()
+        if(micronote){
+            e.preventDefault()
+            e.stopPropagation()
+        }
     }
 
     const handleMouseDown = (e: any, index: number) => {
-        if (e.button === 2) {
+        if (micronote && e.button === 2) {
             // Detect right mouse button (2)
             setDragging(true)
             setDraggingIndex(index)
@@ -491,17 +495,62 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
+    //calling openai api when expanding a single point from another function
+    const expandSinglePoint = async (point: string, created_at: number, utc_time: number) => {
+        const obj = {
+            point: point,
+            created_at: created_at,
+            utc_time: utc_time,
+        }
+
+        const res = await callGPTForSinglePoint(obj, transcription)
+        return res
+    }
+
     //call openai api for a single point expansion
-    // const openAIHelper = async (newPoints: bulletObject[]) => {
-    //     const pointToBeUpdated = newPoints[0]
+    const openAIHelper = (newPoints: bulletObject[]) => {
+        const pointToBeUpdated = newPoints[draggingIndex]
 
-    //     const obj = {
-    //         point: pointToBeUpdated.history[pointToBeUpdated.expand],
-    //         created_at: pointToBeUpdated.created_at,
-    //     }
-
-    //     await callGPTForSinglePoint(obj, transcription, 0)
-    // }
+        expandSinglePoint(pointToBeUpdated.history[pointToBeUpdated.expand], pointToBeUpdated.created_at, pointToBeUpdated.utc_time).then(res => {
+            if(res){
+                toast({
+                    title: 'Done',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+                const editTime = Date.now()
+                newPoints = bulletPoints.map((bp, idx) => {
+                    if(idx === draggingIndex){
+                        let edit = [...bp.edit]
+                        edit.push([])
+                        edit[bp.expand].push({e_point: res, e_time: editTime})
+                        return {
+                            ...bp,
+                            history: [...bp.history, res],
+                            edit: edit,
+                        }
+                    }else{
+                        return bp
+                    }
+                
+                })
+                setDraggingIndex(-1)
+                setInitialY(0)
+                setBulletPoints(() => newPoints)
+            }else{
+                toast({
+                    title: 'Error...',
+                    description: 'Error in expanding the bullet point',
+                    status: 'error',
+                    duration: 5000,
+                    position: 'top-right',
+                    isClosable: true,
+                })
+            }
+        }).catch(() => alert('Error calling GPT-4...'))
+    }
 
     const callGPTForSinglePointFromComponent = async (point: NotePoint, transcription: TranscriptLine[], index: number) => {
         const expandedPoint = expandPoint(point, transcription)
@@ -608,7 +657,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const handleMouseUp = (e: any) => {
-        if (dragging) {
+        if (micronote && dragging) {
             setDragging(false)
             const finalY = e.clientY
 
@@ -649,8 +698,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     setInitialY(0)
                     setBulletPoints(newPoints)
                 }else{
-                    // openAIHelper(newPoints)
-                    newOpenAIHelper(newPoints)
+                    openAIHelper(newPoints)
+                    // newOpenAIHelper(newPoints)
                 }
             }
         }
@@ -898,15 +947,18 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     }
                 </GridItem>
                 :
-                expandSection ?
+                expandSection || !micronote?
                 <GridItem rowSpan={5} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
                     <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
-                        <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
-                        <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                            <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
-                            <TagRightIcon w={3} as={ArrowBackIcon} />
-                            <TagRightIcon w={3} as={ArrowForwardIcon} />
-                        </Tag>
+                        {micronote && <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />}
+                        {
+                            micronote && 
+                            <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                                <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
+                                <TagRightIcon w={3} as={ArrowBackIcon} />
+                                <TagRightIcon w={3} as={ArrowForwardIcon} />
+                            </Tag>
+                        }
                         {
                             themeOrTime === 'theme' ?
                             <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
@@ -1031,11 +1083,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     <GridItem rowSpan={5} colSpan={2} sx={{ padding: '2px', paddingTop: '0', overflowY: 'auto', }}>
                         <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
                             <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
-                            <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                                <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
-                                <TagRightIcon w={3} as={ArrowBackIcon} />
-                                <TagRightIcon w={3} as={ArrowForwardIcon} />
-                            </Tag>
+                            {
+                                micronote &&
+                                <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                                    <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
+                                    <TagRightIcon w={3} as={ArrowBackIcon} />
+                                    <TagRightIcon w={3} as={ArrowForwardIcon} />
+                                </Tag>
+                            }
                             {
                                 themeOrTime === 'theme'?
                                 <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>

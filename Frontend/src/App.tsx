@@ -38,6 +38,7 @@ const App = () => {
   const [selectedNote, setSelectedNote] = useState<Note_t>({
     name: '',
     ytId: '',
+    micronote: true,
     content: [],
     transcription: [],
     expansion: [],
@@ -83,6 +84,7 @@ const App = () => {
     addNote({
       name,
       ytId: '',
+      micronote: isChecked,
       content: [],
       transcription: [],
       expansion: [],
@@ -95,6 +97,7 @@ const App = () => {
     })
 
     setName('')
+    setIsChecked(true)
     onClose()
   }
 
@@ -126,6 +129,7 @@ const App = () => {
 
   const handleCheckBoxChange = (event: any) => {
     setIsChecked(event.target.checked)
+    console.log(event.target.checked)
   }
 
   return (
@@ -172,7 +176,7 @@ const App = () => {
                       <Input placeholder='Name of your note' onChange={(e) => setName(e.target.value)} />
                   </FormControl>
                   <br />
-                  <Checkbox isChecked={isChecked} onChange={handleCheckBoxChange}>
+                  <Checkbox defaultChecked onChange={handleCheckBoxChange}>
                     Enable micro note taking
                   </Checkbox>
               </ModalBody>
