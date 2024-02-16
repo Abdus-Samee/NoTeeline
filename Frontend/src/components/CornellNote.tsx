@@ -65,6 +65,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [expandButtonToggle, setExpandButtonToggle] = useState<boolean>(false)
     const [showQuiz, setShowQuiz] = useState<number>(0) // 0->no quiz, 1->called openai, 2->quiz visible
     const [showSummary, setShowSummary] = useState<boolean>(false)
+    const [summary, setSummary] = useState<string>('')
     const [themeOrTime, setThemeOrTime] = useState<string>('theme')
     const [quizzes, setQuizzes] = useState<Quiz_t[]>([])
     const [quizInfo, setQuizInfo] = useState<any>(null)
@@ -808,6 +809,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const handleSummary = () => {
+        toast({
+            title: 'Summarizing notes...',
+            status: 'info',
+            duration: 2000,
+            position: 'top-right',
+            isClosable: true
+        })
         setShowSummary(!showSummary)
 
         let tr = ''
@@ -827,9 +835,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }).then(res => res.json()).then(data => {
             console.log('Summary:')
             console.log(data)
+            setSummary(data.response)
             toast({
               title: 'Summarization completed',
-              status: 'info',
+              status: 'success',
               duration: 2000,
               position: 'top-right',
               isClosable: true
@@ -1193,6 +1202,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
+                {showSummary && <div style={{ padding: '1vw', }}>{summary}</div>}
                 {/* {
                     showSummary ?
                     <p>HARDCODE SUMMARY</p>
