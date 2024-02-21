@@ -81,17 +81,21 @@ export const getFormattedPromptString = () => {
 
     if(newOnboardings.length === 0) takeOnboardingIntoPrompt = false
 
-    let promptString = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
-                         "You have to expand it to 2-3 full sentences in simple english."
+    let promptString = "You are a note taking assistant. Users will give you their keypoint and the meeting transcript. "+
+                        "You have to expand the keypoint into a note, by taking additional context from the transcript. The note should be a full sentence in simple english." +
+                        "Try to resolve any typos or grammatical mistakes that arise in the keypoint. Do not make the note too long."
     
-    if(takeOnboardingIntoPrompt) promptString += "\nHere are three examples:\n"
+    if(takeOnboardingIntoPrompt) promptString += "\nMake sure that the note aligns with the user's writing style. Use the same writing style as shown below.\n" + 
+                                                 "Here are three examples:\n"
 
     if(takeOnboardingIntoPrompt){
         for(let i = 0; i < newOnboardings.length; i++){
             promptString += "Transcript: ..."+newOnboardings[i].transcript+"...\n"+
-                            "Summary: "+newOnboardings[i].keypoints.join(", ")+"\n"+
+                            "Keypoint: "+newOnboardings[i].keypoints.join(", ")+"\n"+
                             "Note: "+newOnboardings[i].note+"\n\n"
         }
+
+        promptString += "The keypoint refers to the high-level point provided by the user and your task is to write the 'Note' matching the writing style in these note examples."
     }
 
     return promptString
@@ -110,13 +114,12 @@ export const callGPT = async (points: {point: string, history: string[], expand:
             const pointToBeExpanded = point.history[point.expand]
             const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
             const transcript = expandedPoint.transcript.join(".")
-            const PROMPT = promptString +
-                "Transcript: ..."+transcript+"...\n"+
-                "Summary: "+expandedPoint.point+"\n"+
+            const PROMPT = "Transcript: ..." + transcript + "...\n"+
+                "Keypoint: "+expandedPoint.point+"\n"+
                 "Note:"
 
             const res = await openai.chat.completions.create({
-                messages: [{ role: "system", content: PROMPT }],
+                messages: [{ role: "system", content: PROMPT }, { role: "user", content: promptString }],
                 model: "gpt-4-1106-preview",
             })
 
@@ -207,7 +210,7 @@ export const generateQuiz = async (points: string[]) => {
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: system_prompt },
                     { role: "user", content: user_prompt }],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4-0125-preview",
         // seed: SEED,
         temperature: 0.5,
     })
@@ -223,9 +226,9 @@ export const generateTheme = async (expandedPoints: string[]) => {
     
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: prompt }],
-        model: "gpt-3.5-turbo",
+        model: "gpt-4-0125-preview",
         // seed: SEED,
-        temperature: 0.2,
+        temperature: 0.5,
     })
 
     return res.choices[0].message.content || ""
