@@ -135,7 +135,7 @@ const App = () => {
   return (
     <div className='note-ui-root'>
       <div className='sidebar'>
-        <header>Note UI</header>
+        <header>NoTeeline</header>
         <ul>
           <a 
             onClick={() => handleOption('onboarding')} 
