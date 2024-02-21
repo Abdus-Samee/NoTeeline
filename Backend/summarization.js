@@ -44,14 +44,15 @@ async function Langchainsummarization(transcript) {
   
     const llmSummary = new OpenAI({ 
       modelName: "gpt-4-1106-preview",
-      temperature: 0.3,
-      maxTokens: 1000,
+      temperature: 0.5,
+      maxTokens: 600,
       maxRetries: 5,
       openAIApiKey: "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"
      });
 
     const summaryTemplate = `
-    Your goal is to create a summary of a Youtube video. You need to highlight the main points of the video in third-person narrative.
+    Your goal is to create a summary of a Youtube video. You need to highlight the main points of the video.
+    If the transcript includes first person pronouns, replace with corresponding speaker names or replace with passive voice.
     
     Below you find the transcript of the video:
     --------
