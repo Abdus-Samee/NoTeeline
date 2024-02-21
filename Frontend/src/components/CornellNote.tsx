@@ -79,8 +79,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const toast = useToast()
     let timeoutHandle : any
     const opts = {
-        height: '330',
-        width: '70%',
+        // height: '705',
+        // width: '1254',
+        height: '400',
+        width: '80%',
         frameborder: '0',
         playerVars: {
             autoplay: 0,
@@ -924,13 +926,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             onPlay={() => setPause(false)}
                             onPause={countPause}
                             onEnd={stopVideo}
-                            style={{ marginTop: '0.5%',  marginLeft: '25%', }}
+                            style={{ marginTop: '0.5%',  marginLeft: '15%', }}
                         />
                 }
             </GridItem>
             {
                 expandQuizSection ?
-                <GridItem rowSpan={5} colSpan={4} sx={{ padding: '1px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                <GridItem rowSpan={5} colSpan={4} sx={{ padding: '10px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', }}>
                         {showQuiz !== 0 ?
                             <div></div> :
