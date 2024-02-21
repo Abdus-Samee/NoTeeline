@@ -47,7 +47,7 @@ async function Langchainsummarization(transcript) {
       temperature: 0.5,
       maxTokens: 600,
       maxRetries: 5,
-      openAIApiKey: "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"
+      openAIApiKey: "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"
      });
 
     const summaryTemplate = `
