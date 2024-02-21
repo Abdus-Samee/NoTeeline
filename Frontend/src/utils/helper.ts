@@ -177,15 +177,39 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
 }
 
 export const generateQuiz = async (points: string[]) => {
-    const prompt = "Given a topic description, Your task is to generate five multichoice question with answer. " +
-                   "Please mark the question within <Question></Question> tags,  individual choices within <Choice></Choice> tags " +
-                   "and answer within <Answer></Answer> tags.\n" +
-                   "Topic: " + points
+
+    // const prompt = "Given a topic description, Your task is to generate five multichoice question with answer. " +
+    //                "Please mark the question within <Question></Question> tags,  individual choices within <Choice></Choice> tags " +
+    //                "and answer within <Answer></Answer> tags.\n" +
+    //                "Topic: " + points
+
+    const system_prompt = 'Given a topic description, Your task is to generate five multichoice question with answer.  ' + 
+                          'Please mark the question within <Question></Question> tags,  ' + 
+                          'individual choices within <Choice></Choice> tags and answer ' + 
+                          'within <Answer></Answer> tags. Make sure not to always put the right choice in the same choice option, ' + 
+                          'randomly assign it within A, B, C or D.\n' +
+                          'Here is an example: \n' +
+                            'Topic: Resilience refers to how well you can deal with and bounce back from the difficulties of life. It can mean the difference between handling pressure and losing your cool. Resilient people tend to maintain a more positive outlook and cope with stress more effectively. Research has shown that while some people seem to come by resilience naturally, these behaviors can also be learned. Whether you\'re going through a tough time now or you want to be prepared for future challenges, you can build resilience by: Finding purpose, Believing in yourself, Developing a social network, Embracing change, Being optimistic, Nurturing yourself, Developing problem-solving skills, Establishing goals, Taking action, Committing to building skills over time.' + 
+                            '<Question>What does resilience refer to?</Question>\n' +
+                            '<Choice>A. Dealing with difficulties by losing your cool</Choice>\n' +
+                            '<Choice>B. Bouncing back from the challenges of life</Choice>\n' +
+                            '<Choice>C. Avoiding stressful situations altogether</Choice>\n' +
+                            '<Choice>D. Ignoring problems and hoping they go away</Choice>\n' +
+                            '<Answer>B. Bouncing back from the challenges of life</Answer>\n' +
+                            '<Question>Which of the following is NOT a way to build resilience?</Question>\n' +
+                            '<Choice>A. Finding purpose</Choice>\n' +
+                            '<Choice>B. Believing in yourself</Choice>\n' +
+                            '<Choice>C. Avoiding change at all costs</Choice>\n' +
+                            '<Choice>D. Nurturing yourself</Choice>\n' +
+                            '<Answer>C. Avoiding change at all costs</Answer>'
+    
+    const user_prompt =  'Topic: ' + points
     const res = await openai.chat.completions.create({
-        messages: [{ role: "system", content: prompt }],
+        messages: [{ role: "system", content: system_prompt },
+                    { role: "user", content: user_prompt }],
         model: "gpt-3.5-turbo",
         // seed: SEED,
-        temperature: 0.2,
+        temperature: 0.5,
     })
 
     return res.choices[0].message.content || ""
