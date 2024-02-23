@@ -83,7 +83,8 @@ export const getFormattedPromptString = () => {
 
     let promptString = "You are a note taking assistant. Users will give you their keypoint and the meeting transcript. "+
                         "You have to expand the keypoint into a note, by taking additional context from the transcript. The note should be a full sentence in simple english." +
-                        "Try to resolve any typos or grammatical mistakes that arise in the keypoint. Do not make the note too long."
+                        "Try to resolve any typos or grammatical mistakes that arise in the keypoint. Do not make the note too long." + 
+                        "Remember that the keypoint can be very abstract and as short as an abbreviation. Use the transcript to get additional information to ensure a good quality note expansion."
     
     if(takeOnboardingIntoPrompt) promptString += "\nMake sure that the note aligns with the user's writing style. Use the same writing style as shown below.\n" + 
                                                  "Here are three examples:\n"
@@ -95,7 +96,7 @@ export const getFormattedPromptString = () => {
                             "Note: "+newOnboardings[i].note+"\n\n"
         }
 
-        promptString += "The keypoint refers to the high-level point provided by the user and your task is to write the 'Note' matching the writing style in these note examples."
+        promptString += "The keypoint refers to the high-level point provided by the user and your task is to write the 'Note'. Make sure that your expanded note matches the writing style in the provided examples."
     }
 
     return promptString
@@ -114,12 +115,13 @@ export const callGPT = async (points: {point: string, history: string[], expand:
             const pointToBeExpanded = point.history[point.expand]
             const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
             const transcript = expandedPoint.transcript.join(".")
-            const PROMPT = "Transcript: ..." + transcript + "...\n"+
+            const PROMPT = "Expand the provided keypoint into a one sentence note.\n" +
+                "Transcript: ..." + transcript + "...\n"+
                 "Keypoint: "+expandedPoint.point+"\n"+
                 "Note:"
 
             const res = await openai.chat.completions.create({
-                messages: [{ role: "system", content: PROMPT }, { role: "user", content: promptString }],
+                messages: [{ role: "system", content: promptString }, { role: "user", content: PROMPT }],
                 model: "gpt-4-1106-preview",
             })
 
