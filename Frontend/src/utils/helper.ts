@@ -120,6 +120,8 @@ export const callGPT = async (points: {point: string, history: string[], expand:
                 "Keypoint: "+expandedPoint.point+"\n"+
                 "Note:"
 
+            console.log('calling expansion from', PROMPT)
+
             const res = await openai.chat.completions.create({
                 messages: [{ role: "system", content: promptString }, { role: "user", content: PROMPT }],
                 model: "gpt-4-1106-preview",
