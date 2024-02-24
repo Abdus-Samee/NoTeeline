@@ -112,7 +112,7 @@ export const callGPT = async (points: {point: string, history: string[], expand:
         if(point.history.length > point.expand){
             expansion.push({point: point.point, expansion: point.history[point.expand], old: true})
         }else{
-            const pointToBeExpanded = point.history[point.expand]
+            const pointToBeExpanded = point.history[point.expand - 1]
             const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
             const transcript = expandedPoint.transcript.join(".")
             const PROMPT = "Expand the provided keypoint into a one sentence note.\n" +
@@ -125,6 +125,7 @@ export const callGPT = async (points: {point: string, history: string[], expand:
             const res = await openai.chat.completions.create({
                 messages: [{ role: "system", content: promptString }, { role: "user", content: PROMPT }],
                 model: "gpt-4-1106-preview",
+                temperature: 0.5,
             })
 
             if(res?.choices[0]?.message?.content !== null) expansion.push({point: point.point, expansion: res.choices[0].message.content, old: false})
@@ -164,16 +165,16 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
     
     const promptString = getFormattedPromptString()
 
-    const PROMPT = promptString +
+    const PROMPT = "Expand the provided keypoint into a one sentence note.\n" +
             "Transcript: ..."+transcript+"...\n"+
             "Summary: "+expandedPoint.point+"\n"+
             "Note:"
 
     const res = await openai.chat.completions.create({
-        messages: [{ role: "system", content: PROMPT }],
+        messages: [{ role: "system", content: promptString }, { role: "user", content: PROMPT }],
         model: "gpt-4-1106-preview",
         // seed: SEED,
-        temperature: 0.2,
+        temperature: 0.5,
     })
 
     if(res?.choices[0]?.message?.content !== null) return res.choices[0].message.content

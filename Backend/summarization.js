@@ -53,7 +53,7 @@ async function Langchainsummarization(transcript) {
     const summaryTemplate = `
     Your goal is to create a summary of a Youtube video. You need to highlight the main points of the video.
     If the transcript includes first person pronouns, replace with corresponding speaker names or replace with passive voice.
-    
+    The summary should not be more than 8 sentences.
     Below you find the transcript of the video:
     --------
     {text}
