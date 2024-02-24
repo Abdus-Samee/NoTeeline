@@ -51,6 +51,18 @@ app.post('/fetch-summary', (req, res) => {
     }
 })
 
+app.post('/summary-note-transcript', (req, res) => {
+    const requestData = req.body
+
+    if (!requestData || typeof requestData !== 'object') {
+        res.status(400).json({ error: 'Bad Request: Please provide a JSON object in the request body.' })
+     }else{
+        const points = requestData.points
+        
+        //extend code here...
+     }
+})
+
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server listening at http://localhost:${process.env.PORT || 3000}`)
 })

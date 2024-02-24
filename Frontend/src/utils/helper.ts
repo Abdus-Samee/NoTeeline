@@ -40,6 +40,20 @@ export const expandPoint = (point: NotePoint, transcript: TranscriptLine[]) => {
     return expandedPoint
 }
 
+export const expandPointWithranscript = (point: NotePoint, transcript: TranscriptLine[]) => {
+    let expandedPoint = { point: point.point, transcript: [] as string[] }
+    const limit = point.created_at * 1000.0
+    for(var i = 0; i < transcript.length; i++){
+        const tr_start = transcript[i].offset
+
+        //taking transcript with start time <= point's creation time
+        //In reality, only fraction of that transcript may be used
+        if(tr_start <= limit) expandedPoint.transcript.push(transcript[i].text)
+    }
+
+    return expandedPoint
+}
+
 // export const callGPT = (req: GPTRequest) => {
 //     let transcript = req.transcript.join(".")
 

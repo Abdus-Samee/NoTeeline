@@ -7,7 +7,7 @@ import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint } from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint, expandPointWithranscript } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz, { Quiz_t } from './Quiz'
 
@@ -810,6 +810,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         })
     }
 
+    //summarizes the entire note
     const handleSummary = () => {
         toast({
             title: 'Summarizing notes...',
@@ -833,6 +834,37 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
           },
           body: JSON.stringify({
             transcript: tr
+          }),
+        }).then(res => res.json()).then(data => {
+            console.log('Summary:')
+            console.log(data)
+            setSummary(data.response)
+            toast({
+              title: 'Summarization completed',
+              status: 'success',
+              duration: 2000,
+              position: 'top-right',
+              isClosable: true
+            })
+        }).catch(e => console.log(e))
+    }
+
+    //passing expanded note-points and transcript
+    const noteTranscriptSummary = () => {
+        let expanded_points = []
+        for(let i = 0; i < bulletPoints.length; i++){
+            const point = {point: bulletPoints[i].history[bulletPoints[i].expand], created_at: bulletPoints[i].created_at, utc_time: bulletPoints[i].utc_time, }
+            expanded_points.push(expandPointWithranscript(point, transcription))
+        }
+
+        //http://localhost:3000/summary-note-transcript
+        fetch('https://noteeline-backend.onrender.com/summary-note-transcript', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            points: expanded_points,
           }),
         }).then(res => res.json()).then(data => {
             console.log('Summary:')
