@@ -5,14 +5,13 @@ type BulletPointProps = {
     index: number,
     expand: number,
     history: string[],
+    created_at: number,
     editPoint: (id: number) => void
 }
 
-const BulletPoint = ({index, expand, history, editPoint}: BulletPointProps) => {
+const BulletPoint = ({index, expand, history, created_at, editPoint}: BulletPointProps) => {
     const [, setExpanded] = useState<number>(expand)
     const [pointToShow, setPointToShow] = useState<string | null>(null)
-
-    // const toast = useToast()
 
     useEffect(() => {
         if(history.length >= expand){
@@ -29,13 +28,23 @@ const BulletPoint = ({index, expand, history, editPoint}: BulletPointProps) => {
         e.stopPropagation()
         e.preventDefault()
     }
+
+    const formatCreateTime = (time: number) => {
+        let x = Math.floor(time / 60)
+        let y = Math.floor(time - x * 60)
+        
+        let min = (x >= 10) ? `${x}` : `0${x}`
+        let sec = (y >= 10) ? `${y}` : `0${y}`
+
+        return `${min}:${sec}`
+    }
     
     return (
         <div
             className='bullet-point'
             onContextMenu={handleContextMenu}
         >
-            {pointToShow}
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#3D57FF', }}>{formatCreateTime(created_at)}</span> {pointToShow}
             <EditIcon
                 className='bullet-point-cross' 
                 w={4}

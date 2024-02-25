@@ -1050,6 +1050,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                 index={index}
                                                 expand={bulletPoint.expand}
                                                 history={bulletPoint.history}
+                                                created_at={bulletPoint.created_at}
                                                 editPoint={editPoint}
                                             />
                                             :
@@ -1182,6 +1183,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                     index={index}
                                                     expand={bulletPoint.expand}
                                                     history={bulletPoint.history}
+                                                    created_at={bulletPoint.created_at}
                                                     editPoint={editPoint}
                                                 />
                                                 :
