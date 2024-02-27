@@ -21,6 +21,7 @@ import Onboarding from './components/Onboarding'
 import CornellNote from './components/CornellNote'
 
 import { Note_t, useNoteStore } from './state/noteStore'
+import logo from './assets/images/logo.png'
 import './App.css'
 
 const App = () => {
@@ -135,7 +136,10 @@ const App = () => {
   return (
     <div className='note-ui-root'>
       <div className='sidebar'>
-        <header>NoTeeline</header>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#54432C', }}>
+          <img src={logo} alt='Logo' className='logo' />
+          <header>NoTeeline</header>
+        </div>
         <ul>
           <a 
             onClick={() => handleOption('onboarding')} 
