@@ -468,15 +468,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         setBulletPoints(items)
     }
 
+    // styles of the draggable note points
     const getBulletPointStyle = (isDragging: any, draggableStyle: any) => ({
         // some basic styles to make the items look a bit nicer
         userSelect: "none",
         padding: '1vw',
         margin: `0 0 1vh 0`,
-        border: '1px solid #000',
+        // border: '1px solid #000',
         borderRadius: '10px',
         // change background colour if dragging
-        background: isDragging ? "lightgreen" : "#F5F7F8",
+        background: isDragging ? "lightgreen" : "#FFF",
       
         // styles we need to apply on draggables
         ...draggableStyle

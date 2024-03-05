@@ -159,7 +159,7 @@
   width: 90%;
   /* height: 3%; */
   margin-left: 1vw;
-  border-bottom: 1px solid #BCA37F;
+  /* border-bottom: 1px solid #BCA37F; */
   outline: none;
   margin-top: 3vh;
   margin-bottom: 3vh;
@@ -173,7 +173,7 @@
 }
 
 .note-input:focus {
-  border-bottom: 1px solid #54432C;
+  /* border-bottom: 1px solid #54432C; */
 }
 
 .note-ui > ul {
