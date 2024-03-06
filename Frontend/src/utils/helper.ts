@@ -40,7 +40,8 @@ export const expandPoint = (point: NotePoint, transcript: TranscriptLine[]) => {
     return expandedPoint
 }
 
-export const expandPointWithranscript = (point: NotePoint, transcript: TranscriptLine[]) => {
+// returns points with fraction transcript
+export const expandPointWithTranscript = (point: NotePoint, transcript: TranscriptLine[]) => {
     let expandedPoint = { point: point.point, transcript: [] as string[] }
     const limit = point.created_at * 1000.0
     for(var i = 0; i < transcript.length; i++){

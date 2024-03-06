@@ -7,7 +7,7 @@ import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint, expandPointWithranscript } from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint, expandPointWithTranscript } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz, { Quiz_t } from './Quiz'
 
@@ -855,7 +855,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         let expanded_points = []
         for(let i = 0; i < bulletPoints.length; i++){
             const point = {point: bulletPoints[i].history[bulletPoints[i].expand], created_at: bulletPoints[i].created_at, utc_time: bulletPoints[i].utc_time, }
-            expanded_points.push(expandPointWithranscript(point, transcription))
+            expanded_points.push(expandPointWithTranscript(point, transcription))
         }
 
         //http://localhost:3000/summary-note-transcript
@@ -884,8 +884,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     //download button-click stats
     const handleDownload = () => {
         const newPoints = bulletPoints.map((bulletPoint, idx) => {
+            const p = {point: bulletPoint.history[bulletPoint.expand], created_at: bulletPoint.created_at, utc_time: bulletPoint.utc_time, }
+            const expanded_p = expandPointWithTranscript(p, transcription)
             let note_taking_time = -1
-
             if(idx === 0){
                 note_taking_time = bulletPoint.created_at*1000.0
             }else{
@@ -894,6 +895,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
             return {
                 point: bulletPoint.point,
+                fraction_transcript: expanded_p.transcript,
                 // created_at: bulletPoint.created_at,
                 utc_time: bulletPoint.utc_time,
                 note_taking_time: note_taking_time,
@@ -902,7 +904,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         })
 
         const obj = fetchButtonStats(newTitle)
-        let userLog: any = { buttonStats: obj, pauseCount: pauseCount, forwardCount: forwardCount, reverseCount: reverseCount, }
+        const url = isLink ? `www.youtube.com/watch?v=${note.ytId}` : ''
+        let userLog: any = { buttonStats: obj, pauseCount: pauseCount, forwardCount: forwardCount, reverseCount: reverseCount, url: url, }
         userLog.editHistory = newPoints
 
         const jsonString = JSON.stringify(userLog, null, 2);
