@@ -96,12 +96,14 @@ export const getFormattedPromptString = () => {
 
     if(newOnboardings.length === 0) takeOnboardingIntoPrompt = false
 
-    let promptString = "You are a note taking assistant. Users will give you their keypoint and the meeting transcript. "+
-                        "You have to expand the keypoint into a note, by taking additional context from the transcript. The note should be a full sentence in simple english." +
-                        "Try to resolve any typos or grammatical mistakes that arise in the keypoint. Do not make the note too long." + 
-                        "Remember that the keypoint can be very abstract and as short as an abbreviation. Use the transcript to get additional information to ensure a good quality note expansion."
+    let promptString = "I want you to act as a personalized note-taking assistant. Users will give you a keypoint and the youtube transcript. "+
+                        "Your task is to expand the keypoint into a note point, by taking additional context from the transcript. The note should be a full sentence in simple english. " +
+                        "Follow these rules:\n1. Resolve any typos or grammatical mistakes that arise in the keypoint.\n2. The note should not be longer than 1 sentence. " + 
+                        "3. Remember that the keypoint can be very abstract and as short as an abbreviation. Use the transcript to get additional information to ensure a good quality note expansion.\n" +
+                        "4. Just write a single note point, users will request repeatedly for new points they want to add.\n" +
+                        "5. Write it in a way a user would write in a notepad. Do not use sentences such as 'This video talks about...', 'The speaker explains..' etc.";
     
-    if(takeOnboardingIntoPrompt) promptString += "\nMake sure that the note aligns with the user's writing style. Use the same writing style as shown below.\n" + 
+    if(takeOnboardingIntoPrompt) promptString += "\nMake sure that the note aligns with the user's writing style, so that they can read it easily. Use the same writing style as shown below.\n" + 
                                                  "Here are three examples:\n"
 
     if(takeOnboardingIntoPrompt){
@@ -111,7 +113,7 @@ export const getFormattedPromptString = () => {
                             "Note: "+newOnboardings[i].note+"\n\n"
         }
 
-        promptString += "The keypoint refers to the high-level point provided by the user and your task is to write the 'Note'. Make sure that your expanded note matches the writing style in the provided examples."
+        promptString += "The keypoint refers to the high-level keypoint provided by the user and your task is to write a full 'Note' point. Make sure that your expanded note point matches the writing style of 'Note' in the provided examples."
     }
 
     return promptString
