@@ -710,25 +710,24 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const extractThemes = (text: string) => {
-        const themeRegex = /<Topic>(.*?)<\/Topic>[\s\S]*?<p>(.*?)<\/p>/g
-        const matches = Array.from(text.matchAll(themeRegex))
+        const themes: { [key: string]: string[] } = {};
+        const topicRegex = /<Topic name="([^"]+)">([\s\S]*?)<\/Topic>/g;
 
-        const themes: any = {}
-        matches.forEach(match => {
-            const [, topic, points] = match
-            if (!themes[topic]) {
-                themes[topic] = []
-            }
-            themes[topic].push(points.trim())
-        });
+        let match: RegExpExecArray | null;
+        while ((match = topicRegex.exec(text)) !== null) {
+            const [, themeName, content] = match;
+            const points = content.match(/<p>(.*?)<\/p>/g)?.map(p => p.replace(/<\/?p>/g, '')) || [];
+            themes[themeName] = points;
+        }
 
-        return themes
+        console.log('themes', themes);
+        return themes;
     }
 
     //theme sorting
     const handleTheme = () => {
         toast({
-            title: 'Generating themes. Please wait patiently...',
+            title: 'Generating themes. Please wait...',
             status: 'info',
             duration: 2000,
             position: 'top-right',
@@ -914,7 +913,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
 
-        link.download = 'bulletPointsData.json';
+        link.download = name.replace(/\s+/g, '') + 'bulletPointsData.json';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -241,17 +241,48 @@ export const generateQuiz = async (points: string[]) => {
 }
 
 export const generateTheme = async (expandedPoints: string[]) => {
-    const prompt = "Given a list of points, Your task is to perform topic modeling over them. Arrange the points into topics and " + 
-                   "provide a name to each individual topic.  Please mark the topic within <Topic></Topics> tags. the points are marked " +
-                   "with <p> tag as well.\n" + 
-                   "Input points: " + expandedPoints
+    const prompt = `Given a list of points, Your task is to perform topic modeling over them. Arrange the points into topics and
+    provide a name to each individual topic.  Please mark the topic within <Topic></Topics> tags. the points are marked 
+    with <p> tag as well.
+    
+    Follow these rules:
+    1. Each topic should have more than one points.
+    2. Every point should be assigned under one topic. No point should be unassigned.
+    
+    Here is an example:    
+    Input points:
+    1. New York City is home to a vibrant mix of cultures, with communities from nearly every corner of the globe, offering an incredible range of languages, cuisines, and cultural practices.
+    2. New York is home to some of the world's most famous museums, including The Metropolitan Museum of Art and the Museum of Modern Art (MoMA), which house vast collections of art, historical artifacts, and cultural exhibits.
+    3. An iconic Art Deco skyscraper that once held the title of the world's tallest building. It offers breathtaking views of the city from its observation decks.
+    4. Known as the heart of the American theatre industry, it offers world-class performances ranging from dramatic plays to lavish musicals.
+    5. A historic suspension bridge connecting Manhattan and Brooklyn. Walking across the bridge provides stunning views of the New York skyline and the East River.
+    6. The city hosts numerous cultural festivals throughout the year, celebrating everything from Chinese New Year in Chinatown to the West Indian American Day Carnival in Brooklyn, showcasing the city's multicultural heritage.
+
+    Answer:
+    <Topic name="Cultural Diversity">
+    <p>1. New York City is home to a vibrant mix of cultures, with communities from nearly every corner of the globe, offering an incredible range of languages, cuisines, and cultural practices.</p>
+    <p>6. The city hosts numerous cultural festivals throughout the year, celebrating everything from Chinese New Year in Chinatown to the West Indian American Day Carnival in Brooklyn, showcasing the city's multicultural heritage.</p>
+    </Topic>
+    <Topic name="Iconic Landmarks">
+    <p>3. An iconic Art Deco skyscraper that once held the title of the world's tallest building. It offers breathtaking views of the city from its observation decks.</p>
+    <p>5. A historic suspension bridge connecting Manhattan and Brooklyn. Walking across the bridge provides stunning views of the New York skyline and the East River.</p>
+    </Topic>
+    <Topic name="Arts and Entertainment">
+    <p>4. Known as the heart of the American theatre industry, it offers world-class performances ranging from dramatic plays to lavish musicals.</p>
+    <p>2. New York is home to some of the world's most famous museums, including The Metropolitan Museum of Art and the Museum of Modern Art (MoMA), which house vast collections of art, historical artifacts, and cultural exhibits.</p>
+    </Topic>
+
+    Input points: ` + expandedPoints +
+    `\nAnswer: `;
     
     const res = await openai.chat.completions.create({
-        messages: [{ role: "system", content: prompt }],
+        messages: [{ role: "user", content: prompt }],
         model: "gpt-4-0125-preview",
         // seed: SEED,
         temperature: 0.5,
     })
+
+    console.log('theme response', res.choices[0].message.content);
 
     return res.choices[0].message.content || ""
 }
