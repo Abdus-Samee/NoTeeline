@@ -35,13 +35,14 @@ let forwardCount: number = 0
 let reverseCount: number = 0
 
 const CornellNote: React.FC<NoteProps> = ({name, note }) => {
-    const { updateNote, addYouTubeId, startRecording, addTranscription, computeButtonClick, fetchButtonStats } = useNoteStore((state) => ({
+    const { updateNote, addYouTubeId, startRecording, addTranscription, computeButtonClick, fetchButtonStats, addSummary } = useNoteStore((state) => ({
         updateNote: state.updateNote,
         addYouTubeId: state.addYouTubeId,
         startRecording: state.startRecording,
         addTranscription: state.addTranscription,
         computeButtonClick: state.computeButtonClick,
         fetchButtonStats: state.fetchButtonStats,
+        addSummary: state.addSummary,
     }))
     const [micronote, setMicronote] = useState<boolean>(true)
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
@@ -104,6 +105,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         if(note?.transcription){
             setTranscription(note.transcription)
+        }
+
+        if(note?.generatedSummary !== ''){
+            setSummary(note.generatedSummary)
+            setShowSummary(true)
         }
 
         startRecording(name, Date.now())
@@ -814,6 +820,17 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     //summarizes the entire note
     const handleSummary = () => {
+        if(summary !== ''){
+            toast({
+                title: 'Summary already generated',
+                status: 'info',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true
+            })
+            return
+        }
+
         toast({
             title: 'Summarizing notes...',
             status: 'info',
@@ -841,6 +858,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             console.log('Summary:')
             console.log(data)
             setSummary(data.response)
+            addSummary(newTitle, data.response)
             toast({
               title: 'Summarization completed',
               status: 'success',

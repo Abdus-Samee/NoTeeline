@@ -21,6 +21,7 @@ export type Note_t = {
     content: NotePoint[];
     transcription: TranscriptLine[];
     expansion: ExpandedNote[];
+    generatedSummary: string;
     theme_count: number; //how many times theme-order button is clicked
     time_count: number; //how many times time-order button is clicked
     expand_count: number; //how many times expand-all button is clicked
@@ -58,6 +59,7 @@ type NoteStore_t = {
     startRecording: (name: string, time: number) => void;
     computeButtonClick: (name: string, type: string) => void;
     fetchButtonStats: (name: string) => { theme_count: number, expand_count: number, time_count: number };
+    addSummary: (name: string, summary: string) => void;
 }
 
 /**
@@ -199,6 +201,17 @@ const NoteStore = (set: any, get: any) =>({
     fetchButtonStats: (name: string) => {
         const note = get().notes.find((note: Note_t) => note.name === name)
         return note ? { theme_count: note.theme_count, expand_count: note.expand_count, time_count: note.time_count } : null
+    },
+    addSummary: (name: string, summary: string) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === name) {
+                    return {...n, generatedSummary: summary}
+                }
+                return n
+            })
+            return { notes: updatedNotes, }
+        })
     }
 })
 
