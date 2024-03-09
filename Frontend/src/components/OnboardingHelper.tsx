@@ -73,7 +73,7 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, videoSrc, han
                         />
                     </Box>
                     <Box>
-                        <Heading size='md' textTransform='uppercase' color='#54432C'>Keypoints</Heading>
+                        <Heading size='md' color='#54432C'>Keypoint</Heading>
                         {
                             inputList.map((input, i) => (
                                 <input
@@ -94,7 +94,7 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, videoSrc, han
                         />
                     </Box>
                     <Box>
-                        <Heading size='md' textTransform='uppercase' color='#54432C'>User Full Note</Heading>
+                        <Heading size='md'  color='#54432C'>Full Note</Heading>
                         <Textarea
                             placeholder='Enter your note here...'
                             size='sm'

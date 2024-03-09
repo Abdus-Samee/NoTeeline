@@ -38,14 +38,14 @@ const Onboarding: React.FC = () => {
                 "then adjust them the lenses so it matches you perfectly for the first time that " + 
                 "you put it on",
         },
-        {
-            videoSrc: cookingVideo,
-            transcript: "the base of this recipe consists of only two ingredients just like my favorite " + 
-            "drink water now we're gonna take two cups or around 500 milliliters of whipping cream and pour " + 
-            "that into a bowl and get our motorized blendicles working at somewhere between three and forty " + 
-            "five thousand rpms if you don't like holding things and you don't have a stand mixer you can make " + 
-            "a duct tape mixer instead or you can use a whisk if you want to turn your bicep into a thick",
-        },
+        // {
+        //     videoSrc: cookingVideo,
+        //     transcript: "the base of this recipe consists of only two ingredients just like my favorite " + 
+        //     "drink water now we're gonna take two cups or around 500 milliliters of whipping cream and pour " + 
+        //     "that into a bowl and get our motorized blendicles working at somewhere between three and forty " + 
+        //     "five thousand rpms if you don't like holding things and you don't have a stand mixer you can make " + 
+        //     "a duct tape mixer instead or you can use a whisk if you want to turn your bicep into a thick",
+        // },
         {
             videoSrc: mitochondriaVideo,
             transcript: "mitochondria. Here, food is converted into chemical energy called ATP. ATP is released by " + 
