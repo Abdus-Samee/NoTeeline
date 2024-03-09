@@ -218,7 +218,7 @@ export const generatepointsummary = async (points: string, context: string) => {
 }
 
 // ToDo: pass the summary here, *the response from fetch('https://noteeline-backend.onrender.com/youtube-transcript' or handleSummary()*
-export const generateQuiz = async (points: string[]) => {
+export const generateQuiz = async (points: string[], summary: string) => {
     const system_prompt = 'Given a topic description, Your task is to generate five multichoice question with answer.  ' + 
                           'Please mark the question within <Question></Question> tags,  ' + 
                           'individual choices within <Choice></Choice> tags and answer ' + 
@@ -239,8 +239,10 @@ export const generateQuiz = async (points: string[]) => {
                             '<Choice>D. Nurturing yourself</Choice>\n' +
                             '<Answer>C. Avoiding change at all costs</Answer>'
     
-    const user_prompt =  `Topic: ${points}`
+    let user_prompt =  `Topic: ${points}`
                         //   ToDo: Additional Context: ${summary}`
+    if(summary !== '') user_prompt += `\nAdditional Context: ${summary}`
+    
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: system_prompt },
                     { role: "user", content: user_prompt }],

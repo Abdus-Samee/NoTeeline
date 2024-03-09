@@ -22,6 +22,7 @@ export type Note_t = {
     transcription: TranscriptLine[];
     expansion: ExpandedNote[];
     generatedSummary: string;
+    generatedSummary_P: string;
     theme_count: number; //how many times theme-order button is clicked
     time_count: number; //how many times time-order button is clicked
     expand_count: number; //how many times expand-all button is clicked
@@ -60,6 +61,7 @@ type NoteStore_t = {
     computeButtonClick: (name: string, type: string) => void;
     fetchButtonStats: (name: string) => { theme_count: number, expand_count: number, time_count: number };
     addSummary: (name: string, summary: string) => void;
+    addSummary_P: (name: string, summary: string) => void;
 }
 
 /**
@@ -212,7 +214,18 @@ const NoteStore = (set: any, get: any) =>({
             })
             return { notes: updatedNotes, }
         })
-    }
+    },
+    addSummary_P: (name: string, summary: string) => {
+        set((state: any) => {
+            const updatedNotes = state.notes.map((n: Note_t) => {
+                if(n.name === name) {
+                    return {...n, generatedSummary_P: summary}
+                }
+                return n
+            })
+            return { notes: updatedNotes, }
+        })
+    },
 })
 
 export const useNoteStore = create<NoteStore_t>(devtools(persist(NoteStore, { name: 'note-store' })))

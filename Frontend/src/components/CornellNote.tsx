@@ -35,7 +35,7 @@ let forwardCount: number = 0
 let reverseCount: number = 0
 
 const CornellNote: React.FC<NoteProps> = ({name, note }) => {
-    const { updateNote, addYouTubeId, startRecording, addTranscription, computeButtonClick, fetchButtonStats, addSummary } = useNoteStore((state) => ({
+    const { updateNote, addYouTubeId, startRecording, addTranscription, computeButtonClick, fetchButtonStats, addSummary, addSummary_P } = useNoteStore((state) => ({
         updateNote: state.updateNote,
         addYouTubeId: state.addYouTubeId,
         startRecording: state.startRecording,
@@ -43,6 +43,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         computeButtonClick: state.computeButtonClick,
         fetchButtonStats: state.fetchButtonStats,
         addSummary: state.addSummary,
+        addSummary_P: state.addSummary_P,
     }))
     const [micronote, setMicronote] = useState<boolean>(true)
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
@@ -67,6 +68,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [showQuiz, setShowQuiz] = useState<number>(0) // 0->no quiz, 1->called openai, 2->quiz visible
     const [showSummary, setShowSummary] = useState<boolean>(false)
     const [summary, setSummary] = useState<string>('')
+    const [summary_p, setSummary_P] = useState<string>('')
     const [themeOrTime, setThemeOrTime] = useState<string>('theme')
     const [quizzes, setQuizzes] = useState<Quiz_t[]>([])
     const [quizInfo, setQuizInfo] = useState<any>(null)
@@ -109,6 +111,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         if(note?.generatedSummary !== ''){
             setSummary(note.generatedSummary)
+        }
+
+        if(note?.generatedSummary_P !== ''){
+            setSummary_P(note.generatedSummary_P)
             setShowSummary(true)
         }
 
@@ -254,10 +260,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             body: JSON.stringify({
                 ytLink: ytLink,
             }),
-        }).then(res => res.json()).then(data => {
+        }).then(res => res.json()).then(d => {
             // console.log(data)
-            setTranscription(data.response) //each transctiption => {offset, duration, text}
-            if(!data.response){
+            setTranscription(d.response) //each transctiption => {offset, duration, text}
+            if(!d.response){
                 toast({
                     title: 'Warning',
                     description: 'The provided YouTube video does not have a transcription or has it disabled!',
@@ -266,14 +272,44 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     isClosable: true,
                 })
             }else{
-                addTranscription(name, data.response)
+                addTranscription(name, d.response)
                 toast({
-                    title: 'Transcription complete!',
+                    title: 'Transcription completed! Generating summary...',
                     description: 'Your transcription is ready!',
                     status: 'success',
                     duration: 5000,
                     isClosable: true,
                 })
+
+                //generating summary from transcript
+                let tr = ''
+                const res_tr = d.response
+                for(let i = 0; i < res_tr.length; i++){
+                    tr += res_tr[i].text
+                }
+
+                //http://localhost:3000/fetch-summary
+                fetch('https://noteeline-backend.onrender.com/fetch-summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        transcript: tr
+                    }),
+                }).then(res => res.json()).then(data => {
+                    console.log('Summary from transcription:')
+                    console.log(data)
+                    setSummary(data.response)
+                    addSummary(newTitle, data.response)
+                    toast({
+                        title: 'Summarization completed',
+                        status: 'success',
+                        duration: 2000,
+                        position: 'top-right',
+                        isClosable: true
+                    })
+                }).catch(e => console.log(e))
             }
             // console.log(data.response)
         }).catch(err => {
@@ -800,7 +836,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         console.log(newPoints);
 
-        generateQuiz(newPoints).then(res => {
+        generateQuiz(newPoints, summary).then(res => {
             // console.log(res)
             const qs = extractQuizzesInformation(res)
             // console.log(qs)
@@ -818,7 +854,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         })
     }
 
-    //summarizes the entire note
+    //summarizing using the whole transcription
     const handleSummary = () => {
         if(summary !== ''){
             toast({
@@ -871,6 +907,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     //passing expanded note-points and transcript
     const noteTranscriptSummary = () => {
+        toast({
+            title: 'Summarizing notes from points...',
+            status: 'info',
+            duration: 2000,
+            position: 'top-right',
+            isClosable: true
+        })
         let expanded_points = []
         for(let i = 0; i < bulletPoints.length; i++){
             const point = {point: bulletPoints[i].history[bulletPoints[i].expand], created_at: bulletPoints[i].created_at, utc_time: bulletPoints[i].utc_time, }
@@ -882,41 +925,28 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             points_str += `${i+1}. ${expanded_points[i].point}`
         }
 
-        // http://localhost:3000/fetch-summary
-        // https://noteeline-backend.onrender.com/fetch-summary
-        fetch('http://localhost:3000/fetch-summary', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            points: expanded_points,
-          }),
-        }).then(res => res.json()).then(data => {
-            console.log('Summary:')
-            console.log(data);
-
-            // ToDo: fix this. display summary should be the one called on top of points and initial summary
-            generatepointsummary(points_str, data.response).then(res => {
-                setSummary(res); 
-                toast({
-                title: 'Summarization completed',
+        generatepointsummary(points_str, summary).then(res => {
+            console.log('summary from points ' + res)
+            setSummary_P(res)
+            addSummary_P(newTitle, res)
+            setShowSummary(true)
+            toast({
+                title: 'Summarization from points completed',
                 status: 'success',
                 duration: 2000,
                 position: 'top-right',
                 isClosable: true
-                });
-            }).catch(e => {
-                console.log(`Summary Point error: ${e}`)
-                toast({
-                    title: 'Error generating summary. Please try again...',
-                    status: 'info',
-                    duration: 2000,
-                    position: 'top-right',
-                    isClosable: true
-                })
+            });
+        }).catch(e => {
+            console.log(`Summary Point error: ${e}`)
+            toast({
+                title: 'Error generating summary. Please try again...',
+                status: 'info',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true
             })
-        }).catch(e => console.log(e))
+        })
     }
 
     //download button-click stats
@@ -1280,7 +1310,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
-                {showSummary && <div style={{ padding: '1vw', }}>{summary}</div>}
+                {showSummary && <div style={{ padding: '1vw', }}>{summary_p}</div>}
                 {/* {
                     showSummary ?
                     <p>HARDCODE SUMMARY</p>
