@@ -791,9 +791,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         const newPoints: string[] = bulletPoints.map((bulletPoint, index) => {
             return `${bulletPoint.history[bulletPoint.expand]}`
-        })
-        
-        
+        })    
 
         console.log(newPoints);
 
@@ -977,7 +975,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         {showQuiz !== 0 ?
                             <div></div> :
                             <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
-                                <TagLabel>Start quiz</TagLabel>
+                                <TagLabel>Cue Questions</TagLabel>
                                 <TagRightIcon as={SunIcon} />
                             </Tag>
                         }
