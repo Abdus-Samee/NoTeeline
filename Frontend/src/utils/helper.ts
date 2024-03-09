@@ -1,7 +1,7 @@
 import OpenAI from 'openai'
 import { NotePoint, TranscriptLine, OnboardingSection } from "../state/noteStore"
 
-// const SEED = 1
+const SEED = 1
 const WINDOW_SIZE = 20000 //20000ms
 // const OPEN_AI_KEY = import.meta.env.VITE_OPEN_AI_KEY
 const OPEN_AI_KEY = "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"
@@ -190,7 +190,7 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: promptString }, { role: "user", content: PROMPT }],
         model: "gpt-4-1106-preview",
-        // seed: SEED,
+        seed: SEED,
         temperature: 0.5,
     })
 
@@ -201,13 +201,24 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
     // return res
 }
 
+export const generatepointsummary = async (points: string, context: string) => {
+
+    const user_prompt =  `I will give you a context and some keypoints, Your task is to summarize the keypoints in 5. Focus on the keypoint, only use context if you need extra information:
+    Context: ${context}
+    Keypoints: ${points}
+    remember not to make it too long.`
+    const res = await openai.chat.completions.create({
+        messages: [{ role: "user", content: user_prompt }],
+        model: "gpt-4-0125-preview",
+        seed: SEED,
+        temperature: 0.5,
+    })
+
+    return res.choices[0].message.content || ""
+}
+
+// ToDo: pass the summary here, *the response from fetch('https://noteeline-backend.onrender.com/youtube-transcript' or handleSummary()*
 export const generateQuiz = async (points: string[]) => {
-
-    // const prompt = "Given a topic description, Your task is to generate five multichoice question with answer. " +
-    //                "Please mark the question within <Question></Question> tags,  individual choices within <Choice></Choice> tags " +
-    //                "and answer within <Answer></Answer> tags.\n" +
-    //                "Topic: " + points
-
     const system_prompt = 'Given a topic description, Your task is to generate five multichoice question with answer.  ' + 
                           'Please mark the question within <Question></Question> tags,  ' + 
                           'individual choices within <Choice></Choice> tags and answer ' + 
@@ -228,12 +239,13 @@ export const generateQuiz = async (points: string[]) => {
                             '<Choice>D. Nurturing yourself</Choice>\n' +
                             '<Answer>C. Avoiding change at all costs</Answer>'
     
-    const user_prompt =  'Topic: ' + points
+    const user_prompt =  `Topic: ${points}`
+                        //   ToDo: Additional Context: ${summary}`
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: system_prompt },
                     { role: "user", content: user_prompt }],
         model: "gpt-4-0125-preview",
-        // seed: SEED,
+        seed: SEED,
         temperature: 0.5,
     })
 
@@ -278,7 +290,7 @@ export const generateTheme = async (expandedPoints: string[]) => {
     const res = await openai.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
         model: "gpt-4-0125-preview",
-        // seed: SEED,
+        seed: SEED,
         temperature: 0.5,
     })
 

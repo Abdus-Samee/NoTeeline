@@ -35,7 +35,7 @@ async function Langchainsummarization(transcript) {
     //console.log(doc)
 
     const splitter = new TokenTextSplitter({
-      chunkSize: 10000,
+      chunkSize: 50000,
       chunkOverlap: 50,
     });
 

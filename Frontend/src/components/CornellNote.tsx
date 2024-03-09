@@ -7,7 +7,7 @@ import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint, expandPointWithTranscript } from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint, expandPointWithTranscript, generatepointsummary} from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz, { Quiz_t } from './Quiz'
 
@@ -859,8 +859,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             expanded_points.push(expandPointWithTranscript(point, transcription))
         }
 
-        //http://localhost:3000/summary-note-transcript
-        fetch('https://noteeline-backend.onrender.com/summary-note-transcript', {
+        let points_str = '';
+        for(let i = 0; i < expanded_points.length; i++){
+            points_str += `${i+1}. ${expanded_points[i].point}`
+        }
+
+        // http://localhost:3000/fetch-summary
+        // https://noteeline-backend.onrender.com/fetch-summary
+        fetch('http://localhost:3000/fetch-summary', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -870,14 +876,27 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
           }),
         }).then(res => res.json()).then(data => {
             console.log('Summary:')
-            console.log(data)
-            setSummary(data.response)
-            toast({
-              title: 'Summarization completed',
-              status: 'success',
-              duration: 2000,
-              position: 'top-right',
-              isClosable: true
+            console.log(data);
+
+            // ToDo: fix this. display summary should be the one called on top of points and initial summary
+            generatepointsummary(points_str, data.response).then(res => {
+                setSummary(res); 
+                toast({
+                title: 'Summarization completed',
+                status: 'success',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true
+                });
+            }).catch(e => {
+                console.log(`Summary Point error: ${e}`)
+                toast({
+                    title: 'Error generating summary. Please try again...',
+                    status: 'info',
+                    duration: 2000,
+                    position: 'top-right',
+                    isClosable: true
+                })
             })
         }).catch(e => console.log(e))
     }
@@ -1109,7 +1128,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             {showQuiz !== 0 ?
                                 <div></div> :
                                 <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
-                                    <TagLabel>Start quiz</TagLabel>
+                                    <TagLabel>Cue Questions</TagLabel>
                                     <TagRightIcon as={SunIcon} />
                                 </Tag>
                             }
@@ -1239,7 +1258,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             }
             {/* Summarization */}
             <GridItem rowSpan={5} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
-                <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleSummary}>
+                <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={noteTranscriptSummary}>
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
