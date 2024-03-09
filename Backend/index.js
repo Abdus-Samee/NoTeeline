@@ -22,7 +22,7 @@ app.post('/youtube-transcript', (req, res) => {
         const ytLink = requestData.ytLink
         if (ytLink) {
             // youtubeTranscript.YoutubeTranscript.fetchTranscript('https://youtu.be/DxNYOP-2rXs?si=jn2T8RBbAtHxXd1D').then(console.log)
-            youtubeTranscript.YoutubeTranscript.fetchTranscript(ytLink).then((data) => {
+            youtubeTranscript.YoutubeTranscript.fetchTranscript(ytLink, {lang: 'en'}).then((data) => {
                 res.json({ response: data })
             }).catch((err) => {
                 res.status(400).json({ error: err })
@@ -42,7 +42,7 @@ app.post('/fetch-summary', (req, res) => {
        const transcript = requestData.transcript
       
        Langchainsummarization(transcript).then((result) => {
-         console.log('Received summary at index.js')
+         console.log('Received summary at index.js');
          res.json({ response: result })
        }).catch((error) => {
          console.log(error)
