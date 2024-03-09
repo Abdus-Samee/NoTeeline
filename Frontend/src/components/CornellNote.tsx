@@ -240,7 +240,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         addYouTubeId(name, ytId)
 
         //http://localhost:3000/youtube-transcript
-        fetch('https://noteeline-backend.onrender.com/youtube-transcript', {
+        // https://noteeline-backend.onrender.com/youtube-transcript
+        fetch('http://localhost:3000/youtube-transcript', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -734,10 +735,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             isClosable: true
         })
 
-        const newPoints: string[] = bulletPoints.map(bulletPoint => {
-            return bulletPoint.history[bulletPoint.expand]
+        const newPoints: string[] = bulletPoints.map((bulletPoint, index) => {
+            return `${index + 1}. ${bulletPoint.history[bulletPoint.expand]}`
         })
-
+        
         generateTheme(newPoints).then(res => {
             // console.log(res)
             const t = extractThemes(res)
@@ -788,9 +789,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         setShowQuiz(1)
 
-        const newPoints: string[] = bulletPoints.map(bulletPoint => {
-            return bulletPoint.point
+        const newPoints: string[] = bulletPoints.map((bulletPoint, index) => {
+            return `${bulletPoint.history[bulletPoint.expand]}`
         })
+        
+        
+
+        console.log(newPoints);
 
         generateQuiz(newPoints).then(res => {
             // console.log(res)

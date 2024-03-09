@@ -260,16 +260,16 @@ export const generateTheme = async (expandedPoints: string[]) => {
 
     Answer:
     <Topic name="Cultural Diversity">
-    <p>1. New York City is home to a vibrant mix of cultures, with communities from nearly every corner of the globe, offering an incredible range of languages, cuisines, and cultural practices.</p>
-    <p>6. The city hosts numerous cultural festivals throughout the year, celebrating everything from Chinese New Year in Chinatown to the West Indian American Day Carnival in Brooklyn, showcasing the city's multicultural heritage.</p>
+    <p>New York City is home to a vibrant mix of cultures, with communities from nearly every corner of the globe, offering an incredible range of languages, cuisines, and cultural practices.</p>
+    <p>The city hosts numerous cultural festivals throughout the year, celebrating everything from Chinese New Year in Chinatown to the West Indian American Day Carnival in Brooklyn, showcasing the city's multicultural heritage.</p>
     </Topic>
     <Topic name="Iconic Landmarks">
-    <p>3. An iconic Art Deco skyscraper that once held the title of the world's tallest building. It offers breathtaking views of the city from its observation decks.</p>
-    <p>5. A historic suspension bridge connecting Manhattan and Brooklyn. Walking across the bridge provides stunning views of the New York skyline and the East River.</p>
+    <p>An iconic Art Deco skyscraper that once held the title of the world's tallest building. It offers breathtaking views of the city from its observation decks.</p>
+    <p>A historic suspension bridge connecting Manhattan and Brooklyn. Walking across the bridge provides stunning views of the New York skyline and the East River.</p>
     </Topic>
     <Topic name="Arts and Entertainment">
-    <p>4. Known as the heart of the American theatre industry, it offers world-class performances ranging from dramatic plays to lavish musicals.</p>
-    <p>2. New York is home to some of the world's most famous museums, including The Metropolitan Museum of Art and the Museum of Modern Art (MoMA), which house vast collections of art, historical artifacts, and cultural exhibits.</p>
+    <p>Known as the heart of the American theatre industry, it offers world-class performances ranging from dramatic plays to lavish musicals.</p>
+    <p>New York is home to some of the world's most famous museums, including The Metropolitan Museum of Art and the Museum of Modern Art (MoMA), which house vast collections of art, historical artifacts, and cultural exhibits.</p>
     </Topic>
 
     Input points: ` + expandedPoints +
