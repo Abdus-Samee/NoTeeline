@@ -302,13 +302,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     console.log(data)
                     setSummary(data.response)
                     addSummary(newTitle, data.response)
-                    toast({
-                        title: 'Summarization completed',
-                        status: 'success',
-                        duration: 2000,
-                        position: 'top-right',
-                        isClosable: true
-                    })
+                    // toast({
+                    //     title: 'Summarization completed',
+                    //     status: 'success',
+                    //     duration: 2000,
+                    //     position: 'top-right',
+                    //     isClosable: true
+                    // })
                 }).catch(e => console.log(e))
             }
             // console.log(data.response)
@@ -821,7 +821,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     const handleQuiz = () => {
         toast({
-            title: 'Starting quiz. Please wait patiently...',
+            title: 'Starting quiz. Please wait...',
             status: 'info',
             duration: 2000,
             position: 'top-right',
@@ -922,7 +922,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         let points_str = '';
         for(let i = 0; i < expanded_points.length; i++){
-            points_str += `${i+1}. ${expanded_points[i].point}`
+            points_str += `${expanded_points[i].point}`
         }
 
         generatepointsummary(points_str, summary).then(res => {
@@ -1087,7 +1087,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             </Tag>
                         }
                         <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
-                            <TagLabel>Download Stats</TagLabel>
+                            {/* <TagLabel>Download Stats</TagLabel> */}
                             <TagRightIcon as={DownloadIcon} />
                         </Tag>
                     </div>
@@ -1220,7 +1220,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                 </Tag>
                             }
                             <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
-                                <TagLabel>Download Stats</TagLabel>
+                                {/* <TagLabel>Download Stats</TagLabel> */}
                                 <TagRightIcon as={DownloadIcon} />
                             </Tag>
                         </div>

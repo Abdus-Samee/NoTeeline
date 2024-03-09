@@ -279,7 +279,7 @@ button:focus-visible {
 
 .quiz-question {
   padding: 10px;
-  border: 1px solid #000;
+  /* border: 1px solid #000; */
   margin-bottom: 3px;
 }
 
@@ -290,7 +290,7 @@ button:focus-visible {
 .quiz-option {
   padding: 1%;
   margin-bottom: 2px;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   border-radius: 15px;
   /* cursor: pointer; */
 }
