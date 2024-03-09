@@ -240,8 +240,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         addYouTubeId(name, ytId)
 
         //http://localhost:3000/youtube-transcript
-        // https://noteeline-backend.onrender.com/youtube-transcript
-        fetch('http://localhost:3000/youtube-transcript', {
+        fetch('https://noteeline-backend.onrender.com/youtube-transcript', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
