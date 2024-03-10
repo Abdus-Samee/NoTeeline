@@ -2,7 +2,18 @@
 
 import React, { useState, useEffect, useRef, } from 'react'
 import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, theme, keyframes } from '@chakra-ui/react'
-import { SunIcon, ChevronRightIcon, ChevronLeftIcon, TimeIcon, DragHandleIcon, CalendarIcon, ArrowBackIcon, ArrowForwardIcon, DownloadIcon } from '@chakra-ui/icons'
+import { 
+    SunIcon, 
+    ChevronRightIcon, 
+    ChevronLeftIcon, 
+    TimeIcon, 
+    DragHandleIcon, 
+    CalendarIcon, 
+    ArrowBackIcon, 
+    ArrowForwardIcon, 
+    DownloadIcon,
+    EditIcon,
+ } from '@chakra-ui/icons'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
@@ -96,6 +107,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         setNewTitle(name)
         setMicronote(note.micronote)
         setExpandButtonToggle(false)
+        setShowSummary(false)
 
         if (note?.ytId !== '') {
             setEmbedId(note.ytId)
@@ -183,7 +195,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 expand: 0,
                 compress: 0,
                 history: [newPoint],
-                edit: [[{e_point: newPoint, e_time: playerTime, }]],
+                edit: [[{e_point: newPoint, e_time: time_now, }]],
               },
             ])
             let pointStreams = JSON.parse(localStorage.getItem('pointStreams') ?? '""') //adding a stream tracker for a new point
@@ -207,7 +219,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const newPoints = bulletPoints.map((bulletPoint, idx) => {
             if(idx === index){
                 let history = [...bulletPoint.history]
-                history[bulletPoint.expand] = val
+                history[bulletPoint.expand] = val //changing the point itself
 
                 return {
                     ...bulletPoint,
@@ -421,9 +433,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         if(res[idx].old){
                             return newPoint
                         }else{
-                            let edit = [...newPoint.edit]
+                            let edit: {e_point: string, e_time: number, }[][] = [...newPoint.edit]
                             edit.push([])
-                            edit[newPoint.expand].push(res[idx].expansion)
+                            edit[newPoint.expand].push({e_point: res[idx].expansion, e_time: Date.now()})
                             return {
                                 ...newPoint,
                                 history: [...newPoint.history, res[idx].expansion],
@@ -792,10 +804,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const constructThemesToShow = (obj: { [key: string]: string[] }) => {
-        let themes: {type: string, val: string}[] = []
+        let themes: {type: string, val: string, editable: boolean}[] = []
         for(const [topic, points] of Object.entries(obj)){
-            themes.push({type: 'topic', val: topic})
-            themes.push(...points.map((point: string) => ({type: 'point', val: point})))
+            themes.push({type: 'topic', val: topic, editable: false, })
+            themes.push(...points.map((point: string) => ({type: 'point', val: point, editable: false, })))
         }
         return themes
     }
@@ -836,6 +848,52 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         })
     }
 
+    const editTheme = (index: number) => {
+        const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, idx: number) => {
+            if(idx === index){
+                return {
+                    ...theme,
+                    editable: true,
+                }
+            }else{
+                return theme
+            }
+        })
+
+        setThemes(newThemes)
+    }
+
+    const changeTheme = (index: number, val: string) => {
+        const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, idx: number) => {
+            if(idx === index){
+                return {
+                    ...theme,
+                    val: val,
+                }
+            }else{
+                return theme
+            }
+        })
+
+        setThemes(newThemes)
+    }
+
+    const stopThemeEdit = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if(e.key === 'Enter'){
+            const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, idx: number) => {
+                if(idx === index){
+                    return {
+                        ...theme,
+                        editable: false,
+                    }
+                }else{
+                    return theme
+                }
+            })
+    
+            setThemes(newThemes)
+        }
+    }
     //time sorting
     const handleSort = () => {
         setThemeOrTime('theme')
@@ -1219,7 +1277,17 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                         onMouseUp={handleMouseUp}
                                     >
                                         {theme['type'] === 'topic' ?
-                                            <h4 style={{ color: '#000', fontWeight: 'bold', paddingLeft: '1vw', }}>{theme['val']}</h4>
+                                            !theme['editable'] ?
+                                            <h4 style={{ color: '#000', fontWeight: 'bold', }}>
+                                                {theme['val']} <EditIcon w={4} color='green.500' style={{ cursor: 'pointer', }} onClick={() => editTheme(index)} />
+                                            </h4>
+                                            :
+                                            <input 
+                                                type='text'
+                                                defaultValue={theme['val']}
+                                                onChange={(e) => changeTheme(index, e.target.value)}
+                                                onKeyDown={(e) => stopThemeEdit(e, index)}
+                                            />
                                             :
                                             <p>{theme['val']}</p>
                                         }
@@ -1351,20 +1419,53 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             </Droppable>
                         </DragDropContext>
                         :
-                        <>
-                        {Object.entries(themes).map(([topic, points]: [any, any]) => (
-                            <div key={topic}>
-                                <h2 style={{ fontWeight: 'bold', }}>{topic}</h2>
-                                <div>
-                                    {points.map((point: any, index: number) => (
-                                        <div key={index} className='quiz-option'>
-                                            {point}
+                        <DragDropContext onDragEnd={onDrageEndThemes}>
+                            <Droppable droppableId="droppable">
+                            {(provided: any) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                    // style={getListStyle(snapshot.isDraggingOver)}
+                                >
+                                {themes.map((theme: any, index: any) => (
+                                    <Draggable key={theme['val']} draggableId={theme['val']} index={index}>
+                                    {(provided: any, snapshot: any) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            style={getBulletPointStyle(
+                                                snapshot.isDragging,
+                                                provided.draggableProps.style
+                                            )}
+                                            onContextMenu={handleContextMenu}
+                                            onMouseDown={(e) => handleMouseDown(e, index)}
+                                            onMouseUp={handleMouseUp}
+                                        >
+                                            {theme['type'] === 'topic' ?
+                                                !theme['editable'] ?
+                                                <h4 style={{ color: '#000', fontWeight: 'bold', }}>
+                                                    {theme['val']} <EditIcon w={4} color='green.500' style={{ cursor: 'pointer', }} onClick={() => editTheme(index)} />
+                                                </h4>
+                                                :
+                                                <input 
+                                                    type='text'
+                                                    defaultValue={theme['val']}
+                                                    onChange={(e) => changeTheme(index, e.target.value)}
+                                                    onKeyDown={(e) => stopThemeEdit(e, index)}
+                                                />
+                                                :
+                                                <p>{theme['val']}</p>
+                                            }
                                         </div>
-                                    ))}
+                                    )}
+                                    </Draggable>
+                                ))}                             
+                                {provided.placeholder}
                                 </div>
-                            </div>
-                        ))}
-                        </>
+                            )}
+                            </Droppable>
+                        </DragDropContext>
                         }
                         <input
                             type='text'
@@ -1389,12 +1490,6 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     :
                     <div style={{ padding: '1vw', }}>{summary}</div>)
                 }
-                {/* {
-                    showSummary ?
-                    <p>HARDCODE SUMMARY</p>
-                    :
-                    <p>No summary...</p>
-                } */}
             </GridItem>
         </Grid>
     )
