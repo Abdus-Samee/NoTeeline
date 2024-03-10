@@ -10,7 +10,7 @@ export type Quiz_t = {
 const Quiz: React.FC<any> = ({ quizzes, quizInfo, changeQuizInfo }) => {
     const [data, setData] = useState<Quiz_t[]>(quizzes)
     const [quiz, setQuiz] = useState<number>(0)
-    const [progress, setProgress] = useState<number>(0)
+    const [progress, setProgress] = useState<number>(20)
     const [colourGreen, setColourGreen] = useState<number>(-1)
     const [colourRed, setColourRed] = useState<number>(-1)
 
@@ -19,7 +19,7 @@ const Quiz: React.FC<any> = ({ quizzes, quizInfo, changeQuizInfo }) => {
         setData(quizzes)
         if(quizInfo){
             setQuiz(quizInfo.quiz)
-            setProgress(quizInfo.qp)
+            setProgress(20) //(quizInfo.qp)
             setColourGreen(quizInfo.colourGreen)
             setColourRed(quizInfo.colourRed)
         }
@@ -44,14 +44,14 @@ const Quiz: React.FC<any> = ({ quizzes, quizInfo, changeQuizInfo }) => {
         setColourRed(-1)
         setQuiz(q)
         const qp = (quiz == (data.length-1)) ? data.length : q
-        const currentProgress = (qp / data.length) * 100
+        const currentProgress = ((qp+1) / data.length) * 100
         changeQuizInfo({ quiz: q, qp: currentProgress, colourGreen: -1, colourRed: -1 })
         setProgress(currentProgress)
     }
 
     const handleRegenerate = () => {
         setQuiz(0)
-        setProgress(0)
+        setProgress(20)
         setColourGreen(-1)
         setColourRed(-1)
         changeQuizInfo({ quiz: 0, qp: 0, colourGreen: -1, colourRed: -1 })
