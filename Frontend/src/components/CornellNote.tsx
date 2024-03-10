@@ -447,6 +447,27 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     setExpandButtonToggle(!expandButtonToggle)
                     setBulletPoints(ret)
                     computeButtonClick(newTitle, 'expand')
+
+                    // ripple effect of expansion onto the themes if they exist
+                    if(themes.length > 0){
+                        const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, index: number) => {
+                            if(theme['type'] === 'point'){
+                                const val = theme['val']
+                                const idxVal = newPoints.findIndex((point: bulletObject) => point.point === val)
+                                return {
+                                    ...theme,
+                                    val: ret[idxVal].history[ret[idxVal].expand]
+                                }
+                            }else{
+                                return theme
+                            }
+                        })
+
+                        console.log('Expanded themes:')
+                        console.log(newThemes)
+
+                        setThemes(newThemes)
+                    }
                     // console.log(res)
                 }else{
                     toast({
