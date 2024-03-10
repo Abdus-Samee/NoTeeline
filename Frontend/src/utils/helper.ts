@@ -240,7 +240,7 @@ export const generateQuiz = async (points: string[], summary: string) => {
                             '<Answer>C. Avoiding change at all costs</Answer>'
     
     let user_prompt =  `Topic: ${points}`
-    if(summary !== '') user_prompt += `\nAdditional Context: ${summary}`
+    if(summary !== '') user_prompt += `\nAdditional Context to get extra information for the topic: ${summary}`
     
     const res = await openai.chat.completions.create({
         messages: [{ role: "system", content: system_prompt },
