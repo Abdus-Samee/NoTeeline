@@ -203,10 +203,11 @@ export const callGPTForSinglePoint = async (point: NotePoint, transcription: Tra
 
 export const generatepointsummary = async (points: string, context: string) => {
 
-    const user_prompt =  `I will give you a context and some keypoints, Your task is to summarize the keypoints in 5. Focus on the keypoint, only use context if you need extra information:
+    const user_prompt =  `I will give you a context and some keypoints, Your task is to summarize the keypoints in 4 sentences. Focus on the keypoint, only use context if you need extra information:
     Context: ${context}
     Keypoints: ${points}
-    remember not to make it too long.`
+    remember not to make it too long.
+    Do not mark the sentences with 1,2 etc.`
     const res = await openai.chat.completions.create({
         messages: [{ role: "user", content: user_prompt }],
         model: "gpt-4-0125-preview",
