@@ -302,13 +302,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     console.log(data)
                     setSummary(data.response)
                     addSummary(newTitle, data.response)
-                    // toast({
-                    //     title: 'Summarization completed',
-                    //     status: 'success',
-                    //     duration: 2000,
-                    //     position: 'top-right',
-                    //     isClosable: true
-                    // })
+                    toast({
+                        title: 'Summarization completed',
+                        status: 'success',
+                        duration: 2000,
+                        position: 'top-right',
+                        isClosable: true
+                    })
                 }).catch(e => console.log(e))
             }
             // console.log(data.response)
@@ -485,12 +485,37 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         setExpandQuizSection(!expandQuizSection)
     }
 
+    const reorderThemes = (list: {type: string, val: string}[], startIndex: number, endIndex: number) => {
+        const result = Array.from(list)
+        const [removed] = result.splice(startIndex, 1)
+        result.splice(endIndex, 0, removed)
+      
+        return result
+    }
+
     const reorder = (list: bulletObject[], startIndex: number, endIndex: number) => {
         const result = Array.from(list)
         const [removed] = result.splice(startIndex, 1)
         result.splice(endIndex, 0, removed)
       
         return result
+    }
+
+    const onDrageEndThemes = (result: any) => {
+        console.log('Result ', result)
+
+        // dropped outside the list
+        if (!result.destination) {
+          return
+        }
+    
+        const items = reorderThemes(
+          themes,
+          result.source.index,
+          result.destination.index
+        )
+    
+        setThemes(items)
     }
 
     const onDragEnd = (result: any) => {
@@ -752,18 +777,27 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const extractThemes = (text: string) => {
-        const themes: { [key: string]: string[] } = {};
-        const topicRegex = /<Topic name="([^"]+)">([\s\S]*?)<\/Topic>/g;
+        const themes: { [key: string]: string[] } = {}
+        const topicRegex = /<Topic name="([^"]+)">([\s\S]*?)<\/Topic>/g
 
         let match: RegExpExecArray | null;
         while ((match = topicRegex.exec(text)) !== null) {
-            const [, themeName, content] = match;
-            const points = content.match(/<p>(.*?)<\/p>/g)?.map(p => p.replace(/<\/?p>/g, '')) || [];
-            themes[themeName] = points;
+            const [, themeName, content] = match
+            const points = content.match(/<p>(.*?)<\/p>/g)?.map(p => p.replace(/<\/?p>/g, '')) || []
+            themes[themeName] = points
         }
 
-        console.log('themes', themes);
+        console.log('themes', themes)
         return themes;
+    }
+
+    const constructThemesToShow = (obj: { [key: string]: string[] }) => {
+        let themes: {type: string, val: string}[] = []
+        for(const [topic, points] of Object.entries(obj)){
+            themes.push({type: 'topic', val: topic})
+            themes.push(...points.map((point: string) => ({type: 'point', val: point})))
+        }
+        return themes
     }
 
     //theme sorting
@@ -783,7 +817,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         generateTheme(newPoints).then(res => {
             // console.log(res)
             const t = extractThemes(res)
-            setThemes(t)
+            console.log('Themes generated: ')
+            console.log(t)
+            const t2 = constructThemesToShow(t)
+            console.log('Themes to show: ')
+            console.log(t2)
+            setThemes(t2)
             setThemeOrTime('time')
         }).catch(e => {
             console.log(`Quiz error: ${e}`)
@@ -801,6 +840,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const handleSort = () => {
         setThemeOrTime('theme')
         const sortedBulletPoints = [...bulletPoints].sort((a, b) => a.created_at - b.created_at)
+        console.log('Sorted bullet points: ')
+        console.log(sortedBulletPoints)
         setBulletPoints(sortedBulletPoints)
         computeButtonClick(newTitle, 'time')
     }
@@ -1096,8 +1137,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             </Tag>
                             )
                         }
-                        <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
-                            {/* <TagLabel>Download Stats</TagLabel> */}
+                        <Tag size='lg' variant='solid' colorScheme='blue' sx={{ padding: '0', marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
                             <TagRightIcon as={DownloadIcon} />
                         </Tag>
                     </div>
@@ -1155,20 +1195,43 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         </Droppable>
                     </DragDropContext>
                     :
-                    <>
-                    {Object.entries(themes).map(([topic, points]: [any, any]) => (
-                        <div key={topic}>
-                            <h2 style={{ fontWeight: 'bold', }}>{topic}</h2>
-                            <div>
-                                {points.map((point: any, index: number) => (
-                                    <div key={index} className='quiz-option'>
-                                        {point}
+                    <DragDropContext onDragEnd={onDrageEndThemes}>
+                        <Droppable droppableId="droppable">
+                        {(provided: any) => (
+                            <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                // style={getListStyle(snapshot.isDraggingOver)}
+                            >
+                            {themes.map((theme: any, index: any) => (
+                                <Draggable key={theme['val']} draggableId={theme['val']} index={index}>
+                                {(provided: any, snapshot: any) => (
+                                    <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        style={getBulletPointStyle(
+                                            snapshot.isDragging,
+                                            provided.draggableProps.style
+                                        )}
+                                        onContextMenu={handleContextMenu}
+                                        onMouseDown={(e) => handleMouseDown(e, index)}
+                                        onMouseUp={handleMouseUp}
+                                    >
+                                        {theme['type'] === 'topic' ?
+                                            <h4 style={{ color: '#000', fontWeight: 'bold', paddingLeft: '1vw', }}>{theme['val']}</h4>
+                                            :
+                                            <p>{theme['val']}</p>
+                                        }
                                     </div>
-                                ))}
+                                )}
+                                </Draggable>
+                            ))}                             
+                            {provided.placeholder}
                             </div>
-                        </div>
-                    ))}
-                    </>
+                        )}
+                        </Droppable>
+                    </DragDropContext>
                     }
                     <input
                         type='text'
@@ -1321,10 +1384,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
                 {showSummary && 
-                    micronote ? 
+                    (micronote ? 
                     <div style={{ padding: '1vw', }}>{summary_p}</div>
                     :
-                    <div style={{ padding: '1vw', }}>{summary}</div>
+                    <div style={{ padding: '1vw', }}>{summary}</div>)
                 }
                 {/* {
                     showSummary ?
