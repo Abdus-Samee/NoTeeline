@@ -973,7 +973,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         const obj = fetchButtonStats(newTitle)
         const url = isLink ? `www.youtube.com/watch?v=${note.ytId}` : ''
-        let userLog: any = { buttonStats: obj, pauseCount: pauseCount, forwardCount: forwardCount, reverseCount: reverseCount, url: url, }
+        let userLog: any = { 
+            buttonStats: obj, 
+            pauseCount: pauseCount, 
+            forwardCount: forwardCount, 
+            reverseCount: reverseCount,
+            summary_t: summary,
+            summary_p: summary_p,
+            url: url, 
+        }
         userLog.editHistory = newPoints
 
         const jsonString = JSON.stringify(userLog, null, 2);
@@ -1312,7 +1320,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
-                {showSummary && <div style={{ padding: '1vw', }}>{summary_p}</div>}
+                {showSummary && 
+                    micronote ? 
+                    <div style={{ padding: '1vw', }}>{summary_p}</div>
+                    :
+                    <div style={{ padding: '1vw', }}>{summary}</div>
+                }
                 {/* {
                     showSummary ?
                     <p>HARDCODE SUMMARY</p>
