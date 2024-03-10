@@ -1075,6 +1075,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             </Tag>
                         }
                         {
+                            micronote && (
                             themeOrTime === 'theme' ?
                             <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
                                 <TagLabel>Order by Theme</TagLabel>
@@ -1085,6 +1086,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                 <TagLabel>Order by Time</TagLabel>
                                 <TagRightIcon as={TimeIcon} />
                             </Tag>
+                            )
                         }
                         <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
                             {/* <TagLabel>Download Stats</TagLabel> */}
