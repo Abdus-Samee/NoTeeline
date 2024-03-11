@@ -263,6 +263,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         addYouTubeId(name, ytId)
 
+        //https://noteeline-backend.onrender.com/youtube-transcript
         //http://localhost:3000/youtube-transcript
         fetch('https://noteeline-backend.onrender.com/youtube-transcript', {
             method: 'POST',
@@ -273,7 +274,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 ytLink: ytLink,
             }),
         }).then(res => res.json()).then(d => {
-            // console.log(data)
+            console.log(d)
             setTranscription(d.response) //each transctiption => {offset, duration, text}
             if(!d.response){
                 toast({
@@ -406,7 +407,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const newPoints = [...bulletPoints]
         
         if(!expandButtonToggle) newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
-        else newPoints.map((point: bulletObject) => point.expand = point.expand - 1)
+        else newPoints.map((point: bulletObject) => point.expand = point.expand >= 1 ? point.expand - 1 : 0)
         
         const points = bulletPoints.map((point: bulletObject) => ({
             point: point.point,
@@ -417,12 +418,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }))
 
         setBulletPoints(newPoints)
+        console.log('expand button: ' + expandButtonToggle)
 
         if(!expandButtonToggle){
             callGPT(points, transcription).then(res => {
                 if(res){
                     toast({
-                        title: 'Done',
+                        title: 'Done expanding...',
                         status: 'info',
                         duration: 2000,
                         position: 'top-right',
@@ -465,10 +467,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
                         console.log('Expanded themes:')
                         console.log(newThemes)
-
                         setThemes(newThemes)
                     }
                     // console.log(res)
+                    // setExpandButtonToggle(!expandButtonToggle)
                 }else{
                     toast({
                         title: 'Error...',
@@ -480,23 +482,47 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     })
                 }
             }).catch(() => {
-                toast({
-                    title: 'Error...',
-                    description: 'Problem calling GPT-4...',
-                    status: 'error',
-                    duration: 2000,
-                    position: 'top-right',
-                    isClosable: true,
-                })
+                console.log('Error calling GPT4: ')
+                // toast({
+                //     title: 'Error...',
+                //     description: 'Problem calling GPT-4...',
+                //     status: 'error',
+                //     duration: 2000,
+                //     position: 'top-right',
+                //     isClosable: true,
+                // })
             })
         }else{
+            toast({
+                title: 'Done reducing...',
+                status: 'info',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true,
+            })
+
+            // ripple effect of expansion onto the themes if they exist
+            if(themes.length > 0){
+                const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, index: number) => {
+                    if(theme['type'] === 'point'){
+                        const val = theme['val']
+                        const idxVal = newPoints.findIndex((point: bulletObject) => point.history[point.expand+1] === val)
+                        return {
+                            ...theme,
+                            val: newPoints[idxVal].history[newPoints[idxVal].expand]
+                        }
+                    }else{
+                        return theme
+                    }
+                })
+
+                console.log('Reduced themes:')
+                console.log(newThemes)
+                setThemes(newThemes)
+            }
             setExpandButtonToggle(!expandButtonToggle)
             computeButtonClick(newTitle, 'expand')
         }
-
-        // console.log(res)
-        // setExpandedNotes(res)
-        // setExpanding(1)
     }
 
     //calling openai api when expanding a single point from another function

@@ -22,7 +22,7 @@ app.post('/youtube-transcript', (req, res) => {
         const ytLink = requestData.ytLink
         if (ytLink) {
             // youtubeTranscript.YoutubeTranscript.fetchTranscript('https://youtu.be/DxNYOP-2rXs?si=jn2T8RBbAtHxXd1D').then(console.log)
-            youtubeTranscript.YoutubeTranscript.fetchTranscript(ytLink, {lang: 'en'}).then((data) => {
+            youtubeTranscript.YoutubeTranscript.fetchTranscript(ytLink).then((data) => {
                 res.json({ response: data })
             }).catch((err) => {
                 res.status(400).json({ error: err })
