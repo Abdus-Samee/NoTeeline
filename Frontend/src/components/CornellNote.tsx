@@ -108,6 +108,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         setMicronote(note.micronote)
         setExpandButtonToggle(false)
         setShowSummary(false)
+        setSummary('')
+        setSummary_P('')
+        setThemes([])
+        setThemeOrTime('theme')
+        setPauseCount(0)
+        setQuizzes([])
 
         if (note?.ytId !== '') {
             setEmbedId(note.ytId)
