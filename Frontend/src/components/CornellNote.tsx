@@ -882,6 +882,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         generateTheme(newPoints).then(res => {
             // console.log(res)
             const t = extractThemes(res)
+            computeButtonClick(newTitle, 'theme')
             console.log('Themes generated: ')
             console.log(t)
             const t2 = constructThemesToShow(t)
@@ -1124,7 +1125,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         })
 
         const obj = fetchButtonStats(newTitle)
-        const url = isLink ? `www.youtube.com/watch?v=${note.ytId}` : ''
+        const url = isLink ? `www.youtube.com/watch?v=${embedId}` : ''
         let userLog: any = { 
             buttonStats: obj, 
             pauseCount: pauseCount, 
