@@ -30,7 +30,7 @@ for user_folder in os.listdir(userlog_path):
                     video_data['point_count'] = len(bullet_points_data['editHistory'])
                     summary_t = bullet_points_data['summary_t']
                     summary_p = bullet_points_data['summary_p']
-                    note_points = [bpd['point'] for bpd in bullet_points_data['editHistory']]
+                    note_points = [{'point': bpd['point'], 'time_taken': bpd['note_taking_time']} for bpd in bullet_points_data['editHistory']]
                     vd_data['p_id'] = user_folder
                     vd_data['note_points'] = note_points
                     vd_data['summary_p'] = summary_p
@@ -73,7 +73,14 @@ print('\n############ VIDEO DATA ############')
 for video in vd:
     print(f'--------------\n{video} data...\n--------------')
     for v in vd[video]:
-        print(f"{v['p_id']}-{v['micronote']}-{v['summary_t']}-{v['summary_p']}")
-        print(f"Notes: v['note_points']")
+        print('p_id\n----')
+        print(f"{v['p_id']}")
+        print('micronote\n---------')
+        print(f"{v['micronote']}")
+        print('summary_t\n---------')
+        print(f"{v['summary_t']}")
+        print('summary_p\n---------')
+        print(f"{v['summary_p']}")
+        print(f"Notes:\n------\n{v['note_points']}")
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     print()
