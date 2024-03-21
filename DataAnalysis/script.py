@@ -4,7 +4,7 @@ import pandas as pd
 
 userlog_path = "UserLog"
 data = []
-pd = {}
+pd_dict = {}
 vd = {}
 
 for user_folder in os.listdir(userlog_path):
@@ -18,7 +18,9 @@ for user_folder in os.listdir(userlog_path):
             for file in files:
                 file_path = os.path.join(subdir, file)
                 if file == 'onboarding.json':
-                    pass
+                    with open(file_path, 'r') as f:
+                        onboarding_data = json.load(f)
+                    pd_dict['ob_session'] = onboarding_data
                 else:
                     video_data = {}
                     vd_data = {}
