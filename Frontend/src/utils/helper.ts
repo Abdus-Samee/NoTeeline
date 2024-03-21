@@ -262,6 +262,7 @@ export const generateTheme = async (expandedPoints: string[]) => {
     Follow these rules:
     1. Each topic should have more than one points.
     2. Every point should be assigned under one topic. No point should be unassigned.
+    3. The topic should not be very high-level, make them as detailed as possible.
     
     Here is an example:    
     Input points:
@@ -273,15 +274,15 @@ export const generateTheme = async (expandedPoints: string[]) => {
     6. The city hosts numerous cultural festivals throughout the year, celebrating everything from Chinese New Year in Chinatown to the West Indian American Day Carnival in Brooklyn, showcasing the city's multicultural heritage.
 
     Answer:
-    <Topic name="Cultural Diversity">
+    <Topic name="Cultural Celebration in New York City">
     <p>New York City is home to a vibrant mix of cultures, with communities from nearly every corner of the globe, offering an incredible range of languages, cuisines, and cultural practices.</p>
     <p>The city hosts numerous cultural festivals throughout the year, celebrating everything from Chinese New Year in Chinatown to the West Indian American Day Carnival in Brooklyn, showcasing the city's multicultural heritage.</p>
     </Topic>
-    <Topic name="Iconic Landmarks">
+    <Topic name="Iconic Landmarks of New York City">
     <p>An iconic Art Deco skyscraper that once held the title of the world's tallest building. It offers breathtaking views of the city from its observation decks.</p>
     <p>A historic suspension bridge connecting Manhattan and Brooklyn. Walking across the bridge provides stunning views of the New York skyline and the East River.</p>
     </Topic>
-    <Topic name="Arts and Entertainment">
+    <Topic name="Museum and theatre in New York City">
     <p>Known as the heart of the American theatre industry, it offers world-class performances ranging from dramatic plays to lavish musicals.</p>
     <p>New York is home to some of the world's most famous museums, including The Metropolitan Museum of Art and the Museum of Modern Art (MoMA), which house vast collections of art, historical artifacts, and cultural exhibits.</p>
     </Topic>
