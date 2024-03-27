@@ -4,7 +4,8 @@ import { NotePoint, TranscriptLine, OnboardingSection } from "../state/noteStore
 const SEED = 1
 const WINDOW_SIZE = 20000 //20000ms
 // const OPEN_AI_KEY = import.meta.env.VITE_OPEN_AI_KEY
-const OPEN_AI_KEY = "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"
+//const OPEN_AI_KEY = "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"
+const OPEN_AI_KEY = JSON.parse(localStorage.getItem('gptKey'))
 export const openai = new OpenAI({ apiKey: OPEN_AI_KEY, dangerouslyAllowBrowser: true })
 // const template = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
 //                  "You have to expand it to 2-3 full sentences in simple english.\nHere is one example:\n"+
