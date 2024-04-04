@@ -87,7 +87,7 @@ const App = () => {
     addNote({
       name,
       ytId: '',
-      micronote: isChecked,
+      micronote: true, //isChecked,
       content: [],
       transcription: [],
       expansion: [],
@@ -183,10 +183,10 @@ const App = () => {
                       <FormLabel>Name</FormLabel>
                       <Input placeholder='Name of your note' onChange={(e) => setName(e.target.value)} />
                   </FormControl>
-                  <br />
+                  {/*<br />
                   <Checkbox defaultChecked onChange={handleCheckBoxChange}>
                     Enable micro note taking
-                  </Checkbox>
+                  </Checkbox>*/}
               </ModalBody>
               <ModalFooter>
                   <Button colorScheme='blue' mr={3} onClick={saveNote}>
