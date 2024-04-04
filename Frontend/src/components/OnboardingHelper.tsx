@@ -63,7 +63,7 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, videoSrc, han
     return (
         <Card style={{ marginBottom: '1vh', }}>
             <CardBody>
-                <Stack divider={<StackDivider />} spacing='4'>
+                <Stack divider={<StackDivider />} style={{ width: '612px', }} spacing='4'>
                     <Box>
                         <video 
                             src={videoSrc}

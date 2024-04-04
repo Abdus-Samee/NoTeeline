@@ -292,13 +292,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 })
             }else{
                 addTranscription(name, d.response)
-                toast({
-                    title: 'Transcription completed! Generating summary...',
-                    description: 'Your transcription is ready!',
-                    status: 'success',
-                    duration: 5000,
-                    isClosable: true,
-                })
+                //toast({
+                //    title: 'Transcription completed! Generating summary...',
+                //    description: 'Your transcription is ready!',
+                //    status: 'success',
+                //    duration: 5000,
+                //    isClosable: true,
+                //})
 
                 //generating summary from transcript
                 let tr = ''
@@ -321,13 +321,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     console.log(data)
                     setSummary(data.response)
                     addSummary(newTitle, data.response)
-                    toast({
+                    /*toast({
                         title: 'Summarization completed',
                         status: 'success',
                         duration: 2000,
                         position: 'top-right',
                         isClosable: true
-                    })
+                    })*/
                 }).catch(e => console.log(e))
             }
             // console.log(data.response)
@@ -429,13 +429,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         if(!expandButtonToggle){
             callGPT(points, transcription).then(res => {
                 if(res){
-                    toast({
+                    /*toast({
                         title: 'Done expanding...',
                         status: 'info',
                         duration: 2000,
                         position: 'top-right',
                         isClosable: true,
-                    })
+                    })*/
     
                     const ret = newPoints.map((newPoint, idx) => {
                         if(res[idx].old){
@@ -649,13 +649,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         expandSinglePoint(pointToBeUpdated.history[pointToBeUpdated.expand], pointToBeUpdated.created_at, pointToBeUpdated.utc_time).then(res => {
             if(res){
-                toast({
+                /*toast({
                     title: 'Done',
                     status: 'info',
                     duration: 2000,
                     position: 'top-right',
                     isClosable: true,
-                })
+                })*/
                 const editTime = Date.now()
                 newPoints = bulletPoints.map((bp, idx) => {
                     if(idx === draggingIndex){
@@ -1010,13 +1010,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     //summarizing using the whole transcription
     const handleSummary = () => {
         if(summary !== ''){
-            toast({
+            /*toast({
                 title: 'Summary already generated',
                 status: 'info',
                 duration: 2000,
                 position: 'top-right',
                 isClosable: true
-            })
+            })*/
             return
         }
 
@@ -1048,13 +1048,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             console.log(data)
             setSummary(data.response)
             addSummary(newTitle, data.response)
-            toast({
+            /*toast({
               title: 'Summarization completed',
               status: 'success',
               duration: 2000,
               position: 'top-right',
               isClosable: true
-            })
+            })*/
         }).catch(e => console.log(e))
     }
 
@@ -1083,13 +1083,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             setSummary_P(res)
             addSummary_P(newTitle, res)
             setShowSummary(true)
-            toast({
+            /*toast({
                 title: 'Summarization from points completed',
                 status: 'success',
                 duration: 2000,
                 position: 'top-right',
                 isClosable: true
-            });
+            })*/
         }).catch(e => {
             console.log(`Summary Point error: ${e}`)
             toast({
