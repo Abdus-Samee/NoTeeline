@@ -1249,9 +1249,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             </Tag>
                             )
                         }
-                        <Tag size='lg' variant='solid' colorScheme='blue' sx={{ padding: '0', marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
+                        {/* <Tag size='lg' variant='solid' colorScheme='blue' sx={{ padding: '0', marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
                             <TagRightIcon as={DownloadIcon} />
-                        </Tag>
+                        </Tag> */}
                     </div>
                     {themeOrTime !== 'time' ?
                     <DragDropContext onDragEnd={onDragEnd}>
@@ -1414,10 +1414,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                     <TagRightIcon as={TimeIcon} />
                                 </Tag>
                             }
-                            <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
-                                {/* <TagLabel>Download Stats</TagLabel> */}
+                            {/* <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
                                 <TagRightIcon as={DownloadIcon} />
-                            </Tag>
+                            </Tag> */}
                         </div>
                         {themeOrTime !== 'time' ?
                         <DragDropContext onDragEnd={onDragEnd}>

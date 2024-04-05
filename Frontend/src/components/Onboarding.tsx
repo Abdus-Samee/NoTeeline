@@ -222,13 +222,13 @@ const Onboarding: React.FC = () => {
             >
                 Submit
             </Button>
-            <Button 
+            {/* <Button 
                 colorScheme='orange' 
                 style={{ marginBottom: '2vh', marginLeft: '1vw', }}
                 onClick={handleDownload}
             >
                 Download Data
-            </Button>
+            </Button> */}
         </div>
     );
 };
