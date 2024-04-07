@@ -15,8 +15,9 @@ import {
   useToast,
   Checkbox,
   Box,
+  Heading,
  } from '@chakra-ui/react'
-import { DeleteIcon, ChevronLeftIcon, ArrowLeftIcon, HamburgerIcon } from '@chakra-ui/icons'
+import { DeleteIcon, ChevronLeftIcon, ArrowLeftIcon, HamburgerIcon, CloseIcon, } from '@chakra-ui/icons'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import Onboarding from './components/Onboarding'
@@ -151,7 +152,7 @@ const App_c = () => {
         exit={{ width: '0%', }}
         transition={{ duration: 0.3, ease: 'easeInOut', }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#54432C', }}>
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', background: '#54432C', }}>
           <div 
             style={{ 
               display: 'flex',
@@ -164,8 +165,8 @@ const App_c = () => {
             NoTeeline
           </header>
           </div>
-          <span style={{ padding: '5px', cursor: 'pointer'}}>
-            <ArrowLeftIcon 
+          <span style={{ paddingRight: '5px', cursor: 'pointer'}}>
+            <CloseIcon 
               w={4} 
               h={4}
               sx={{ cursor: 'pointer', }}
@@ -238,13 +239,48 @@ const App_c = () => {
         }}
       >
         {!showLeftPane && (
-          <HamburgerIcon
-            w={6}
-            h={6}
-            color='tomato'
-            sx={{ cursor: 'pointer', }}
-            onClick={() => setShowLeftPane(!showLeftPane)}
-          />
+          <div
+            style={{
+              position: '-webkit-sticky',
+              position: 'sticky',
+              top: '0',
+              zIndex: '1',
+              background: '#fff',
+              display: 'inline-flex',
+              flexDirection: 'row',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              //border: '1px solid red',
+            }}
+          >
+          <Box 
+            width={8} 
+            height={8} 
+            style={{
+              textAlign: 'center', 
+              marginTop: '1%',
+              marginLeft: '1%',
+              borderRadius: '50%', 
+              background: '#54432C', 
+          }}>
+            <HamburgerIcon
+              w={6}
+              h={6}
+              color='#fff'
+              sx={{ cursor: 'pointer', marginLeft: '0vw', }}
+              onClick={() => setShowLeftPane(!showLeftPane)}
+            />
+          </Box>
+            <Box
+              style={{
+                marginTop: '1%',
+              }}
+            >
+              <Heading fontSize={30} fontWeight={600}>
+                NoTeeline
+              </Heading>
+            </Box>
+          </div>
         )}
         {active === 'onboarding' && <Onboarding />}
         {active !== '' && active !== 'onboarding' && <CornellNote name={active} note={selectedNote} />}

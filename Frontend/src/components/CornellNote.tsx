@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import React, { useState, useEffect, useRef, } from 'react'
-import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, theme, keyframes } from '@chakra-ui/react'
+import { Box, Heading, Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, theme, keyframes } from '@chakra-ui/react'
 import { 
     SunIcon, 
     ChevronRightIcon, 
@@ -13,6 +13,7 @@ import {
     ArrowForwardIcon, 
     DownloadIcon,
     EditIcon,
+    HamburgerIcon,
  } from '@chakra-ui/icons'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
@@ -88,22 +89,45 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     // const [forwardCount, setForwardCount] = useState<number>(0)
     // const [reverseCount, setReverseCount] = useState<number>(0)
     // const [pointStreams, setPointStreams] = useState<string[]>([])
+    const [videoWidth, setVideoWidth] = useState<string>('70vw')
+    const [videoHeight, setVideoHeight] = useState<string>('50vh')
+    const [opts, setOpts] = useState<any>({
+      height: '400',
+      width: '80%',
+      frameborder: '0',
+      playerVars: { autoplay: 0, },
+    })
 
     const ref = useRef(null)
     const toast = useToast()
     let timeoutHandle : any
-    const opts = {
+    /*const opts = {
         // height: '705',
         // width: '1254',
-        height: '400',
-        width: '80%',
+        height: videoHeight,
+        width: videoHeight,
         frameborder: '0',
         playerVars: {
             autoplay: 0,
         },
-    }
+    }*/
 
     useEffect(() => {
+        console.log(window.innerWidth, window.innerHeight)
+        const iw = window.innerWidth
+
+        /*if(iw > 2100){
+          setOpts((prev) => ({...prev, height: '750', width: '1800', })) // [2101, ...]
+        }else if(iw > 1900){
+          setOpts((prev) => ({...prev, height: '680', width: '1400', })) // [1901, 2100]
+        }else if(iw > 1568){
+          setOpts((prev) => ({...prev, height: '670', width: '1200', })) // [1569, 1900]
+        }else if(iw > 1070){
+          setOpts((prev) => ({...prev, height: '400', width: '720', })) // [1071, 1100]
+        }else if(iw > 899){
+          setOpts((prev) => ({...prev, height: '350', width: '700', })) // [900, 1070]
+        }*/
+
         setNewTitle(name)
         setMicronote(note.micronote)
         setExpandButtonToggle(false)
@@ -1160,12 +1184,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         <Grid
             h='137%'
             w='100%'
-            templateRows='repeat(15, 1fr)'
+            templateRows='repeat(18, 1fr)'
             templateColumns='repeat(4, 1fr)'
             sx={{ overflowX: 'hidden', }}
         >
             {/* YouTube video player */}
-            <GridItem rowSpan={5} colSpan={4} sx={{ borderBottom: '1px solid #000', }}>
+            <GridItem rowSpan={6} colSpan={4} sx={{ borderBottom: '1px solid #000', }}>
                 {
                     !isLink ?
                         <InputGroup
@@ -1191,13 +1215,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             onPlay={() => setPause(false)}
                             onPause={countPause}
                             onEnd={stopVideo}
-                            style={{ marginTop: '0.5%',  marginLeft: '15%', }}
+                            style={{ marginTop: '0%',  marginLeft: '15%', }}
                         />
                 }
             </GridItem>
             {
                 expandQuizSection ?
-                <GridItem rowSpan={5} colSpan={4} sx={{ padding: '10px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                <GridItem rowSpan={7} colSpan={4} sx={{ padding: '10px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', }}>
                         {showQuiz !== 0 ?
                             <div></div> :
@@ -1224,7 +1248,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </GridItem>
                 :
                 expandSection || !micronote?
-                <GridItem rowSpan={5} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
+                <GridItem rowSpan={7} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
                     <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
                         {micronote && <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />}
                         {
@@ -1366,7 +1390,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 </GridItem>
                 :
                 <>
-                    <GridItem rowSpan={5} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                    <GridItem rowSpan={7} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', }}>
                             {showQuiz !== 0 ?
                                 <div></div> :
