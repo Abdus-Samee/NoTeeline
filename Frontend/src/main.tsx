@@ -3,6 +3,7 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App.tsx'
 import Home from './Home.tsx'
+import App_c from './App_copy.tsx'
 
 import './index.css'
 
@@ -25,7 +26,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/note',
-    element: <App />,
+    element: <App_c />,
     errorElement: <div>404 Not Found</div>,
   }
 ])

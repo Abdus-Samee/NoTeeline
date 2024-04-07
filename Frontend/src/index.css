@@ -92,7 +92,7 @@
 .note-content {
   position: fixed;
   top: 0;
-  left: 19%;
+  /*left: 19%;*/
   width: 81%;
   height: 100%;
   text-align: left;
