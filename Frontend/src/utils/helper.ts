@@ -56,34 +56,6 @@ export const expandPointWithTranscript = (point: NotePoint, transcript: Transcri
     return expandedPoint
 }
 
-// export const callGPT = (req: GPTRequest) => {
-//     let transcript = req.transcript.join(".")
-
-//     const PROMPT = "You are a note taking assistant. Users will give you their summary and the meeting transcript."+
-//                "You have to expand it to 2-3 full sentences in simple english.\nHere is one example:\n"+
-//                "Transcript: .. Yeah. So, for background, we both did these scans for this research project that we have at Meta called"+
-//                "Kodak Avatars. And the idea is that instead of our avatars being cartoony and instead of actually transmitting a video, "+
-//                "what it does is we’ve scanned ourselves and a lot of different expressions, and we’ve built a computer model of each of "+
-//                "our faces and bodies and the different expressions that we make and collapsed that into a Kodak that then when you have the "+
-//                "headset on your head, it sees your face, it sees your expression, and it can basically send an encoded version of what you’re "+
-//                "supposed to look like over the wire. So, in addition to being photorealistic, it’s also actually much more bandwidth efficient than "+
-//                "transmitting a full video or especially a 3D immersive video of a whole scene like this...\n"+
-//                "Summary: kodak, encode face, efficient\n"+
-//                "Note: Kodak is a compressed format of the facial expression. So, besides being photorealistic, it is highly efficient for transmission as well.\n\n"+
-//                "Transcript: ..."+transcript+"...\n"+
-//                "Summary: "+req.point+"\n"+
-//                "Note:"
-
-//     openai.chat.completions.create({
-//         messages: [{ role: "system", content: PROMPT }],
-//         model: "gpt-4",
-//     }).then((res) => {
-//         console.log('GPT response for: ' + req.point + ' => ', res.choices[0].message.content)
-//     }).catch((err) => {
-//         console.log(err)
-//     })
-// }
-
 export const getFormattedPromptString = () => {
     const noteStore = localStorage.getItem('note-store')
     const onboardings = noteStore ? JSON.parse(noteStore).state.onboardings : []
@@ -120,8 +92,78 @@ export const getFormattedPromptString = () => {
     return promptString
 }
 
+export const genResponses = async (points: {point: string, history: string[], expand: number, created_at: number, utc_time: number, }[], transcription: TranscriptLine[]) => {
+    const promptString = getFormattedPromptString()
+    const responses = await Promise.all(
+      points.map(async (point, idx) => {
+        try{
+          if(point.history.length > point.expand){
+            console.log(`${point.history.length}, ${point.expand}`)
+          }else{
+            const pointToBeExpanded = point.history[point.expand - 1]
+            const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
+            const transcript = expandedPoint.transcript.join(".")
+            const PROMPT = "Expand the provided keypoint into a one sentence note.\n" +
+                "Transcript: ..." + transcript + "...\n"+
+                "Keypoint: "+expandedPoint.point+"\n"+
+                "Note:"
+
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${OPEN_AI_KEY}`,
+            },
+            body: JSON.stringify({
+              model: 'gpt-4-1106-preview',
+              messages: [{ role: 'system', content: promptString}, { role: 'user', content: PROMPT }],
+              stream: true,
+              temperature: 0.5,
+            }),
+          })
+
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder('utf-8')
+          let response = ''
+
+          while(true){
+            const chunk = await reader.read()
+            const { done, value } = chunk
+            if(done){
+              break
+            }
+            const decodedChunk = decoder.decode(value)
+            const lines = decodedChunk.split('\n')
+            const parsedLines = lines.map(line => line.replace(/^data: /, '').trim()).filter(line => line !== '' && line !== '[DONE]').map(line => JSON.parse(line))
+
+            for (const parsedLine of parsedLines){
+              const { choices } = parsedLine
+              const { delta } = choices[0]
+              const { content } = delta
+              if(content){
+                response += content
+                console.log(`response for prompt ${idx+1}: ${response}`)
+              }
+            }
+
+            //response += decodedChunk
+          }
+          return response
+         }
+        }catch(e){
+          console.log('Error ' + e)
+        }
+      })
+    )
+
+    /*responses.forEach((response, index) => {
+      console.log(`Response for prompt ${index+1} => ${response}`)
+    })*/
+  }
+
 export const callGPT = async (points: {point: string, history: string[], expand: number, created_at: number, utc_time: number, }[], transcription: TranscriptLine[]) => {
     const promptString = getFormattedPromptString()
+    console.log(openai)
     
     let expansion = [] as any[]
     for(let i = 0; i < points.length; i++){
@@ -138,7 +180,7 @@ export const callGPT = async (points: {point: string, history: string[], expand:
                 "Keypoint: "+expandedPoint.point+"\n"+
                 "Note:"
 
-            console.log('calling expansion from', PROMPT)
+            //console.log('calling expansion from', PROMPT)
 
             const res = await openai.chat.completions.create({
                 messages: [{ role: "system", content: promptString }, { role: "user", content: PROMPT }],

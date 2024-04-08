@@ -6,23 +6,44 @@ type BulletPointProps = {
     expand: number,
     history: string[],
     created_at: number,
-    editPoint: (id: number) => void
+    editPoint: (id: number) => void,
+    state: number,
+    tempString: string,
 }
 
-const BulletPoint = ({index, expand, history, created_at, editPoint}: BulletPointProps) => {
+const BulletPoint = ({index, expand, history, created_at, editPoint, state, tempString, }: BulletPointProps) => {
     const [, setExpanded] = useState<number>(expand)
     const [pointToShow, setPointToShow] = useState<string | null>(null)
+    const [toStateOne, setToStateOne] = useState<boolean>(true)
+
+    // increase expand
+    // call openai api
+    // add to history
 
     useEffect(() => {
-        if(history.length >= expand){
+        if(state === 1){
+          if(index === 0) console.log(`Received => ${tempString}`)
+          let updatedPoint = ''
+          if(toStateOne){
+            setToStateOne(false)
+          }else{
+            updatedPoint = pointToShow
+          }
+          //let updatedPoint = pointToShow
+          updatedPoint += tempString
+          setPointToShow(updatedPoint)
+        }
+        else if(history.length > expand){
             const point = history[expand]
             setPointToShow(point)
             setExpanded(expand)   
         }else{
-            setPointToShow('Expanding...')
+            //setPointToShow('')
+            //setPointToShow('Expanding/Reducing...')
+            setToStateOne(true)
             setExpanded(expand)
         }
-    }, [expand, history])
+    }, [tempString, expand, history])
 
     const handleContextMenu = (e: any) => {
         e.stopPropagation()

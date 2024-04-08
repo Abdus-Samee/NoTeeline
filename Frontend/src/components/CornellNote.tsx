@@ -38,6 +38,9 @@ type bulletObject = {
     compress: number;
     history: string[];
     edit: {e_point: string, e_time: number, }[][];
+    state: number; // 0 for stable, 1 for expanding/reducing
+    tempString: string; // string during streamlined output
+    totalString: string;
 }
 
 // let chunks : any[] = []
@@ -112,9 +115,162 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         },
     }*/
 
+    const js_sleep = (ms) => {
+      return new Promise((resolve) => setTimeout(resolve, ms)) 
+    }
+
+    const OPEN_AI_KEY = "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"
+
+    const streamViewHelper = (index: number, text: string) => {
+      const newPoints = [...bulletPoints]
+      newPoints[index].tempString = text
+      if(index === 0) console.log(`Sent => ${text}`)
+      setBulletPoints(newPoints)
+    }
+
+    const genResponses = async (points: {point: string, history: string[], expand: number, created_at: number, utc_time: number, }[], transcription: TranscriptLine[]) => {
+    const promptString = getFormattedPromptString()
+    const responses = await Promise.all(
+      points.map(async (point, idx) => {
+        try{
+          if(point.history.length > point.expand){
+            console.log(`${point.history.length}, ${point.expand}`)
+          }else{
+            const pointToBeExpanded = point.history[point.expand - 1]
+            const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
+            const transcript = expandedPoint.transcript.join(".")
+            const PROMPT = "Expand the provided keypoint into a one sentence note.\n" +
+                "Transcript: ..." + transcript + "...\n"+
+                "Keypoint: "+expandedPoint.point+"\n"+
+                "Note:"
+
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${OPEN_AI_KEY}`,
+            },
+            body: JSON.stringify({
+              model: 'gpt-4-1106-preview',
+              messages: [{ role: 'system', content: promptString}, { role: 'user', content: PROMPT }],
+              stream: true,
+              temperature: 0.5,
+            }),
+          })
+
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder('utf-8')
+          let response = ''
+
+          while(true){
+            const chunk = await reader.read()
+            const { done, value } = chunk
+            if(done){
+              break
+            }
+            const decodedChunk = decoder.decode(value)
+            const lines = decodedChunk.split('\n')
+            const parsedLines = lines.map(line => line.replace(/^data: /, '').trim()).filter(line => line !== '' && line !== '[DONE]').map(line => JSON.parse(line))
+
+            for (const parsedLine of parsedLines){
+              const { choices } = parsedLine
+              const { delta } = choices[0]
+              const { content } = delta
+              if(content){
+                response += content
+                //console.log(`response for prompt ${idx+1}: ${response}`)
+                streamViewHelper(idx, content)
+                await js_sleep(500)
+              }
+            }
+
+            //response += decodedChunk
+          }
+          return response
+         }
+        }catch(e){
+          console.log('Error ' + e)
+        }
+      })
+    )
+    
+    let rep = []
+    responses.forEach((response, index) => {
+      rep.push(response)
+      //console.log(`Response for prompt ${index+1} => ${response}`)
+    })
+
+    return rep
+  }
+
+    const testDrive = async () => {
+      if(!expandButtonToggle){
+            toast({
+                title: 'Expanding all the points...',
+                description: 'Please wait while we expand the bullet points',
+                status: 'info',
+                duration: 5000,
+                position: 'top-right',
+                isClosable: true,
+            })
+        }else{
+            toast({
+                title: 'Reducing all the points...',
+                description: 'Please wait while we reduce the bullet points',
+                status: 'info',
+                duration: 2000,
+                position: 'top-right',
+                isClosable: true,
+            })
+        }
+
+        const newPoints = [...bulletPoints]
+        
+        if(!expandButtonToggle) newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
+        else newPoints.map((point: bulletObject) => point.expand = point.expand >= 1 ? point.expand - 1 : 0)
+        newPoints.map((point: bulletObject) => point.state = 1)
+      const points = bulletPoints.map((point: bulletObject) => ({
+            point: point.point,
+            history: point.history,
+            expand: point.expand,
+            created_at: point.created_at,
+            utc_time: point.utc_time,
+      }))
+
+      setBulletPoints(newPoints)
+      console.log('expand button: ' + expandButtonToggle)
+
+      if(!expandButtonToggle){
+        genResponses(points, transcription).then(res => {
+          //console.log(`Rep => ${res}`)
+          console.log('Done... ...')
+          const ret = newPoints.map((newPoint, idx) => {
+               let edit: {e_point: string, e_time: number, }[][] = [...newPoint.edit]
+               edit.push([])
+               edit[newPoint.expand].push({e_point: res[idx], e_time: Date.now()})
+               //console.log(`string for ${idx+1} => ${newPoint.tempString}`)
+               return {
+                ...newPoint,
+                history: [...newPoint.history, res[idx]],
+                edit: edit,
+                state: 0,
+                tempString: '',
+                totalString: '',
+               }
+          })
+
+          setExpandButtonToggle(!expandButtonToggle)
+          setBulletPoints(ret)
+          computeButtonClick(newTitle, 'expand')
+
+        })
+      }
+    }
+
     useEffect(() => {
         console.log(window.innerWidth, window.innerHeight)
         const iw = window.innerWidth
+        //console.log('GPT4 key: ' + JSON.parse(localStorage.getItem('gptKey')))
 
         /*if(iw > 2100){
           setOpts((prev) => ({...prev, height: '750', width: '1800', })) // [2101, ...]
@@ -170,6 +326,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             compress: 0,
             history: [cont.point],
             edit: [[{e_point: cont.point, e_time: cont.utc_time, }]],
+            state: 0,
+            tempString: '',
+            totalString: '',
         }))
 
         let pointStreams: string[] = []
@@ -1189,6 +1348,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             sx={{ overflowX: 'hidden', }}
         >
             {/* YouTube video player */}
+            <button onClick={testDrive}>Test</button>
             <GridItem rowSpan={6} colSpan={4} sx={{ borderBottom: '1px solid #000', }}>
                 {
                     !isLink ?
@@ -1310,6 +1470,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                 history={bulletPoint.history}
                                                 created_at={bulletPoint.created_at}
                                                 editPoint={editPoint}
+                                                state={bulletPoint.state}
+                                                tempString={bulletPoint.tempString}
                                             />
                                             :
                                             <textarea
@@ -1475,6 +1637,8 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                                     history={bulletPoint.history}
                                                     created_at={bulletPoint.created_at}
                                                     editPoint={editPoint}
+                                                    state={bulletPoint.state}
+                                                    tempString={bulletPoint.tempString}
                                                 />
                                                 :
                                                 <textarea

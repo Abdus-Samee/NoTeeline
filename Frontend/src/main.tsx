@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App.tsx'
 import Home from './Home.tsx'
 import App_c from './App_copy.tsx'
+import Test from './Test.tsx'
 
 import './index.css'
 
@@ -27,6 +28,11 @@ const router = createBrowserRouter([
   {
     path: '/note',
     element: <App_c />,
+    errorElement: <div>404 Not Found</div>,
+  },
+  {
+    path: '/test',
+    element: <Test />,
     errorElement: <div>404 Not Found</div>,
   }
 ])
