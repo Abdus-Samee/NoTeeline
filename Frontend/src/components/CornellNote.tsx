@@ -119,7 +119,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
       return new Promise((resolve) => setTimeout(resolve, ms)) 
     }
 
-    const OPEN_AI_KEY = "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"
+    //const OPEN_AI_KEY = "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"
+    const OPEN_AI_KEY = JSON.parse(localStorage.getItem('gptKey'))
+    const SLEEP_DELAY = 150
 
     const streamViewHelper = (index: number, text: string) => {
       const newPoints = [...bulletPoints]
@@ -180,7 +182,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 response += content
                 //console.log(`response for prompt ${idx+1}: ${response}`)
                 streamViewHelper(idx, content)
-                await js_sleep(500)
+                await js_sleep(SLEEP_DELAY)
               }
             }
 

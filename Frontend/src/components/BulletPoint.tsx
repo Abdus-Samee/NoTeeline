@@ -36,7 +36,8 @@ const BulletPoint = ({index, expand, history, created_at, editPoint, state, temp
         else if(history.length > expand){
             const point = history[expand]
             setPointToShow(point)
-            setExpanded(expand)   
+            setExpanded(expand)
+            setToStateOne(true)
         }else{
             //setPointToShow('')
             //setPointToShow('Expanding/Reducing...')
