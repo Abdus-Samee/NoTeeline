@@ -115,7 +115,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         },
     }*/
 
-    const js_sleep = (ms) => {
+    const js_sleep = (ms: number | undefined) => {
       return new Promise((resolve) => setTimeout(resolve, ms)) 
     }
 
@@ -196,7 +196,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
       })
     )
     
-    let rep = []
+    let rep: (string | undefined)[] = []
     responses.forEach((response, index) => {
       rep.push(response)
       //console.log(`Response for prompt ${index+1} => ${response}`)
@@ -300,6 +300,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         if (note?.ytId !== '') {
             setEmbedId(note.ytId)
             setIsLink(true)
+
+            if(note?.transcription.length === 0){
+                getYoutubeTranscription(note.ytId);
+            }
         }else{
             setEmbedId('')
             setIsLink(false)
@@ -437,8 +441,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
     }
 
-    const getYoutubeTranscription = () => {
-        let ytId = ''
+    const getYoutubeTranscription = (youtubeId: string = '') => {
+        console.log(`youtubeid: ${youtubeId}`)
+        let ytId = youtubeId
         if(ytLink.includes('watch')){
             ytId = ytLink.split('v=')[1]
             setEmbedId(ytId)
@@ -447,12 +452,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             ytId = ytLink.split('/')[3].split('?')[0]
             setEmbedId(ytId)
             setIsLink(true)
-        }else{
+        }else if(ytId === ''){
             alert('Invalid YouTube link!')
             // return
         }
 
-        addYouTubeId(name, ytId)
+        if(youtubeId === '') addYouTubeId(name, ytId)
 
         //https://noteeline-backend.onrender.com/youtube-transcript
         //http://localhost:3000/youtube-transcript
@@ -462,12 +467,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ytLink: ytLink,
+                ytLink: `https://www.youtube.com/watch?v=${ytId}`,
             }),
         }).then(res => res.json()).then(d => {
             console.log(d)
-            setTranscription(d.response) //each transctiption => {offset, duration, text}
-            if(!d.response){
+            setTranscription(d.transcript) //each transctiption => {start, duration, text}
+            if(!d.transcript){
                 toast({
                     title: 'Warning',
                     description: 'The provided YouTube video does not have a transcription or has it disabled!',
@@ -476,7 +481,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     isClosable: true,
                 })
             }else{
-                addTranscription(name, d.response)
+                const resp: {text: string, start: number, duration: number}[] = d.transcript
+                const response = Array.isArray(resp) ? resp.map(({text, start, duration}) => ({
+                    text,
+                    offset: start,
+                    duration
+                })) : []
+                addTranscription(name, response)
                 //toast({
                 //    title: 'Transcription completed! Generating summary...',
                 //    description: 'Your transcription is ready!',
@@ -487,7 +498,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
                 //generating summary from transcript
                 let tr = ''
-                const res_tr = d.response
+                const res_tr = response
                 for(let i = 0; i < res_tr.length; i++){
                     tr += res_tr[i].text
                 }
@@ -1360,10 +1371,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             <Input
                                 placeholder='Enter a YouTube link...'
                                 style={{ background: 'white', }}
-                                onChange={(e) => setYtLink(e.target.value)}
+                                onChange={(e: { target: { value: React.SetStateAction<string> } }) => setYtLink(e.target.value)}
                             />
                             <InputRightElement width='4.5rem' style={{ padding: '0.5vw', }}>
-                                <Button h='1.75rem' size='sm' color='white' colorScheme='red' onClick={getYoutubeTranscription}>
+                                <Button h='1.75rem' size='sm' color='white' colorScheme='red' onClick={() => getYoutubeTranscription('')}>
                                     Submit
                                 </Button>
                             </InputRightElement>

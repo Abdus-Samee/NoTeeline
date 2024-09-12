@@ -42,7 +42,7 @@ const Home = () => {
       flexDirection='column'
       align='center'
       justify='center'
-      style={{ marginTop: '20vh', }}
+      style={{ marginTop: '15vh', }}
     >
       <Box mb={10} style={{ fontWeight: '600', fontSize: '18px', }}>
         <Typewriter
@@ -61,7 +61,7 @@ const Home = () => {
         boxShadow='lg'
       >
         <Box textAlign='center'>
-          <Heading color='#4338CA'>NoTeeline</Heading>
+          <Heading color='#54432C'>NoTeeline</Heading>
         </Box>
         <Box my={4} textAlign='center'>
           <form>

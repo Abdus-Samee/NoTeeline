@@ -4,12 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@langchain/openai": "^0.0.2",
+    "axios": "^1.7.7",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "youtube-transcript": "^1.0.6",
-    "@langchain/openai": "^0.0.2",
-    "langchain": "^0.0.207"
+    "langchain": "^0.0.207",
+    "youtube-transcript": "^1.0.6"
   },
   "resolutions": {
     "@langchain/core": "0.1.5"

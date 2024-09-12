@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { 
   Button, 
   useDisclosure,
@@ -24,6 +24,7 @@ import Onboarding from './components/Onboarding'
 import CornellNote from './components/CornellNote'
 
 import { Note_t, useNoteStore } from './state/noteStore'
+import { getDemoNote } from './utils/loadDemoNote'
 import logo from './assets/images/logo.png'
 import './App.css'
 
@@ -35,8 +36,6 @@ const App_c = () => {
     removeNote: state.removeNote,
     fetchNote: state.fetchNote
   }))
-
-  
   const [name, setName] = useState<string>('')
   const [active, setActive] = useState<string>('')
   const [showLeftPane, setShowLeftPane] = useState(true)
@@ -60,6 +59,16 @@ const App_c = () => {
   
   const { isOpen, onOpen, onClose } = useDisclosure()
   const toast = useToast()
+
+  useEffect(() => {
+    let note: Note_t = fetchNote("Demo Note")
+    // adding the demo note to localStorage while loading the component
+    // if it's already not added
+    if(!note){
+      note = getDemoNote()
+      addNote(note)
+    }
+  }, [])
 
   const saveNote = () => {
     if(name === '') {
@@ -177,8 +186,8 @@ const App_c = () => {
         </div>
         <ul>
           <a 
-            onClick={() => handleOption('onboarding')} 
             className={active === 'onboarding' ? 'active-tab' : ''}
+            onClick={() => handleOption('onboarding')}
           >
             <li style={{ cursor: 'pointer', }}>Onboarding Session</li>
           </a>
