@@ -2,24 +2,24 @@
 
 import React, { useState, useEffect, useRef, } from 'react'
 import { Box, Heading, Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, theme, keyframes } from '@chakra-ui/react'
-import { 
-    SunIcon, 
-    ChevronRightIcon, 
-    ChevronLeftIcon, 
-    TimeIcon, 
-    DragHandleIcon, 
-    CalendarIcon, 
-    ArrowBackIcon, 
-    ArrowForwardIcon, 
+import {
+    SunIcon,
+    ChevronRightIcon,
+    ChevronLeftIcon,
+    TimeIcon,
+    DragHandleIcon,
+    CalendarIcon,
+    ArrowBackIcon,
+    ArrowForwardIcon,
     DownloadIcon,
     EditIcon,
     HamburgerIcon,
- } from '@chakra-ui/icons'
+} from '@chakra-ui/icons'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
 
 import { NotePoint, TranscriptLine, useNoteStore, Note_t } from '../state/noteStore'
-import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint, expandPointWithTranscript, generatepointsummary} from '../utils/helper'
+import { openai, expandPoint, getFormattedPromptString, callGPT, generateQuiz, generateTheme, callGPTForSinglePoint, expandPointWithTranscript, generatepointsummary } from '../utils/helper'
 import BulletPoint from './BulletPoint'
 import Quiz, { Quiz_t } from './Quiz'
 
@@ -37,7 +37,7 @@ type bulletObject = {
     expand: number;
     compress: number;
     history: string[];
-    edit: {e_point: string, e_time: number, }[][];
+    edit: { e_point: string, e_time: number, }[][];
     state: number; // 0 for stable, 1 for expanding/reducing
     tempString: string; // string during streamlined output
     totalString: string;
@@ -49,7 +49,7 @@ let previousTime: number = 0
 let forwardCount: number = 0
 let reverseCount: number = 0
 
-const CornellNote: React.FC<NoteProps> = ({name, note }) => {
+const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
     const { updateNote, addYouTubeId, startRecording, addTranscription, computeButtonClick, fetchButtonStats, addSummary, addSummary_P } = useNoteStore((state) => ({
         updateNote: state.updateNote,
         addYouTubeId: state.addYouTubeId,
@@ -95,15 +95,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const [videoWidth, setVideoWidth] = useState<string>('70vw')
     const [videoHeight, setVideoHeight] = useState<string>('50vh')
     const [opts, setOpts] = useState<any>({
-      height: '400',
-      width: '80%',
-      frameborder: '0',
-      playerVars: { autoplay: 0, },
+        height: '400',
+        width: '80%',
+        frameborder: '0',
+        playerVars: { autoplay: 0, },
     })
 
     const ref = useRef(null)
     const toast = useToast()
-    let timeoutHandle : any
+    let timeoutHandle: any
     /*const opts = {
         // height: '705',
         // width: '1254',
@@ -116,7 +116,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }*/
 
     const js_sleep = (ms: number | undefined) => {
-      return new Promise((resolve) => setTimeout(resolve, ms)) 
+        return new Promise((resolve) => setTimeout(resolve, ms))
     }
 
     //const OPEN_AI_KEY = "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"
@@ -124,89 +124,89 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const SLEEP_DELAY = 150
 
     const streamViewHelper = (index: number, text: string) => {
-      const newPoints = [...bulletPoints]
-      newPoints[index].tempString = text
-      if(index === 0) console.log(`Sent => ${text}`)
-      setBulletPoints(newPoints)
+        const newPoints = [...bulletPoints]
+        newPoints[index].tempString = text
+        if (index === 0) console.log(`Sent => ${text}`)
+        setBulletPoints(newPoints)
     }
 
-    const genResponses = async (points: {point: string, history: string[], expand: number, created_at: number, utc_time: number, }[], transcription: TranscriptLine[]) => {
-    const promptString = getFormattedPromptString()
-    const responses = await Promise.all(
-      points.map(async (point, idx) => {
-        try{
-          if(point.history.length > point.expand){
-            console.log(`${point.history.length}, ${point.expand}`)
-          }else{
-            const pointToBeExpanded = point.history[point.expand - 1]
-            const expandedPoint = expandPoint({point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
-            const transcript = expandedPoint.transcript.join(".")
-            const PROMPT = "Expand the provided keypoint into a one sentence note.\n" +
-                "Transcript: ..." + transcript + "...\n"+
-                "Keypoint: "+expandedPoint.point+"\n"+
-                "Note:"
+    const genResponses = async (points: { point: string, history: string[], expand: number, created_at: number, utc_time: number, }[], transcription: TranscriptLine[]) => {
+        const promptString = getFormattedPromptString()
+        const responses = await Promise.all(
+            points.map(async (point, idx) => {
+                try {
+                    if (point.history.length > point.expand) {
+                        console.log(`${point.history.length}, ${point.expand}`)
+                    } else {
+                        const pointToBeExpanded = point.history[point.expand - 1]
+                        const expandedPoint = expandPoint({ point: pointToBeExpanded, created_at: point.created_at, utc_time: point.utc_time, }, transcription)
+                        const transcript = expandedPoint.transcript.join(".")
+                        const PROMPT = "Expand the provided keypoint into a one sentence note.\n" +
+                            "Transcript: ..." + transcript + "...\n" +
+                            "Keypoint: " + expandedPoint.point + "\n" +
+                            "Note:"
 
-          const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${OPEN_AI_KEY}`,
-            },
-            body: JSON.stringify({
-              model: 'gpt-4-1106-preview',
-              messages: [{ role: 'system', content: promptString}, { role: 'user', content: PROMPT }],
-              stream: true,
-              temperature: 0.5,
-            }),
-          })
+                        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${OPEN_AI_KEY}`,
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-4-1106-preview',
+                                messages: [{ role: 'system', content: promptString }, { role: 'user', content: PROMPT }],
+                                stream: true,
+                                temperature: 0.5,
+                            }),
+                        })
 
-          const reader = res.body.getReader()
-          const decoder = new TextDecoder('utf-8')
-          let response = ''
+                        const reader = res.body.getReader()
+                        const decoder = new TextDecoder('utf-8')
+                        let response = ''
 
-          while(true){
-            const chunk = await reader.read()
-            const { done, value } = chunk
-            if(done){
-              break
-            }
-            const decodedChunk = decoder.decode(value)
-            const lines = decodedChunk.split('\n')
-            const parsedLines = lines.map(line => line.replace(/^data: /, '').trim()).filter(line => line !== '' && line !== '[DONE]').map(line => JSON.parse(line))
+                        while (true) {
+                            const chunk = await reader.read()
+                            const { done, value } = chunk
+                            if (done) {
+                                break
+                            }
+                            const decodedChunk = decoder.decode(value)
+                            const lines = decodedChunk.split('\n')
+                            const parsedLines = lines.map(line => line.replace(/^data: /, '').trim()).filter(line => line !== '' && line !== '[DONE]').map(line => JSON.parse(line))
 
-            for (const parsedLine of parsedLines){
-              const { choices } = parsedLine
-              const { delta } = choices[0]
-              const { content } = delta
-              if(content){
-                response += content
-                //console.log(`response for prompt ${idx+1}: ${response}`)
-                streamViewHelper(idx, content)
-                await js_sleep(SLEEP_DELAY)
-              }
-            }
+                            for (const parsedLine of parsedLines) {
+                                const { choices } = parsedLine
+                                const { delta } = choices[0]
+                                const { content } = delta
+                                if (content) {
+                                    response += content
+                                    //console.log(`response for prompt ${idx+1}: ${response}`)
+                                    streamViewHelper(idx, content)
+                                    await js_sleep(SLEEP_DELAY)
+                                }
+                            }
 
-            //response += decodedChunk
-          }
-          return response
-         }
-        }catch(e){
-          console.log('Error ' + e)
-        }
-      })
-    )
-    
-    let rep: (string | undefined)[] = []
-    responses.forEach((response, index) => {
-      rep.push(response)
-      //console.log(`Response for prompt ${index+1} => ${response}`)
-    })
+                            //response += decodedChunk
+                        }
+                        return response
+                    }
+                } catch (e) {
+                    console.log('Error ' + e)
+                }
+            })
+        )
 
-    return rep
-  }
+        let rep: (string | undefined)[] = []
+        responses.forEach((response, index) => {
+            rep.push(response)
+            //console.log(`Response for prompt ${index+1} => ${response}`)
+        })
+
+        return rep
+    }
 
     const testDrive = async () => {
-      if(!expandButtonToggle){
+        if (!expandButtonToggle) {
             toast({
                 title: 'Expanding all the points...',
                 description: 'Please wait while we expand the bullet points',
@@ -215,7 +215,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 position: 'top-right',
                 isClosable: true,
             })
-        }else{
+        } else {
             toast({
                 title: 'Reducing all the points...',
                 description: 'Please wait while we reduce the bullet points',
@@ -227,64 +227,65 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }
 
         const newPoints = [...bulletPoints]
-        
-        if(!expandButtonToggle) newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
+
+        if (!expandButtonToggle) newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
         else newPoints.map((point: bulletObject) => point.expand = point.expand >= 1 ? point.expand - 1 : 0)
         newPoints.map((point: bulletObject) => point.state = 1)
-      const points = bulletPoints.map((point: bulletObject) => ({
+        const points = bulletPoints.map((point: bulletObject) => ({
             point: point.point,
             history: point.history,
             expand: point.expand,
             created_at: point.created_at,
             utc_time: point.utc_time,
-      }))
+        }))
 
-      setBulletPoints(newPoints)
-      console.log('expand button: ' + expandButtonToggle)
+        setBulletPoints(newPoints)
+        console.log('expand button: ' + expandButtonToggle)
 
-      if(!expandButtonToggle){
-        genResponses(points, transcription).then(res => {
-          //console.log(`Rep => ${res}`)
-          console.log('Done... ...')
-          const ret = newPoints.map((newPoint, idx) => {
-               let edit: {e_point: string, e_time: number, }[][] = [...newPoint.edit]
-               edit.push([])
-               edit[newPoint.expand].push({e_point: res[idx], e_time: Date.now()})
-               //console.log(`string for ${idx+1} => ${newPoint.tempString}`)
-               return {
-                ...newPoint,
-                history: [...newPoint.history, res[idx]],
-                edit: edit,
-                state: 0,
-                tempString: '',
-                totalString: '',
-               }
-          })
+        if (!expandButtonToggle) {
+            genResponses(points, transcription).then(res => {
+                //console.log(`Rep => ${res}`)
+                console.log('Done... ...')
+                const ret = newPoints.map((newPoint, idx) => {
+                    let edit: { e_point: string, e_time: number, }[][] = [...newPoint.edit]
+                    edit.push([])
+                    edit[newPoint.expand].push({ e_point: res[idx], e_time: Date.now() })
+                    //console.log(`string for ${idx+1} => ${newPoint.tempString}`)
+                    return {
+                        ...newPoint,
+                        history: [...newPoint.history, res[idx]],
+                        edit: edit,
+                        state: 0,
+                        tempString: '',
+                        totalString: '',
+                    }
+                })
 
-          setExpandButtonToggle(!expandButtonToggle)
-          setBulletPoints(ret)
-          computeButtonClick(newTitle, 'expand')
+                setExpandButtonToggle(!expandButtonToggle)
+                setBulletPoints(ret)
+                computeButtonClick(newTitle, 'expand')
 
-        })
-      }
+            })
+        }
     }
 
     useEffect(() => {
         console.log(window.innerWidth, window.innerHeight)
         const iw = window.innerWidth
-        //console.log('GPT4 key: ' + JSON.parse(localStorage.getItem('gptKey')))
 
-        /*if(iw > 2100){
-          setOpts((prev) => ({...prev, height: '750', width: '1800', })) // [2101, ...]
-        }else if(iw > 1900){
-          setOpts((prev) => ({...prev, height: '680', width: '1400', })) // [1901, 2100]
-        }else if(iw > 1568){
-          setOpts((prev) => ({...prev, height: '670', width: '1200', })) // [1569, 1900]
-        }else if(iw > 1070){
-          setOpts((prev) => ({...prev, height: '400', width: '720', })) // [1071, 1100]
-        }else if(iw > 899){
-          setOpts((prev) => ({...prev, height: '350', width: '700', })) // [900, 1070]
-        }*/
+        setOpts((prev: any) => ({...prev, height: 0.4559 * window.innerHeight, width: 0.5 * window.innerWidth, }))
+
+        // if(iw > 2100){
+        //   setOpts((prev) => ({...prev, height: '750', width: '1800', })) // [2101, ...]
+        // }else if(iw > 1900){
+        //   setOpts((prev) => ({...prev, height: '680', width: '1400', })) // [1901, 2100]
+        // }else if(iw > 1568){
+        //   setOpts((prev) => ({...prev, height: '670', width: '1200', })) // [1569, 1900]
+        // }else if(iw > 1070){
+        //   setOpts((prev) => ({...prev, height: '400', width: '720', })) // [1071, 1100]
+        // }else if(iw > 899){
+        //   setOpts((prev) => ({...prev, height: '350', width: '700', })) // [900, 1070]
+        // }
 
         setNewTitle(name)
         setMicronote(note.micronote)
@@ -301,23 +302,23 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             setEmbedId(note.ytId)
             setIsLink(true)
 
-            if(note?.transcription.length === 0){
+            if (note?.transcription.length === 0) {
                 getYoutubeTranscription(note.ytId);
             }
-        }else{
+        } else {
             setEmbedId('')
             setIsLink(false)
         }
 
-        if(note?.transcription){
+        if (note?.transcription) {
             setTranscription(note.transcription)
         }
 
-        if(note?.generatedSummary !== ''){
+        if (note?.generatedSummary !== '') {
             setSummary(note.generatedSummary)
         }
 
-        if(note?.generatedSummary_P !== ''){
+        if (note?.generatedSummary_P !== '') {
             setSummary_P(note.generatedSummary_P)
             setShowSummary(true)
         }
@@ -331,7 +332,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             expand: 0,
             compress: 0,
             history: [cont.point],
-            edit: [[{e_point: cont.point, e_time: cont.utc_time, }]],
+            edit: [[{ e_point: cont.point, e_time: cont.utc_time, }]],
             state: 0,
             tempString: '',
             totalString: '',
@@ -379,19 +380,19 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             const maxId = Math.max(...bulletPoints.map((point: bulletObject) => parseInt(point.id.split('-')[1])))
 
             updatedPoints.push(np)
-            
+
             updateNote(newTitle, updatedPoints)
             setBulletPoints([
-              ...bulletPoints,
-              {
-                ...np,
-                editable: false,
-                id: `bullet-${maxId}`,
-                expand: 0,
-                compress: 0,
-                history: [newPoint],
-                edit: [[{e_point: newPoint, e_time: time_now, }]],
-              },
+                ...bulletPoints,
+                {
+                    ...np,
+                    editable: false,
+                    id: `bullet-${maxId}`,
+                    expand: 0,
+                    compress: 0,
+                    history: [newPoint],
+                    edit: [[{ e_point: newPoint, e_time: time_now, }]],
+                },
             ])
             let pointStreams = JSON.parse(localStorage.getItem('pointStreams') ?? '""') //adding a stream tracker for a new point
             pointStreams.push('')
@@ -408,11 +409,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     //instantly changes an editable bullet point's state when typed on input
-    const changeEditPoint = (index : number, val : string) => {
+    const changeEditPoint = (index: number, val: string) => {
         // const newPoints = [...bulletPoints]
         // newPoints[index].point = val
         const newPoints = bulletPoints.map((bulletPoint, idx) => {
-            if(idx === index){
+            if (idx === index) {
                 let history = [...bulletPoint.history]
                 history[bulletPoint.expand] = val //changing the point itself
 
@@ -420,7 +421,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     ...bulletPoint,
                     history: history,
                 }
-            }else{
+            } else {
                 return bulletPoint
             }
         })
@@ -429,35 +430,35 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     //makes an editable bullet point to uneditable
-    const updateEditPoint = (index : number, event : React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const updateEditPoint = (index: number, event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter') {
             event.preventDefault()
             const newPoints = [...bulletPoints]
             newPoints[index].editable = false
             const latestEdit = newPoints[index].history[newPoints[index].expand]
-            newPoints[index].edit[newPoints[index].expand].push({e_point: latestEdit, e_time: Date.now()})
+            newPoints[index].edit[newPoints[index].expand].push({ e_point: latestEdit, e_time: Date.now() })
             setBulletPoints(newPoints)
-            updateNote(newTitle, bulletPoints.map((point: bulletObject) => ({point: point.point, created_at: point.created_at, utc_time: point.utc_time})))
+            updateNote(newTitle, bulletPoints.map((point: bulletObject) => ({ point: point.point, created_at: point.created_at, utc_time: point.utc_time })))
         }
     }
 
     const getYoutubeTranscription = (youtubeId: string = '') => {
         console.log(`youtubeid: ${youtubeId}`)
         let ytId = youtubeId
-        if(ytLink.includes('watch')){
+        if (ytLink.includes('watch')) {
             ytId = ytLink.split('v=')[1]
             setEmbedId(ytId)
             setIsLink(true)
-        }else if(ytLink.includes('youtu.be')){
+        } else if (ytLink.includes('youtu.be')) {
             ytId = ytLink.split('/')[3].split('?')[0]
             setEmbedId(ytId)
             setIsLink(true)
-        }else if(ytId === ''){
+        } else if (ytId === '') {
             alert('Invalid YouTube link!')
             // return
         }
 
-        if(youtubeId === '') addYouTubeId(name, ytId)
+        if (youtubeId === '') addYouTubeId(name, ytId)
 
         //https://noteeline-backend.onrender.com/youtube-transcript
         //http://localhost:3000/youtube-transcript
@@ -472,7 +473,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         }).then(res => res.json()).then(d => {
             console.log(d)
             setTranscription(d.transcript) //each transctiption => {start, duration, text}
-            if(!d.transcript){
+            if (!d.transcript) {
                 toast({
                     title: 'Warning',
                     description: 'The provided YouTube video does not have a transcription or has it disabled!',
@@ -480,9 +481,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     duration: 5000,
                     isClosable: true,
                 })
-            }else{
-                const resp: {text: string, start: number, duration: number}[] = d.transcript
-                const response = Array.isArray(resp) ? resp.map(({text, start, duration}) => ({
+            } else {
+                const resp: { text: string, start: number, duration: number }[] = d.transcript
+                const response = Array.isArray(resp) ? resp.map(({ text, start, duration }) => ({
                     text,
                     offset: start,
                     duration
@@ -499,7 +500,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 //generating summary from transcript
                 let tr = ''
                 const res_tr = response
-                for(let i = 0; i < res_tr.length; i++){
+                for (let i = 0; i < res_tr.length; i++) {
                     tr += res_tr[i].text
                 }
 
@@ -543,7 +544,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const time = e.target.getCurrentTime() // time: number
         const playerState = e.target.getPlayerState() //playerState: number
 
-        if(playerState === 1){
+        if (playerState === 1) {
             // let diffTime = time - playerTime
             setPlayerTime(time)
             // diffTime = parseFloat(diffTime.toFixed(2))
@@ -551,18 +552,18 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             const D = time - previousTime
             previousTime = time
             const epsilon = 2
-            if(Math.abs(D) > epsilon){
-                if(D > 0){
+            if (Math.abs(D) > epsilon) {
+                if (D > 0) {
                     forwardCount += 1
                     // console.log(`forwardCount: ${forwardCount}, ${D}`)
                 }
-                else{
+                else {
                     reverseCount += 1
                     // console.log(`reverseCount: ${reverseCount}, ${D}`)
                 }
             }
             // console.log(time)
-        }else if(playerState === 2){
+        } else if (playerState === 2) {
             // console.log('paused')
         }
         timeoutHandle = window.setTimeout(() => handleVideoStateChange(e), 1000)
@@ -584,7 +585,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     //expand all points at a time
     const expandNote = async () => {
-        if(!expandButtonToggle){
+        if (!expandButtonToggle) {
             toast({
                 title: 'Expanding all the points...',
                 description: 'Please wait while we expand the bullet points',
@@ -593,7 +594,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 position: 'top-right',
                 isClosable: true,
             })
-        }else{
+        } else {
             toast({
                 title: 'Reducing all the points...',
                 description: 'Please wait while we reduce the bullet points',
@@ -607,10 +608,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         // setExpanding(0)
 
         const newPoints = [...bulletPoints]
-        
-        if(!expandButtonToggle) newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
+
+        if (!expandButtonToggle) newPoints.map((point: bulletObject) => point.expand = point.expand + 1)
         else newPoints.map((point: bulletObject) => point.expand = point.expand >= 1 ? point.expand - 1 : 0)
-        
+
         const points = bulletPoints.map((point: bulletObject) => ({
             point: point.point,
             history: point.history,
@@ -622,9 +623,9 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         setBulletPoints(newPoints)
         console.log('expand button: ' + expandButtonToggle)
 
-        if(!expandButtonToggle){
+        if (!expandButtonToggle) {
             callGPT(points, transcription).then(res => {
-                if(res){
+                if (res) {
                     /*toast({
                         title: 'Done expanding...',
                         status: 'info',
@@ -632,14 +633,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                         position: 'top-right',
                         isClosable: true,
                     })*/
-    
+
                     const ret = newPoints.map((newPoint, idx) => {
-                        if(res[idx].old){
+                        if (res[idx].old) {
                             return newPoint
-                        }else{
-                            let edit: {e_point: string, e_time: number, }[][] = [...newPoint.edit]
+                        } else {
+                            let edit: { e_point: string, e_time: number, }[][] = [...newPoint.edit]
                             edit.push([])
-                            edit[newPoint.expand].push({e_point: res[idx].expansion, e_time: Date.now()})
+                            edit[newPoint.expand].push({ e_point: res[idx].expansion, e_time: Date.now() })
                             return {
                                 ...newPoint,
                                 history: [...newPoint.history, res[idx].expansion],
@@ -647,22 +648,22 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             }
                         }
                     })
-                    
+
                     setExpandButtonToggle(!expandButtonToggle)
                     setBulletPoints(ret)
                     computeButtonClick(newTitle, 'expand')
 
                     // ripple effect of expansion onto the themes if they exist
-                    if(themes.length > 0){
-                        const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, index: number) => {
-                            if(theme['type'] === 'point'){
+                    if (themes.length > 0) {
+                        const newThemes = themes.map((theme: { type: string, val: string, editable: boolean }, index: number) => {
+                            if (theme['type'] === 'point') {
                                 const val = theme['val']
                                 const idxVal = newPoints.findIndex((point: bulletObject) => point.point === val)
                                 return {
                                     ...theme,
                                     val: ret[idxVal].history[ret[idxVal].expand]
                                 }
-                            }else{
+                            } else {
                                 return theme
                             }
                         })
@@ -673,7 +674,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     }
                     // console.log(res)
                     // setExpandButtonToggle(!expandButtonToggle)
-                }else{
+                } else {
                     toast({
                         title: 'Error...',
                         description: 'Error in expanding the bullet point',
@@ -694,7 +695,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 //     isClosable: true,
                 // })
             })
-        }else{
+        } else {
             toast({
                 title: 'Done reducing...',
                 status: 'info',
@@ -704,16 +705,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             })
 
             // ripple effect of expansion onto the themes if they exist
-            if(themes.length > 0){
-                const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, index: number) => {
-                    if(theme['type'] === 'point'){
+            if (themes.length > 0) {
+                const newThemes = themes.map((theme: { type: string, val: string, editable: boolean }, index: number) => {
+                    if (theme['type'] === 'point') {
                         const val = theme['val']
-                        const idxVal = newPoints.findIndex((point: bulletObject) => point.history[point.expand+1] === val)
+                        const idxVal = newPoints.findIndex((point: bulletObject) => point.history[point.expand + 1] === val)
                         return {
                             ...theme,
                             val: newPoints[idxVal].history[newPoints[idxVal].expand]
                         }
-                    }else{
+                    } else {
                         return theme
                     }
                 })
@@ -746,11 +747,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         setExpandQuizSection(!expandQuizSection)
     }
 
-    const reorderThemes = (list: {type: string, val: string}[], startIndex: number, endIndex: number) => {
+    const reorderThemes = (list: { type: string, val: string }[], startIndex: number, endIndex: number) => {
         const result = Array.from(list)
         const [removed] = result.splice(startIndex, 1)
         result.splice(endIndex, 0, removed)
-      
+
         return result
     }
 
@@ -758,7 +759,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const result = Array.from(list)
         const [removed] = result.splice(startIndex, 1)
         result.splice(endIndex, 0, removed)
-      
+
         return result
     }
 
@@ -767,15 +768,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         // dropped outside the list
         if (!result.destination) {
-          return
+            return
         }
-    
+
         const items = reorderThemes(
-          themes,
-          result.source.index,
-          result.destination.index
+            themes,
+            result.source.index,
+            result.destination.index
         )
-    
+
         setThemes(items)
     }
 
@@ -784,15 +785,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         // dropped outside the list
         if (!result.destination) {
-          return
+            return
         }
-    
+
         const items = reorder(
-          bulletPoints,
-          result.source.index,
-          result.destination.index
+            bulletPoints,
+            result.source.index,
+            result.destination.index
         )
-    
+
         setBulletPoints(items)
     }
 
@@ -806,13 +807,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         borderRadius: '10px',
         // change background colour if dragging
         background: isDragging ? "lightgreen" : "#FFF",
-      
+
         // styles we need to apply on draggables
         ...draggableStyle
     })
 
     const handleContextMenu = (e: any) => {
-        if(micronote){
+        if (micronote) {
             e.preventDefault()
             e.stopPropagation()
         }
@@ -844,7 +845,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const pointToBeUpdated = newPoints[draggingIndex]
 
         expandSinglePoint(pointToBeUpdated.history[pointToBeUpdated.expand], pointToBeUpdated.created_at, pointToBeUpdated.utc_time).then(res => {
-            if(res){
+            if (res) {
                 /*toast({
                     title: 'Done',
                     status: 'info',
@@ -854,24 +855,24 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 })*/
                 const editTime = Date.now()
                 newPoints = bulletPoints.map((bp, idx) => {
-                    if(idx === draggingIndex){
+                    if (idx === draggingIndex) {
                         let edit = [...bp.edit]
                         edit.push([])
-                        edit[bp.expand].push({e_point: res, e_time: editTime})
+                        edit[bp.expand].push({ e_point: res, e_time: editTime })
                         return {
                             ...bp,
                             history: [...bp.history, res],
                             edit: edit,
                         }
-                    }else{
+                    } else {
                         return bp
                     }
-                
+
                 })
                 setDraggingIndex(-1)
                 setInitialY(0)
                 setBulletPoints(() => newPoints)
-            }else{
+            } else {
                 toast({
                     title: 'Error...',
                     description: 'Error in expanding the bullet point',
@@ -887,14 +888,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     const callGPTForSinglePointFromComponent = async (point: NotePoint, transcription: TranscriptLine[], index: number) => {
         const expandedPoint = expandPoint(point, transcription)
         const transcript = expandedPoint.transcript.join(".")
-        
+
         const promptString = getFormattedPromptString()
-    
+
         const PROMPT = promptString +
-                "Transcript: ..."+transcript+"...\n"+
-                "Summary: "+expandedPoint.point+"\n"+
-                "Note:"
-    
+            "Transcript: ..." + transcript + "...\n" +
+            "Summary: " + expandedPoint.point + "\n" +
+            "Note:"
+
         const res = await openai.chat.completions.create({
             messages: [{ role: "system", content: PROMPT }],
             model: "gpt-3.5-turbo",
@@ -902,7 +903,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             // seed: SEED,
             temperature: 0.2,
         })
-    
+
         for await (const chunk of res) {
             console.log(`Point ${index}: ${chunk.choices[0]?.delta?.content}` || "")
             addToPointStream(index, chunk.choices[0]?.delta?.content || "")
@@ -915,7 +916,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         // console.log(pointStreams)
         const pointStreams = JSON.parse(localStorage.getItem('pointStreams') ?? '""')
         const pointStream = pointStreams[index]
-        if(pointStream === ''){
+        if (pointStream === '') {
             // console.log('empty stream for ' + index)
             setDraggingIndex(-1)
             setInitialY(0)
@@ -924,7 +925,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         pointStreams[index] += chunk
         localStorage.setItem('pointStreams', JSON.stringify(pointStreams))
         console.log(pointStreams)
-        
+
         // const newPoints = bulletPoints.map((bp, idx) => {
         //     if(idx === index){
         //         let hst = [...bp.history]
@@ -941,16 +942,16 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         //     }else{
         //         return bp
         //     }
-        
+
         // })
         // setBulletPoints(() => newPoints)
-        
+
         setBulletPoints(prevPoints => {
             let newPoints = [...prevPoints]
             let hst = [...newPoints[index].history]
-            if(pointStream === ''){
+            if (pointStream === '') {
                 hst = [...hst, pointStreams[index]]
-            }else{
+            } else {
                 hst[index] = pointStreams[index]
             }
             newPoints[index].history = hst
@@ -983,7 +984,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         //     }else{
         //         return bp
         //     }
-        
+
         // })
         // setBulletPoints(() => updatedPoints)
     }
@@ -994,15 +995,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             const finalY = e.clientY
 
             //too short displacement
-            if(Math.abs(finalY - initialY) < 30) return
+            if (Math.abs(finalY - initialY) < 30) return
 
             const isUpwards: boolean = finalY < initialY
-            
-            const newPoints = [...bulletPoints]
-            if(isUpwards) newPoints[draggingIndex].expand = newPoints[draggingIndex].expand + 1
-            else newPoints[draggingIndex].expand = Math.max(0, newPoints[draggingIndex].expand -1)
 
-            if(!isUpwards){
+            const newPoints = [...bulletPoints]
+            if (isUpwards) newPoints[draggingIndex].expand = newPoints[draggingIndex].expand + 1
+            else newPoints[draggingIndex].expand = Math.max(0, newPoints[draggingIndex].expand - 1)
+
+            if (!isUpwards) {
                 toast({
                     title: 'Compressing...',
                     description: 'Please wait while we compress the bullet point',
@@ -1015,7 +1016,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                 setDraggingIndex(-1)
                 setInitialY(0)
                 setBulletPoints(newPoints)
-            }else{
+            } else {
                 toast({
                     title: 'Expanding...',
                     description: 'Please wait while we expand the bullet point',
@@ -1025,11 +1026,11 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                     isClosable: true,
                 })
 
-                if(newPoints[draggingIndex].history.length > newPoints[draggingIndex].expand){
+                if (newPoints[draggingIndex].history.length > newPoints[draggingIndex].expand) {
                     setDraggingIndex(-1)
                     setInitialY(0)
                     setBulletPoints(newPoints)
-                }else{
+                } else {
                     openAIHelper(newPoints)
                     // newOpenAIHelper(newPoints)
                 }
@@ -1053,10 +1054,10 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const constructThemesToShow = (obj: { [key: string]: string[] }) => {
-        let themes: {type: string, val: string, editable: boolean}[] = []
-        for(const [topic, points] of Object.entries(obj)){
-            themes.push({type: 'topic', val: topic, editable: false, })
-            themes.push(...points.map((point: string) => ({type: 'point', val: point, editable: false, })))
+        let themes: { type: string, val: string, editable: boolean }[] = []
+        for (const [topic, points] of Object.entries(obj)) {
+            themes.push({ type: 'topic', val: topic, editable: false, })
+            themes.push(...points.map((point: string) => ({ type: 'point', val: point, editable: false, })))
         }
         return themes
     }
@@ -1074,7 +1075,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         const newPoints: string[] = bulletPoints.map((bulletPoint, index) => {
             return `${index + 1}. ${bulletPoint.history[bulletPoint.expand]}`
         })
-        
+
         generateTheme(newPoints).then(res => {
             // console.log(res)
             const t = extractThemes(res)
@@ -1099,13 +1100,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const editTheme = (index: number) => {
-        const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, idx: number) => {
-            if(idx === index){
+        const newThemes = themes.map((theme: { type: string, val: string, editable: boolean }, idx: number) => {
+            if (idx === index) {
                 return {
                     ...theme,
                     editable: true,
                 }
-            }else{
+            } else {
                 return theme
             }
         })
@@ -1114,13 +1115,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const changeTheme = (index: number, val: string) => {
-        const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, idx: number) => {
-            if(idx === index){
+        const newThemes = themes.map((theme: { type: string, val: string, editable: boolean }, idx: number) => {
+            if (idx === index) {
                 return {
                     ...theme,
                     val: val,
                 }
-            }else{
+            } else {
                 return theme
             }
         })
@@ -1129,18 +1130,18 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     }
 
     const stopThemeEdit = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-        if(e.key === 'Enter'){
-            const newThemes = themes.map((theme: {type: string, val: string, editable: boolean}, idx: number) => {
-                if(idx === index){
+        if (e.key === 'Enter') {
+            const newThemes = themes.map((theme: { type: string, val: string, editable: boolean }, idx: number) => {
+                if (idx === index) {
                     return {
                         ...theme,
                         editable: false,
                     }
-                }else{
+                } else {
                     return theme
                 }
             })
-    
+
             setThemes(newThemes)
         }
     }
@@ -1156,15 +1157,15 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     const extractQuizzesInformation = (quizzesText: any) => {
         const quizRegex = /<Question>(.*?)<\/Question>\s*<Choice>(.*?)<\/Choice>\s*<Choice>(.*?)<\/Choice>\s*<Choice>(.*?)<\/Choice>\s*<Choice>(.*?)<\/Choice>\s*<Answer>(.*?)<\/Answer>/gs
-      
+
         const matches = Array.from(quizzesText.matchAll(quizRegex))
-      
+
         const quizzes = matches.map((match: any) => {
-          const [, question, option1, option2, option3, option4, answer] = match as any
-          const options = [option1, option2, option3, option4]
-          return { question, answer, options }
+            const [, question, option1, option2, option3, option4, answer] = match as any
+            const options = [option1, option2, option3, option4]
+            return { question, answer, options }
         })
-      
+
         return quizzes
     }
 
@@ -1181,7 +1182,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         const newPoints: string[] = bulletPoints.map((bulletPoint, index) => {
             return `${bulletPoint.history[bulletPoint.expand]}`
-        })    
+        })
 
         console.log(newPoints);
 
@@ -1205,7 +1206,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
     //summarizing using the whole transcription
     const handleSummary = () => {
-        if(summary !== ''){
+        if (summary !== '') {
             /*toast({
                 title: 'Summary already generated',
                 status: 'info',
@@ -1226,19 +1227,19 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         setShowSummary(!showSummary)
 
         let tr = ''
-        for(let i = 0; i < transcription.length; i++){
-          tr += transcription[i].text
+        for (let i = 0; i < transcription.length; i++) {
+            tr += transcription[i].text
         }
 
         //http://localhost:3000/fetch-summary
         fetch('https://noteeline-backend.onrender.com/fetch-summary', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            transcript: tr
-          }),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                transcript: tr
+            }),
         }).then(res => res.json()).then(data => {
             console.log('Summary:')
             console.log(data)
@@ -1264,13 +1265,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             isClosable: true
         })
         let expanded_points = []
-        for(let i = 0; i < bulletPoints.length; i++){
-            const point = {point: bulletPoints[i].history[bulletPoints[i].expand], created_at: bulletPoints[i].created_at, utc_time: bulletPoints[i].utc_time, }
+        for (let i = 0; i < bulletPoints.length; i++) {
+            const point = { point: bulletPoints[i].history[bulletPoints[i].expand], created_at: bulletPoints[i].created_at, utc_time: bulletPoints[i].utc_time, }
             expanded_points.push(expandPointWithTranscript(point, transcription))
         }
 
         let points_str = '';
-        for(let i = 0; i < expanded_points.length; i++){
+        for (let i = 0; i < expanded_points.length; i++) {
             points_str += `${expanded_points[i].point}`
         }
 
@@ -1301,13 +1302,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
     //download button-click stats
     const handleDownload = () => {
         const newPoints = bulletPoints.map((bulletPoint, idx) => {
-            const p = {point: bulletPoint.history[bulletPoint.expand], created_at: bulletPoint.created_at, utc_time: bulletPoint.utc_time, }
+            const p = { point: bulletPoint.history[bulletPoint.expand], created_at: bulletPoint.created_at, utc_time: bulletPoint.utc_time, }
             const expanded_p = expandPointWithTranscript(p, transcription)
             let note_taking_time = -1
-            if(idx === 0){
-                note_taking_time = bulletPoint.created_at*1000.0
-            }else{
-                note_taking_time = bulletPoint.utc_time - bulletPoints[idx-1].utc_time
+            if (idx === 0) {
+                note_taking_time = bulletPoint.created_at * 1000.0
+            } else {
+                note_taking_time = bulletPoint.utc_time - bulletPoints[idx - 1].utc_time
             }
 
             return {
@@ -1322,14 +1323,14 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
 
         const obj = fetchButtonStats(newTitle)
         const url = isLink ? `www.youtube.com/watch?v=${embedId}` : ''
-        let userLog: any = { 
-            buttonStats: obj, 
-            pauseCount: pauseCount, 
-            forwardCount: forwardCount, 
+        let userLog: any = {
+            buttonStats: obj,
+            pauseCount: pauseCount,
+            forwardCount: forwardCount,
             reverseCount: reverseCount,
             summary_t: summary,
             summary_p: summary_p,
-            url: url, 
+            url: url,
         }
         userLog.editHistory = newPoints
 
@@ -1351,7 +1352,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
         // if(info.qp === 100) setShowQuiz(!showQuiz)
         // console.log(info)
     }
-    
+
     return (
         <Grid
             h='137%'
@@ -1361,12 +1362,12 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
             sx={{ overflowX: 'hidden', }}
         >
             {/* YouTube video player */}
-            <button onClick={testDrive}>Test</button>
+            {/* <button onClick={testDrive}>Test</button> */}
             <GridItem rowSpan={6} colSpan={4} sx={{ borderBottom: '1px solid #000', }}>
                 {
                     !isLink ?
                         <InputGroup
-                            style={{ marginBottom: '5vh', width: '50%', marginLeft: '25%', marginTop: '1%', }}    
+                            style={{ marginBottom: '5vh', width: '50%', marginLeft: '25%', marginTop: '1%', }}
                         >
                             <Input
                                 placeholder='Enter a YouTube link...'
@@ -1380,7 +1381,7 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             </InputRightElement>
                         </InputGroup>
                         :
-                        <YouTube 
+                        <YouTube
                             ref={ref}
                             opts={opts}
                             videoId={embedId}
@@ -1388,184 +1389,13 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                             onPlay={() => setPause(false)}
                             onPause={countPause}
                             onEnd={stopVideo}
-                            style={{ marginTop: '0%',  marginLeft: '15%', }}
+                            style={{ marginTop: '0%', marginLeft: '15%', }}
                         />
                 }
             </GridItem>
             {
                 expandQuizSection ?
-                <GridItem rowSpan={7} colSpan={4} sx={{ padding: '10px', overflowY: 'auto', borderRight: '1px solid #000', }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                        {showQuiz !== 0 ?
-                            <div></div> :
-                            <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
-                                <TagLabel>Cue Questions</TagLabel>
-                                <TagRightIcon as={SunIcon} />
-                            </Tag>
-                        }
-                        <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
-                    </div>
-                    <br/>
-                    {
-                        showQuiz === 2 ?
-                        quizzes && quizzes.length > 0 ?
-                            <Quiz quizzes={quizzes} quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
-                            :
-                            <p>No quizzes to show !</p>
-                        :
-                        showQuiz === 1 ?
-                        <p>Loading quizzes...</p>
-                        :
-                        <p>No quizzes to show !</p>
-                    }
-                </GridItem>
-                :
-                expandSection || !micronote?
-                <GridItem rowSpan={7} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
-                    <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
-                        {micronote && <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />}
-                        {
-                            micronote && 
-                            <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                                <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
-                                <TagRightIcon w={3} as={ArrowBackIcon} />
-                                <TagRightIcon w={3} as={ArrowForwardIcon} />
-                            </Tag>
-                        }
-                        {
-                            micronote && (
-                            themeOrTime === 'theme' ?
-                            <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
-                                <TagLabel>Order by Theme</TagLabel>
-                                <TagRightIcon as={DragHandleIcon} />
-                            </Tag>
-                            :
-                            <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
-                                <TagLabel>Order by Time</TagLabel>
-                                <TagRightIcon as={TimeIcon} />
-                            </Tag>
-                            )
-                        }
-                        {/* <Tag size='lg' variant='solid' colorScheme='blue' sx={{ padding: '0', marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
-                            <TagRightIcon as={DownloadIcon} />
-                        </Tag> */}
-                    </div>
-                    {themeOrTime !== 'time' ?
-                    <DragDropContext onDragEnd={onDragEnd}>
-                        <Droppable droppableId="droppable">
-                        {(provided: any) => (
-                            <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                                // style={getListStyle(snapshot.isDraggingOver)}
-                            >
-                            {bulletPoints.map((bulletPoint, index) => (
-                                <Draggable key={bulletPoint.id} draggableId={bulletPoint.id} index={index}>
-                                {(provided: any, snapshot: any) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={getBulletPointStyle(
-                                            snapshot.isDragging,
-                                            provided.draggableProps.style
-                                        )}
-                                        onContextMenu={handleContextMenu}
-                                        onMouseDown={(e) => handleMouseDown(e, index)}
-                                        onMouseUp={handleMouseUp}
-                                    >
-                                        {
-                                            !bulletPoint.editable ?
-                                            <BulletPoint
-                                                key={index}
-                                                index={index}
-                                                expand={bulletPoint.expand}
-                                                history={bulletPoint.history}
-                                                created_at={bulletPoint.created_at}
-                                                editPoint={editPoint}
-                                                state={bulletPoint.state}
-                                                tempString={bulletPoint.tempString}
-                                            />
-                                            :
-                                            <textarea
-                                                // type='text'
-                                                defaultValue={bulletPoint.point}
-                                                className='note-input'
-                                                onChange={(e) => changeEditPoint(index, e.target.value)}
-                                                onKeyDown={event => updateEditPoint(index, event)}
-                                                rows={Math.max(Math.ceil(bulletPoint.point.length / 200), 1)}
-                                            />
-                                        }
-                                    </div>
-                                )}
-                                </Draggable>
-                            ))}                            
-                            {provided.placeholder}
-                            </div>
-                        )}
-                        </Droppable>
-                    </DragDropContext>
-                    :
-                    <DragDropContext onDragEnd={onDrageEndThemes}>
-                        <Droppable droppableId="droppable">
-                        {(provided: any) => (
-                            <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                                // style={getListStyle(snapshot.isDraggingOver)}
-                            >
-                            {themes.map((theme: any, index: any) => (
-                                <Draggable key={theme['val']} draggableId={theme['val']} index={index}>
-                                {(provided: any, snapshot: any) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        style={getBulletPointStyle(
-                                            snapshot.isDragging,
-                                            provided.draggableProps.style
-                                        )}
-                                        onContextMenu={handleContextMenu}
-                                        onMouseDown={(e) => handleMouseDown(e, index)}
-                                        onMouseUp={handleMouseUp}
-                                    >
-                                        {theme['type'] === 'topic' ?
-                                            !theme['editable'] ?
-                                            <h4 style={{ color: '#000', fontWeight: 'bold', }}>
-                                                {theme['val']} <EditIcon w={4} color='green.500' style={{ cursor: 'pointer', }} onClick={() => editTheme(index)} />
-                                            </h4>
-                                            :
-                                            <input 
-                                                type='text'
-                                                defaultValue={theme['val']}
-                                                onChange={(e) => changeTheme(index, e.target.value)}
-                                                onKeyDown={(e) => stopThemeEdit(e, index)}
-                                            />
-                                            :
-                                            <p>{theme['val']}</p>
-                                        }
-                                    </div>
-                                )}
-                                </Draggable>
-                            ))}                             
-                            {provided.placeholder}
-                            </div>
-                        )}
-                        </Droppable>
-                    </DragDropContext>
-                    }
-                    <input
-                        type='text'
-                        placeholder='Write a point...'
-                        className='note-input'
-                        value={newPoint}
-                        onChange={(e) => setNewPoint(e.target.value)}
-                        onKeyDown={event => handleKeyDown(event)}
-                    />
-                </GridItem>
-                :
-                <>
-                    <GridItem rowSpan={7} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                    <GridItem rowSpan={7} colSpan={4} sx={{ padding: '10px', overflowY: 'auto', borderRight: '1px solid #000', }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', }}>
                             {showQuiz !== 0 ?
                                 <div></div> :
@@ -1574,175 +1404,346 @@ const CornellNote: React.FC<NoteProps> = ({name, note }) => {
                                     <TagRightIcon as={SunIcon} />
                                 </Tag>
                             }
-                            <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
+                            <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
                         </div>
-                        <br/>
+                        <br />
                         {
                             showQuiz === 2 ?
-                            quizzes && quizzes.length > 0 ?
-                                <Quiz quizzes={quizzes} quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
+                                quizzes && quizzes.length > 0 ?
+                                    <Quiz quizzes={quizzes} quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
+                                    :
+                                    <p>No quizzes to show !</p>
                                 :
-                                <p>No quizzes to show !</p>
-                            :
-                            showQuiz === 1 ?
-                            <p>Loading quizzes...</p>
-                            :
-                            <p>No quizzes to show !</p>
+                                showQuiz === 1 ?
+                                    <p>Loading quizzes...</p>
+                                    :
+                                    <p>No quizzes to show !</p>
                         }
                     </GridItem>
-                    <GridItem rowSpan={5} colSpan={2} sx={{ padding: '2px', paddingTop: '0', overflowY: 'auto', }}>
-                        <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
-                            <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
-                            {
-                                micronote &&
-                                <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
-                                    <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
-                                    <TagRightIcon w={3} as={ArrowBackIcon} />
-                                    <TagRightIcon w={3} as={ArrowForwardIcon} />
-                                </Tag>
-                            }
-                            {
-                                themeOrTime === 'theme'?
-                                <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
-                                    <TagLabel>Order by Theme</TagLabel>
-                                    <TagRightIcon as={DragHandleIcon} />
-                                </Tag>
+                    :
+                    expandSection || !micronote ?
+                        <GridItem rowSpan={7} colSpan={4} sx={{ padding: '3px', paddingTop: '0', overflowY: 'auto', }}>
+                            <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
+                                {micronote && <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />}
+                                {
+                                    micronote &&
+                                    <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                                        <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
+                                        <TagRightIcon w={3} as={ArrowBackIcon} />
+                                        <TagRightIcon w={3} as={ArrowForwardIcon} />
+                                    </Tag>
+                                }
+                                {
+                                    micronote && (
+                                        themeOrTime === 'theme' ?
+                                            <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
+                                                <TagLabel>Order by Theme</TagLabel>
+                                                <TagRightIcon as={DragHandleIcon} />
+                                            </Tag>
+                                            :
+                                            <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
+                                                <TagLabel>Order by Time</TagLabel>
+                                                <TagRightIcon as={TimeIcon} />
+                                            </Tag>
+                                    )
+                                }
+                                {/* <Tag size='lg' variant='solid' colorScheme='blue' sx={{ padding: '0', marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
+                            <TagRightIcon as={DownloadIcon} />
+                        </Tag> */}
+                            </div>
+                            {themeOrTime !== 'time' ?
+                                <DragDropContext onDragEnd={onDragEnd}>
+                                    <Droppable droppableId="droppable">
+                                        {(provided: any) => (
+                                            <div
+                                                {...provided.droppableProps}
+                                                ref={provided.innerRef}
+                                            // style={getListStyle(snapshot.isDraggingOver)}
+                                            >
+                                                {bulletPoints.map((bulletPoint, index) => (
+                                                    <Draggable key={bulletPoint.id} draggableId={bulletPoint.id} index={index}>
+                                                        {(provided: any, snapshot: any) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                style={getBulletPointStyle(
+                                                                    snapshot.isDragging,
+                                                                    provided.draggableProps.style
+                                                                )}
+                                                                onContextMenu={handleContextMenu}
+                                                                onMouseDown={(e) => handleMouseDown(e, index)}
+                                                                onMouseUp={handleMouseUp}
+                                                            >
+                                                                {
+                                                                    !bulletPoint.editable ?
+                                                                        <BulletPoint
+                                                                            key={index}
+                                                                            index={index}
+                                                                            expand={bulletPoint.expand}
+                                                                            history={bulletPoint.history}
+                                                                            created_at={bulletPoint.created_at}
+                                                                            editPoint={editPoint}
+                                                                            state={bulletPoint.state}
+                                                                            tempString={bulletPoint.tempString}
+                                                                        />
+                                                                        :
+                                                                        <textarea
+                                                                            // type='text'
+                                                                            defaultValue={bulletPoint.point}
+                                                                            className='note-input'
+                                                                            onChange={(e) => changeEditPoint(index, e.target.value)}
+                                                                            onKeyDown={event => updateEditPoint(index, event)}
+                                                                            rows={Math.max(Math.ceil(bulletPoint.point.length / 200), 1)}
+                                                                        />
+                                                                }
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                ))}
+                                                {provided.placeholder}
+                                            </div>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
                                 :
-                                <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
-                                    <TagLabel>Order by Time</TagLabel>
-                                    <TagRightIcon as={TimeIcon} />
-                                </Tag>
+                                <DragDropContext onDragEnd={onDrageEndThemes}>
+                                    <Droppable droppableId="droppable">
+                                        {(provided: any) => (
+                                            <div
+                                                {...provided.droppableProps}
+                                                ref={provided.innerRef}
+                                            // style={getListStyle(snapshot.isDraggingOver)}
+                                            >
+                                                {themes.map((theme: any, index: any) => (
+                                                    <Draggable key={theme['val']} draggableId={theme['val']} index={index}>
+                                                        {(provided: any, snapshot: any) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                style={getBulletPointStyle(
+                                                                    snapshot.isDragging,
+                                                                    provided.draggableProps.style
+                                                                )}
+                                                                onContextMenu={handleContextMenu}
+                                                                onMouseDown={(e) => handleMouseDown(e, index)}
+                                                                onMouseUp={handleMouseUp}
+                                                            >
+                                                                {theme['type'] === 'topic' ?
+                                                                    !theme['editable'] ?
+                                                                        <h4 style={{ color: '#000', fontWeight: 'bold', }}>
+                                                                            {theme['val']} <EditIcon w={4} color='green.500' style={{ cursor: 'pointer', }} onClick={() => editTheme(index)} />
+                                                                        </h4>
+                                                                        :
+                                                                        <input
+                                                                            type='text'
+                                                                            defaultValue={theme['val']}
+                                                                            onChange={(e) => changeTheme(index, e.target.value)}
+                                                                            onKeyDown={(e) => stopThemeEdit(e, index)}
+                                                                        />
+                                                                    :
+                                                                    <p>{theme['val']}</p>
+                                                                }
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                ))}
+                                                {provided.placeholder}
+                                            </div>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
                             }
-                            {/* <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
+                            <input
+                                type='text'
+                                placeholder='Write a point...'
+                                className='note-input'
+                                value={newPoint}
+                                onChange={(e) => setNewPoint(e.target.value)}
+                                onKeyDown={event => handleKeyDown(event)}
+                            />
+                        </GridItem>
+                        :
+                        <>
+                            <GridItem rowSpan={7} colSpan={2} sx={{ padding: '2px', overflowY: 'auto', borderRight: '1px solid #000', }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', }}>
+                                    {showQuiz !== 0 ?
+                                        <div></div> :
+                                        <Tag size='lg' variant='solid' colorScheme='teal' sx={{ cursor: 'pointer', }} onClick={handleQuiz}>
+                                            <TagLabel>Cue Questions</TagLabel>
+                                            <TagRightIcon as={SunIcon} />
+                                        </Tag>
+                                    }
+                                    <ChevronLeftIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />
+                                </div>
+                                <br />
+                                {
+                                    showQuiz === 2 ?
+                                        quizzes && quizzes.length > 0 ?
+                                            <Quiz quizzes={quizzes} quizInfo={quizInfo} changeQuizInfo={changeQuizInfo} />
+                                            :
+                                            <p>No quizzes to show !</p>
+                                        :
+                                        showQuiz === 1 ?
+                                            <p>Loading quizzes...</p>
+                                            :
+                                            <p>No quizzes to show !</p>
+                                }
+                            </GridItem>
+                            <GridItem rowSpan={5} colSpan={2} sx={{ padding: '2px', paddingTop: '0', overflowY: 'auto', }}>
+                                <div style={{ paddingTop: '1px', position: 'sticky', top: 0, zIndex: 1, background: '#fff', }}>
+                                    <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
+                                    {
+                                        micronote &&
+                                        <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                                            <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
+                                            <TagRightIcon w={3} as={ArrowBackIcon} />
+                                            <TagRightIcon w={3} as={ArrowForwardIcon} />
+                                        </Tag>
+                                    }
+                                    {
+                                        themeOrTime === 'theme' ?
+                                            <Tag size='lg' variant='solid' colorScheme='red' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={handleTheme}>
+                                                <TagLabel>Order by Theme</TagLabel>
+                                                <TagRightIcon as={DragHandleIcon} />
+                                            </Tag>
+                                            :
+                                            <Tag size='lg' variant='solid' colorScheme='green' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleSort}>
+                                                <TagLabel>Order by Time</TagLabel>
+                                                <TagRightIcon as={TimeIcon} />
+                                            </Tag>
+                                    }
+                                    {/* <Tag size='lg' variant='solid' colorScheme='blue' sx={{ marginLeft: '1px', marginBottom: '1vh', cursor: 'pointer', }} onClick={handleDownload}>
                                 <TagRightIcon as={DownloadIcon} />
                             </Tag> */}
-                        </div>
-                        {themeOrTime !== 'time' ?
-                        <DragDropContext onDragEnd={onDragEnd}>
-                            <Droppable droppableId="droppable">
-                            {(provided: any) => (
-                                <div
-                                {...provided.droppableProps}
-                                ref={provided.innerRef}
-                                // style={getListStyle(snapshot.isDraggingOver)}
-                                >
-                                {bulletPoints.map((bulletPoint, index) => (
-                                    <Draggable key={bulletPoint.id} draggableId={bulletPoint.id} index={index}>
-                                    {(provided: any, snapshot: any) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            style={getBulletPointStyle(
-                                                snapshot.isDragging,
-                                                provided.draggableProps.style
-                                            )}
-                                            onContextMenu={handleContextMenu}
-                                            onMouseDown={(e) => handleMouseDown(e, index)}
-                                            onMouseUp={handleMouseUp}
-                                        >
-                                            {
-                                                !bulletPoint.editable ?
-                                                <BulletPoint
-                                                    key={index}
-                                                    index={index}
-                                                    expand={bulletPoint.expand}
-                                                    history={bulletPoint.history}
-                                                    created_at={bulletPoint.created_at}
-                                                    editPoint={editPoint}
-                                                    state={bulletPoint.state}
-                                                    tempString={bulletPoint.tempString}
-                                                />
-                                                :
-                                                <textarea
-                                                    // type='text'
-                                                    defaultValue={bulletPoint.history[bulletPoint.expand]}
-                                                    className='note-input'
-                                                    onChange={(e) => changeEditPoint(index, e.target.value)}
-                                                    onKeyDown={event => updateEditPoint(index, event)}
-                                                    rows={Math.max(Math.ceil(bulletPoint.point.length / 100), 1)}
-                                                />
-                                            }
-                                        </div>
-                                    )}
-                                    </Draggable>
-                                ))}
-                                {provided.placeholder}
                                 </div>
-                            )}
-                            </Droppable>
-                        </DragDropContext>
-                        :
-                        <DragDropContext onDragEnd={onDrageEndThemes}>
-                            <Droppable droppableId="droppable">
-                            {(provided: any) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                    // style={getListStyle(snapshot.isDraggingOver)}
-                                >
-                                {themes.map((theme: any, index: any) => (
-                                    <Draggable key={theme['val']} draggableId={theme['val']} index={index}>
-                                    {(provided: any, snapshot: any) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            style={getBulletPointStyle(
-                                                snapshot.isDragging,
-                                                provided.draggableProps.style
+                                {themeOrTime !== 'time' ?
+                                    <DragDropContext onDragEnd={onDragEnd}>
+                                        <Droppable droppableId="droppable">
+                                            {(provided: any) => (
+                                                <div
+                                                    {...provided.droppableProps}
+                                                    ref={provided.innerRef}
+                                                // style={getListStyle(snapshot.isDraggingOver)}
+                                                >
+                                                    {bulletPoints.map((bulletPoint, index) => (
+                                                        <Draggable key={bulletPoint.id} draggableId={bulletPoint.id} index={index}>
+                                                            {(provided: any, snapshot: any) => (
+                                                                <div
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.draggableProps}
+                                                                    {...provided.dragHandleProps}
+                                                                    style={getBulletPointStyle(
+                                                                        snapshot.isDragging,
+                                                                        provided.draggableProps.style
+                                                                    )}
+                                                                    onContextMenu={handleContextMenu}
+                                                                    onMouseDown={(e) => handleMouseDown(e, index)}
+                                                                    onMouseUp={handleMouseUp}
+                                                                >
+                                                                    {
+                                                                        !bulletPoint.editable ?
+                                                                            <BulletPoint
+                                                                                key={index}
+                                                                                index={index}
+                                                                                expand={bulletPoint.expand}
+                                                                                history={bulletPoint.history}
+                                                                                created_at={bulletPoint.created_at}
+                                                                                editPoint={editPoint}
+                                                                                state={bulletPoint.state}
+                                                                                tempString={bulletPoint.tempString}
+                                                                            />
+                                                                            :
+                                                                            <textarea
+                                                                                // type='text'
+                                                                                defaultValue={bulletPoint.history[bulletPoint.expand]}
+                                                                                className='note-input'
+                                                                                onChange={(e) => changeEditPoint(index, e.target.value)}
+                                                                                onKeyDown={event => updateEditPoint(index, event)}
+                                                                                rows={Math.max(Math.ceil(bulletPoint.point.length / 100), 1)}
+                                                                            />
+                                                                    }
+                                                                </div>
+                                                            )}
+                                                        </Draggable>
+                                                    ))}
+                                                    {provided.placeholder}
+                                                </div>
                                             )}
-                                            onContextMenu={handleContextMenu}
-                                            onMouseDown={(e) => handleMouseDown(e, index)}
-                                            onMouseUp={handleMouseUp}
-                                        >
-                                            {theme['type'] === 'topic' ?
-                                                !theme['editable'] ?
-                                                <h4 style={{ color: '#000', fontWeight: 'bold', }}>
-                                                    {theme['val']} <EditIcon w={4} color='green.500' style={{ cursor: 'pointer', }} onClick={() => editTheme(index)} />
-                                                </h4>
-                                                :
-                                                <input 
-                                                    type='text'
-                                                    defaultValue={theme['val']}
-                                                    onChange={(e) => changeTheme(index, e.target.value)}
-                                                    onKeyDown={(e) => stopThemeEdit(e, index)}
-                                                />
-                                                :
-                                                <p>{theme['val']}</p>
-                                            }
-                                        </div>
-                                    )}
-                                    </Draggable>
-                                ))}                             
-                                {provided.placeholder}
-                                </div>
-                            )}
-                            </Droppable>
-                        </DragDropContext>
-                        }
-                        <input
-                            type='text'
-                            placeholder='Write a point...'
-                            className='note-input'
-                            value={newPoint}
-                            onChange={(e) => setNewPoint(e.target.value)}
-                            onKeyDown={event => handleKeyDown(event)}
-                        />
-                    </GridItem>
-                </>
+                                        </Droppable>
+                                    </DragDropContext>
+                                    :
+                                    <DragDropContext onDragEnd={onDrageEndThemes}>
+                                        <Droppable droppableId="droppable">
+                                            {(provided: any) => (
+                                                <div
+                                                    {...provided.droppableProps}
+                                                    ref={provided.innerRef}
+                                                // style={getListStyle(snapshot.isDraggingOver)}
+                                                >
+                                                    {themes.map((theme: any, index: any) => (
+                                                        <Draggable key={theme['val']} draggableId={theme['val']} index={index}>
+                                                            {(provided: any, snapshot: any) => (
+                                                                <div
+                                                                    ref={provided.innerRef}
+                                                                    {...provided.draggableProps}
+                                                                    {...provided.dragHandleProps}
+                                                                    style={getBulletPointStyle(
+                                                                        snapshot.isDragging,
+                                                                        provided.draggableProps.style
+                                                                    )}
+                                                                    onContextMenu={handleContextMenu}
+                                                                    onMouseDown={(e) => handleMouseDown(e, index)}
+                                                                    onMouseUp={handleMouseUp}
+                                                                >
+                                                                    {theme['type'] === 'topic' ?
+                                                                        !theme['editable'] ?
+                                                                            <h4 style={{ color: '#000', fontWeight: 'bold', }}>
+                                                                                {theme['val']} <EditIcon w={4} color='green.500' style={{ cursor: 'pointer', }} onClick={() => editTheme(index)} />
+                                                                            </h4>
+                                                                            :
+                                                                            <input
+                                                                                type='text'
+                                                                                defaultValue={theme['val']}
+                                                                                onChange={(e) => changeTheme(index, e.target.value)}
+                                                                                onKeyDown={(e) => stopThemeEdit(e, index)}
+                                                                            />
+                                                                        :
+                                                                        <p>{theme['val']}</p>
+                                                                    }
+                                                                </div>
+                                                            )}
+                                                        </Draggable>
+                                                    ))}
+                                                    {provided.placeholder}
+                                                </div>
+                                            )}
+                                        </Droppable>
+                                    </DragDropContext>
+                                }
+                                <input
+                                    type='text'
+                                    placeholder='Write a point...'
+                                    className='note-input'
+                                    value={newPoint}
+                                    onChange={(e) => setNewPoint(e.target.value)}
+                                    onKeyDown={event => handleKeyDown(event)}
+                                />
+                            </GridItem>
+                        </>
             }
             {/* Summarization */}
-            <GridItem rowSpan={5} colSpan={4}  sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
+            <GridItem rowSpan={5} colSpan={4} sx={{ padding: '2px', borderTop: '1px solid #000', overflowY: 'auto', }}>
                 <Tag size='lg' variant='solid' colorScheme='cyan' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={noteTranscriptSummary}>
                     <TagLabel>Summary</TagLabel>
                     <TagRightIcon as={CalendarIcon} />
                 </Tag>
-                {showSummary && 
-                    (micronote ? 
-                    <div style={{ padding: '1vw', }}>{summary_p}</div>
-                    :
-                    <div style={{ padding: '1vw', }}>{summary}</div>)
+                {showSummary &&
+                    (micronote ?
+                        <div style={{ padding: '1vw', }}>{summary_p}</div>
+                        :
+                        <div style={{ padding: '1vw', }}>{summary}</div>)
                 }
             </GridItem>
         </Grid>
