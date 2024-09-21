@@ -205,6 +205,7 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         return rep
     }
 
+    // streaming openai exapnsion outputs for all points
     const testDrive = async () => {
         if (!expandButtonToggle) {
             toast({
@@ -245,7 +246,7 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         if (!expandButtonToggle) {
             genResponses(points, transcription).then(res => {
                 //console.log(`Rep => ${res}`)
-                console.log('Done... ...')
+                console.log('Done expanding ...')
                 const ret = newPoints.map((newPoint, idx) => {
                     let edit: { e_point: string, e_time: number, }[][] = [...newPoint.edit]
                     edit.push([])
@@ -1427,7 +1428,7 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                                 {micronote && <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandSection} />}
                                 {
                                     micronote &&
-                                    <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                                    <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={testDrive}>
                                         <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
                                         <TagRightIcon w={3} as={ArrowBackIcon} />
                                         <TagRightIcon w={3} as={ArrowForwardIcon} />
@@ -1596,7 +1597,7 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                                     <ChevronRightIcon w={8} h={8} color="tomato" sx={{ cursor: 'pointer', }} onClick={toggleExpandQuizSection} />
                                     {
                                         micronote &&
-                                        <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={expandNote}>
+                                        <Tag size='lg' variant='solid' colorScheme='yellow' sx={{ marginLeft: '1px', cursor: 'pointer', }} onClick={testDrive}>
                                             <TagLabel>{expandButtonToggle ? 'Reduce' : 'Expand'}</TagLabel>
                                             <TagRightIcon w={3} as={ArrowBackIcon} />
                                             <TagRightIcon w={3} as={ArrowForwardIcon} />
