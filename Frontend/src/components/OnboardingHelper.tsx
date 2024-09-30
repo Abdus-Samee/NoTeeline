@@ -4,6 +4,7 @@ import YouTube from 'react-youtube'
 
 type OnboardingHelperProps = {
     index: number,
+    firstPoint: any,
     videoSrc: any,
     handleNoteChange: (count: number, input: string) => void,
     setInput: (count: number, input: string) => void,
@@ -12,7 +13,7 @@ type OnboardingHelperProps = {
     getSpecificOnboarding: any,
 }
 
-const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, videoSrc, handleNoteChange, setInput, handleKeyDown, updateInput, getSpecificOnboarding}: OnboardingHelperProps) => {
+const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, firstPoint, videoSrc, handleNoteChange, setInput, handleKeyDown, updateInput, getSpecificOnboarding}: OnboardingHelperProps) => {
     const [newPoint, setNewPoint] = useState<string>('')
     const [note, setNote] = useState<string>('')
     const [inputList, setInputList] = useState<string[]>([])
@@ -22,7 +23,9 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, videoSrc, han
         const obj = getSpecificOnboarding(index)
         if(obj !== null){
             setNote(obj.note)
-            setInputList(obj.keypoints)
+            const kp = obj.keypoints
+            if(kp.length > 0) setInputList(kp)
+            else setInputList([firstPoint])
         }
     }, [])
 

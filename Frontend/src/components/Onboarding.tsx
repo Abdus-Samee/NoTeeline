@@ -20,17 +20,10 @@ const Onboarding: React.FC = () => {
     const [inputList, setInputList] = useState<string[][]>([[], [], []])
     const [storedOnboardings, setStoredOnboardings] = useState<any>(null)
 
-    const toast = useToast()
-
-    useEffect(() => {
-      const onboardings = fetchAllOnboardings()
-      setStoredOnboardings(() => onboardings)
-      console.log('Fetched stored onboardings...')
-    }, [])
-
     let onboardingSections = [
         {
             videoSrc: comparisonVideo,
+            firstPoint: 'btm wheel',
             transcript: "look at something basic like meta Quest 3 has this little wheel on the " + 
                 "bottom that you can use to adjust the Optics inside well Apple didn't want to " +
                 "put this little physical wheel that you have to manually do instead there are " + 
@@ -48,6 +41,7 @@ const Onboarding: React.FC = () => {
         // },
         {
             videoSrc: mitochondriaVideo,
+            firstPoint: 'ATP',
             transcript: "mitochondria. Here, food is converted into chemical energy called ATP. ATP is released by " + 
             "the mitochondria,  so cells can use it. Mitochondria consists of two membranes, an outer membrane separating " + 
             "it from  the cytosol, and an inner membrane surrounding the so called matrix. The area between these  membranes is " + 
@@ -56,11 +50,20 @@ const Onboarding: React.FC = () => {
         },
         {
             videoSrc: tedxVideo,
+            firstPoint: 'motivation fickle',
             transcript: "Why does motivation seem so fickle? And what even is it in the first place? Psychologists define motivation as " + 
             "the desire or impetus to initiate and maintain a particular behavior. In other words, it's the energy that drives you to do something. " + 
             "And knowing the source of that drive is particularly important when it comes to understanding how to maintain it.",
         },
     ]
+
+    const toast = useToast()
+
+    useEffect(() => {
+      const onboardings = fetchAllOnboardings()
+      setStoredOnboardings(() => onboardings)
+      console.log('Fetched stored onboardings...')
+    }, [])
 
     const getSpecificOnboarding = (idx: number) => {
       return storedOnboardings.length > 0 ? storedOnboardings[idx] : null
@@ -152,7 +155,7 @@ const Onboarding: React.FC = () => {
             const onboardingSectionObj: OnboardingSection = {
                 id: index,
                 note: note,
-                keypoints: inputList,
+                keypoints: inputList.length > 0 ? inputList : [onboardingSections[index].firstPoint],
                 transcript: onboardingSection.transcript,
             }
             addOnboarding(onboardingSectionObj)
@@ -204,6 +207,7 @@ const Onboarding: React.FC = () => {
                   <OnboardingHelper 
                       key={index}
                       index={index}
+                      firstPoint={onboardingSection.firstPoint}
                       videoSrc={onboardingSection.videoSrc}
                       handleNoteChange={handleNoteChange}
                       setInput={setInput}
