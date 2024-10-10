@@ -4,5 +4,6 @@
 *.csv
 *.txt
 *.xlsx
+**.crt
 node_modules
 !DataAnalysis/mcurves/*.pdf
