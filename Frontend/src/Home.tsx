@@ -1,30 +1,25 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   FormControl,
-  FormLabel,
-  FormErrorMessage,
   FormHelperText,
   Button,
   Input,
   Flex,
-  Spacer,
   Box,
   Heading,
   Text,
-  useToast,
 } from '@chakra-ui/react'
-import { InfoOutlineIcon } from '@chakra-ui/icons'
+import { InfoOutlineIcon, WarningTwoIcon } from '@chakra-ui/icons'
 import { Typewriter } from 'react-simple-typewriter'
 
 const Home = () => {
   const [gptKey, setGptKey] = useState<string>('')
   const [errorMsg, setErrorMsg] = useState<string>('')
 
-  const toast = useToast()
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault()
     console.log(gptKey)
     if(gptKey === ''){
@@ -54,6 +49,7 @@ const Home = () => {
       </Box>
       <Box
         p={8}
+        mb={8}
         minWidth='25vw'
         maxWidth='30vw'
         borderWidth={1}
@@ -97,6 +93,9 @@ const Home = () => {
           </Text>
         </Box>
       </Box>
+      <Text fontSize='xs' color='#54432C' as='b'>
+        <WarningTwoIcon /> The website might not always be up and running
+      </Text>
     </Flex>
    )
 }
