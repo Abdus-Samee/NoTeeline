@@ -473,8 +473,8 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
             }),
         }).then(res => res.json()).then(d => {
             console.log(d)
-            setTranscription(d.transcript) //each transctiption => {start, duration, text}
-            if (!d.transcript) {
+            setTranscription(d) //each transctiption => {start, duration, text}
+            if (!d) {
                 toast({
                     title: 'Warning',
                     description: 'The provided YouTube video does not have a transcription or has it disabled!',
