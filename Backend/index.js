@@ -19,7 +19,7 @@ app.get('/test/:videoId', async (req, res) => {
     const videoId = req.params.videoId;
 
     try{
-        const response = await axios.get(`https://hppnkk4o5araiwaxeg5ppegzbe0fzkzf.lambda-url.us-east-2.on.aws/?video_id=${videoId}`);
+        const response = await axios.get(`https://noteeline-apis.vercel.app/transcript/${videoId}`);
         res.json(response.data);
     } catch (error) {
         res.status(500).json({ error: `Problem with request: ${error.message}` });
