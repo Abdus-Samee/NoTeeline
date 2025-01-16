@@ -52,7 +52,7 @@ app.post('/youtube-transcript', async (req, res) => {
         if (ytLink) {
             const videoId = getYouTubeVideoID(ytLink); 
             try{
-                const response = await axios.get(`https://hppnkk4o5araiwaxeg5ppegzbe0fzkzf.lambda-url.us-east-2.on.aws/?video_id=${videoId}`);
+                const response = await axios.get(`https://noteeline-apis.vercel.app/transcript/${videoId}`);
                 res.json(response.data);
             } catch (error) {
                 res.status(500).json({ error: `Problem with request: ${error.message}` });
