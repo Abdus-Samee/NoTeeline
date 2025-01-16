@@ -489,6 +489,15 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                     offset: start,
                     duration
                 })) : []
+                const response2 = d.map(({ text, start, duration }) => ({
+                    text,
+                    offset: start,
+                    duration
+                }))
+
+                console.log ( response )
+                console.log ( response2 )
+                
                 addTranscription(name, response)
                 setTranscription(response)
                 //toast({
