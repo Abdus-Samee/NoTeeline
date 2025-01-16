@@ -472,8 +472,8 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                 ytLink: `https://www.youtube.com/watch?v=${ytId}`,
             }),
         }).then(res => res.json()).then(d => {
-            console.log(d)
-            setTranscription(d) //each transctiption => {start, duration, text}
+            console.log(d) //each transctiption => {start, duration, text}
+            // setTranscription(d)
             if (!d) {
                 toast({
                     title: 'Warning',
@@ -483,13 +483,14 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                     isClosable: true,
                 })
             } else {
-                const resp: { text: string, start: number, duration: number }[] = d.transcript
+                const resp: { text: string, start: number, duration: number }[] = d
                 const response = Array.isArray(resp) ? resp.map(({ text, start, duration }) => ({
                     text,
                     offset: start,
                     duration
                 })) : []
                 addTranscription(name, response)
+                setTranscription(response)
                 //toast({
                 //    title: 'Transcription completed! Generating summary...',
                 //    description: 'Your transcription is ready!',
