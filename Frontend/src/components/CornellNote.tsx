@@ -153,7 +153,7 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                                 Authorization: `Bearer ${OPEN_AI_KEY}`,
                             },
                             body: JSON.stringify({
-                                model: 'gpt-4-1106-preview',
+                                model: 'gpt-4-turbo',
                                 messages: [{ role: 'system', content: promptString }, { role: 'user', content: PROMPT }],
                                 stream: true,
                                 seed: 1,
