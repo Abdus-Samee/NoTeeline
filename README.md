@@ -1,4 +1,4 @@
-# AI-Quick-Note
+# NoTeeline: Supporting Real-Time, Personalized Notetaking with LLM-Enhanced Micronotes
 
   
 
