@@ -4,7 +4,7 @@
 
 ## Local Development
  - Clone the repo using the following command:
-	`$ git clone https://github.com/oaishi/AI-Quick-Note.git`
+	`$ git clone https://github.com/oaishi/NoTeeline.git`
 - If *npm* is the desired package manager, then just replace the command:
 	- `yarn` with the command `npm install`
 	- `yarn dev` with the command `npm run dev`
