@@ -156,6 +156,7 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                                 model: 'gpt-4-1106-preview',
                                 messages: [{ role: 'system', content: promptString }, { role: 'user', content: PROMPT }],
                                 stream: true,
+                                seed: 1,
                                 temperature: 0.5,
                             }),
                         })
