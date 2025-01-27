@@ -26,3 +26,4 @@
 ## News
 - `[28-01-2025]` The micronotes can be expanded using the openai api which produces streamlined real-time output
 - `[28-01-2025]` A personal openai api key is to be provided in the landing page of NoTeeline for the app to work
+- `[28-01-2025]` NoTeeline got featured in huggingface, [link](https://huggingface.co/papers/2409.16493)
