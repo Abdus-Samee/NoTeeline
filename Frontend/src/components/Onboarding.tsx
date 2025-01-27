@@ -31,14 +31,6 @@ const Onboarding: React.FC = () => {
                 "then adjust them the lenses so it matches you perfectly for the first time that " + 
                 "you put it on",
         },
-        // {
-        //     videoSrc: cookingVideo,
-        //     transcript: "the base of this recipe consists of only two ingredients just like my favorite " + 
-        //     "drink water now we're gonna take two cups or around 500 milliliters of whipping cream and pour " + 
-        //     "that into a bowl and get our motorized blendicles working at somewhere between three and forty " + 
-        //     "five thousand rpms if you don't like holding things and you don't have a stand mixer you can make " + 
-        //     "a duct tape mixer instead or you can use a whisk if you want to turn your bicep into a thick",
-        // },
         {
             videoSrc: mitochondriaVideo,
             firstPoint: 'ATP',
@@ -136,7 +128,6 @@ const Onboarding: React.FC = () => {
                         return [...list, input]
                     }else return list
                 })
-                // setInputList(updatedList)
             }
         }
 
@@ -197,10 +188,6 @@ const Onboarding: React.FC = () => {
 
     return (
         <div className='onboarding-ui'>
-            {/*<h1 className='note-title'>
-                Onboarding Session
-                <hr style={{ width: '75%', border: '1px dashed #566949' }} />
-            </h1>*/}
             {
               storedOnboardings !== null ?
               onboardingSections.map((onboardingSection, index) => (

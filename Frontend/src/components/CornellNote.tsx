@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import React, { useState, useEffect, useRef, } from 'react'
-import { Box, Heading, Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, theme, keyframes } from '@chakra-ui/react'
+import { Grid, GridItem, Tag, TagRightIcon, TagLabel, Button, InputGroup, Input, InputRightElement, useToast, theme, keyframes } from '@chakra-ui/react'
 import {
     SunIcon,
     ChevronRightIcon,
@@ -11,9 +11,7 @@ import {
     CalendarIcon,
     ArrowBackIcon,
     ArrowForwardIcon,
-    DownloadIcon,
     EditIcon,
-    HamburgerIcon,
 } from '@chakra-ui/icons'
 import YouTube from 'react-youtube'
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd"
@@ -43,8 +41,6 @@ type bulletObject = {
     totalString: string;
 }
 
-// let chunks : any[] = []
-// let audioURL : string
 let previousTime: number = 0
 let forwardCount: number = 0
 let reverseCount: number = 0
@@ -64,15 +60,11 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
     const [bulletPoints, setBulletPoints] = useState<bulletObject[]>([])
     const [newPoint, setNewPoint] = useState<string>('')
     const [newTitle, setNewTitle] = useState<string>('')
-    // const [editTitle, setEditTitle] = useState<boolean>(false)
-    // const [recording, setRecording] = useState<any>(null)
     const [ytLink, setYtLink] = useState<string>('')
     const [embedId, setEmbedId] = useState<string>('')
     const [isLink, setIsLink] = useState<boolean>(false)
     const [transcription, setTranscription] = useState<TranscriptLine[]>([]) //yt transcription
     const [playerTime, setPlayerTime] = useState<number>(0) //time of the yt player at any instant
-    // const [expandedNotes, setExpandedNotes] = useState<ExpandedNote[]>([]) //expanded notes [{point, expansion}]
-    // const [expanding, setExpanding] = useState<number>(-1) //-1: not expanding, 0: expanding, 1: expanded
     const [, setPause] = useState<boolean>(false)
     const [expandSection, setExpandSection] = useState<boolean>(true) //show only note section by default
     const [expandQuizSection, setExpandQuizSection] = useState<boolean>(false)
@@ -89,11 +81,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
     const [quizInfo, setQuizInfo] = useState<any>(null)
     const [themes, setThemes] = useState<any>([])
     const [pauseCount, setPauseCount] = useState<number>(0)
-    // const [forwardCount, setForwardCount] = useState<number>(0)
-    // const [reverseCount, setReverseCount] = useState<number>(0)
-    // const [pointStreams, setPointStreams] = useState<string[]>([])
-    const [videoWidth, setVideoWidth] = useState<string>('70vw')
-    const [videoHeight, setVideoHeight] = useState<string>('50vh')
     const [opts, setOpts] = useState<any>({
         height: '400',
         width: '80%',
@@ -104,22 +91,11 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
     const ref = useRef(null)
     const toast = useToast()
     let timeoutHandle: any
-    /*const opts = {
-        // height: '705',
-        // width: '1254',
-        height: videoHeight,
-        width: videoHeight,
-        frameborder: '0',
-        playerVars: {
-            autoplay: 0,
-        },
-    }*/
 
     const js_sleep = (ms: number | undefined) => {
         return new Promise((resolve) => setTimeout(resolve, ms))
     }
 
-    //const OPEN_AI_KEY = "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"
     const OPEN_AI_KEY = JSON.parse(localStorage.getItem('gptKey'))
     const SLEEP_DELAY = 150
 
@@ -181,13 +157,11 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                                 const { content } = delta
                                 if (content) {
                                     response += content
-                                    //console.log(`response for prompt ${idx+1}: ${response}`)
                                     streamViewHelper(idx, content)
                                     await js_sleep(SLEEP_DELAY)
                                 }
                             }
 
-                            //response += decodedChunk
                         }
                         return response
                     }
@@ -200,7 +174,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         let rep: (string | undefined)[] = []
         responses.forEach((response, index) => {
             rep.push(response)
-            //console.log(`Response for prompt ${index+1} => ${response}`)
         })
 
         return rep
@@ -246,13 +219,11 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
 
         if (!expandButtonToggle) {
             genResponses(points, transcription).then(res => {
-                //console.log(`Rep => ${res}`)
                 console.log('Done expanding ...')
                 const ret = newPoints.map((newPoint, idx) => {
                     let edit: { e_point: string, e_time: number, }[][] = [...newPoint.edit]
                     edit.push([])
                     edit[newPoint.expand].push({ e_point: res[idx], e_time: Date.now() })
-                    //console.log(`string for ${idx+1} => ${newPoint.tempString}`)
                     return {
                         ...newPoint,
                         history: [...newPoint.history, res[idx]],
@@ -276,18 +247,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         const iw = window.innerWidth
 
         setOpts((prev: any) => ({...prev, height: 0.4559 * window.innerHeight, width: 0.5 * window.innerWidth, }))
-
-        // if(iw > 2100){
-        //   setOpts((prev) => ({...prev, height: '750', width: '1800', })) // [2101, ...]
-        // }else if(iw > 1900){
-        //   setOpts((prev) => ({...prev, height: '680', width: '1400', })) // [1901, 2100]
-        // }else if(iw > 1568){
-        //   setOpts((prev) => ({...prev, height: '670', width: '1200', })) // [1569, 1900]
-        // }else if(iw > 1070){
-        //   setOpts((prev) => ({...prev, height: '400', width: '720', })) // [1071, 1100]
-        // }else if(iw > 899){
-        //   setOpts((prev) => ({...prev, height: '350', width: '700', })) // [900, 1070]
-        // }
 
         setNewTitle(name)
         setMicronote(note.micronote)
@@ -412,8 +371,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
 
     //instantly changes an editable bullet point's state when typed on input
     const changeEditPoint = (index: number, val: string) => {
-        // const newPoints = [...bulletPoints]
-        // newPoints[index].point = val
         const newPoints = bulletPoints.map((bulletPoint, idx) => {
             if (idx === index) {
                 let history = [...bulletPoint.history]
@@ -462,8 +419,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
 
         if (youtubeId === '') addYouTubeId(name, ytId)
 
-        //https://noteeline-backend.onrender.com/youtube-transcript
-        //http://localhost:3000/youtube-transcript
         fetch('https://noteeline-backend.onrender.com/youtube-transcript', {
             method: 'POST',
             headers: {
@@ -474,7 +429,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
             }),
         }).then(res => res.json()).then(d => {
             console.log(d) //each transctiption => {start, duration, text}
-            // setTranscription(d)
             if (!d) {
                 toast({
                     title: 'Warning',
@@ -501,13 +455,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                 
                 addTranscription(name, response)
                 setTranscription(response)
-                //toast({
-                //    title: 'Transcription completed! Generating summary...',
-                //    description: 'Your transcription is ready!',
-                //    status: 'success',
-                //    duration: 5000,
-                //    isClosable: true,
-                //})
 
                 //generating summary from transcript
                 let tr = ''
@@ -530,16 +477,8 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                     console.log(data)
                     setSummary(data.response)
                     addSummary(newTitle, data.response)
-                    /*toast({
-                        title: 'Summarization completed',
-                        status: 'success',
-                        duration: 2000,
-                        position: 'top-right',
-                        isClosable: true
-                    })*/
                 }).catch(e => console.log(e))
             }
-            // console.log(data.response)
         }).catch(err => {
             console.log(err)
             toast({
@@ -557,26 +496,18 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         const playerState = e.target.getPlayerState() //playerState: number
 
         if (playerState === 1) {
-            // let diffTime = time - playerTime
             setPlayerTime(time)
-            // diffTime = parseFloat(diffTime.toFixed(2))
-            // console.log(diffTime)
             const D = time - previousTime
             previousTime = time
             const epsilon = 2
             if (Math.abs(D) > epsilon) {
                 if (D > 0) {
                     forwardCount += 1
-                    // console.log(`forwardCount: ${forwardCount}, ${D}`)
                 }
                 else {
                     reverseCount += 1
-                    // console.log(`reverseCount: ${reverseCount}, ${D}`)
                 }
             }
-            // console.log(time)
-        } else if (playerState === 2) {
-            // console.log('paused')
         }
         timeoutHandle = window.setTimeout(() => handleVideoStateChange(e), 1000)
     }
@@ -638,13 +569,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         if (!expandButtonToggle) {
             callGPT(points, transcription).then(res => {
                 if (res) {
-                    /*toast({
-                        title: 'Done expanding...',
-                        status: 'info',
-                        duration: 2000,
-                        position: 'top-right',
-                        isClosable: true,
-                    })*/
 
                     const ret = newPoints.map((newPoint, idx) => {
                         if (res[idx].old) {
@@ -698,14 +622,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                 }
             }).catch(() => {
                 console.log('Error calling GPT4: ')
-                // toast({
-                //     title: 'Error...',
-                //     description: 'Problem calling GPT-4...',
-                //     status: 'error',
-                //     duration: 2000,
-                //     position: 'top-right',
-                //     isClosable: true,
-                // })
             })
         } else {
             toast({
@@ -739,17 +655,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
             computeButtonClick(newTitle, 'expand')
         }
     }
-
-    //calling openai api when expanding a single point from another function
-    // const expandSinglePoint = async (point: string, created_at: number) => {
-    //     const obj = {
-    //         point: point,
-    //         created_at: created_at,
-    //     }
-
-    //     // const res = await callGPTForSinglePoint(obj, transcription)
-    //     // return res
-    // }
 
     const toggleExpandSection = () => {
         setExpandSection(!expandSection)
@@ -815,7 +720,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         userSelect: "none",
         padding: '1vw',
         margin: `0 0 1vh 0`,
-        // border: '1px solid #000',
         borderRadius: '10px',
         // change background colour if dragging
         background: isDragging ? "lightgreen" : "#FFF",
@@ -858,13 +762,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
 
         expandSinglePoint(pointToBeUpdated.history[pointToBeUpdated.expand], pointToBeUpdated.created_at, pointToBeUpdated.utc_time).then(res => {
             if (res) {
-                /*toast({
-                    title: 'Done',
-                    status: 'info',
-                    duration: 2000,
-                    position: 'top-right',
-                    isClosable: true,
-                })*/
                 const editTime = Date.now()
                 newPoints = bulletPoints.map((bp, idx) => {
                     if (idx === draggingIndex) {
@@ -925,11 +822,9 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
     }
 
     const addToPointStream = (index: number, chunk: any) => {
-        // console.log(pointStreams)
         const pointStreams = JSON.parse(localStorage.getItem('pointStreams') ?? '""')
         const pointStream = pointStreams[index]
         if (pointStream === '') {
-            // console.log('empty stream for ' + index)
             setDraggingIndex(-1)
             setInitialY(0)
         }
@@ -937,26 +832,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         pointStreams[index] += chunk
         localStorage.setItem('pointStreams', JSON.stringify(pointStreams))
         console.log(pointStreams)
-
-        // const newPoints = bulletPoints.map((bp, idx) => {
-        //     if(idx === index){
-        //         let hst = [...bp.history]
-        //         if(pointStream === ''){
-        //             hst = [...hst, pointStreams[idx]]
-        //         }else{
-        //             hst[index] = pointStreams[idx]
-        //         }
-
-        //         return {
-        //             ...bp,
-        //             history: hst,
-        //         }
-        //     }else{
-        //         return bp
-        //     }
-
-        // })
-        // setBulletPoints(() => newPoints)
 
         setBulletPoints(prevPoints => {
             let newPoints = [...prevPoints]
@@ -982,23 +857,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
         }
 
         await callGPTForSinglePointFromComponent(obj, transcription, draggingIndex)
-
-        // const updatedPoints = bulletPoints.map((bp, idx) => {
-        //     if(idx === index){
-        //         let edit = [...bp.edit]
-        //         edit.push([])
-        //         edit[bp.expand].push(newPointStreams[idx])
-        //         return {
-        //             ...bp,
-        //             history: [...bp.history, newPointStreams[idx]],
-        //             edit: edit,
-        //         }
-        //     }else{
-        //         return bp
-        //     }
-
-        // })
-        // setBulletPoints(() => updatedPoints)
     }
 
     const handleMouseUp = (e: any) => {
@@ -1044,7 +902,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
                     setBulletPoints(newPoints)
                 } else {
                     openAIHelper(newPoints)
-                    // newOpenAIHelper(newPoints)
                 }
             }
         }
@@ -1219,13 +1076,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
     //summarizing using the whole transcription
     const handleSummary = () => {
         if (summary !== '') {
-            /*toast({
-                title: 'Summary already generated',
-                status: 'info',
-                duration: 2000,
-                position: 'top-right',
-                isClosable: true
-            })*/
             return
         }
 
@@ -1257,13 +1107,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
             console.log(data)
             setSummary(data.response)
             addSummary(newTitle, data.response)
-            /*toast({
-              title: 'Summarization completed',
-              status: 'success',
-              duration: 2000,
-              position: 'top-right',
-              isClosable: true
-            })*/
         }).catch(e => console.log(e))
     }
 
@@ -1292,13 +1135,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
             setSummary_P(res)
             addSummary_P(newTitle, res)
             setShowSummary(true)
-            /*toast({
-                title: 'Summarization from points completed',
-                status: 'success',
-                duration: 2000,
-                position: 'top-right',
-                isClosable: true
-            })*/
         }).catch(e => {
             console.log(`Summary Point error: ${e}`)
             toast({
@@ -1361,8 +1197,6 @@ const CornellNote: React.FC<NoteProps> = ({ name, note }) => {
     //store state of quiz while changing panels
     const changeQuizInfo = (info: any) => {
         setQuizInfo(info)
-        // if(info.qp === 100) setShowQuiz(!showQuiz)
-        // console.log(info)
     }
 
     return (

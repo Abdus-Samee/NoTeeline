@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { Card, CardBody, Heading, Stack, StackDivider, Box, Textarea } from '@chakra-ui/react'
-import YouTube from 'react-youtube'
 
 type OnboardingHelperProps = {
     index: number,
@@ -19,7 +18,6 @@ const OnboardingHelper: React.FC<OnboardingHelperProps> = ({index, firstPoint, v
     const [inputList, setInputList] = useState<string[]>([])
 
     useEffect(() => {
-        // console.log(storedOnboarding)
         const obj = getSpecificOnboarding(index)
         if(obj !== null){
             setNote(obj.note)
