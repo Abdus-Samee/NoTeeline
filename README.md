@@ -21,3 +21,8 @@
  - Create a file named `.env` under the folder **Frontend**
  - Locate the file `.env.example` under the same folder and copy its contents to the file `.env` created earlier
  - Add the OpenAI key in the mentioned space inside `.env`
+
+
+## News
+- `[28-01-2025]` The micronotes can be expanded using the openai api which produces streamlined real-time output
+- `[28-01-2025]` A personal openai api key is to be provided in the landing page of NoTeeline for the app to work
