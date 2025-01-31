@@ -21,9 +21,9 @@ https://github.com/user-attachments/assets/9ab7edcc-3d8a-4030-a01f-6c076db3605e
 You can also find the long preview in <a target = "_blank" href = "https://www.youtube.com/watch?v=UUWTUbET86I">YouTube</a> for a better quality.
 
 ## 📰 News
-- `[28-01-2025]` The micronotes can be expanded using the openai api which produces streamlined real-time output
-- `[28-01-2025]` A personal openai api key is to be provided in the landing page of NoTeeline for the app to work
-- `[28-01-2025]` NoTeeline got featured in huggingface, [link](https://huggingface.co/papers/2409.16493)
+- `[28-01-2025]` The micronotes can be expanded using the OpenAI API which produces streamlined real-time output
+- `[28-01-2025]` A personal OpenAI API key is to be provided on the landing page of NoTeeline for the app to work
+- `[28-01-2025]` NoTeeline got featured in Huggingface, [link](https://huggingface.co/papers/2409.16493)
 
 ## 🛠️ Local Development
  - Clone the repo using the following command:
@@ -37,9 +37,10 @@ You can also find the long preview in <a target = "_blank" href = "https://www.y
 - While the current working directory is **Frontend**, run the command `yarn dev` to start the frontend
 
 ### ⚙️ Backend
-- In order to start the server, `cd` into the **Backend** folder and run `yarn` to install all the necessary packages for the backend server
-- While being in the **Backend** directory, run the command `node index.js` to start the server at port 3000
-- The file `transcript.py` is originally used in a flask-based server to send transcript of youtube videos. When developing in a physical machine (**not cloud**), it could be transformed into a js code to be used by the server file `index.js`
+- To start the server, `cd` into the **Backend** folder and run `yarn` to install all the necessary packages for the backend server
+- While in the **Backend** directory, run the command `node index.js` to start the server at port 3000
+  
+Please note that `transcript.py` is used in a flask-based server to send transcripts of YouTube videos. When developing in a local machine, it could be transformed into a js code to be used by the server file `index.js`
 
 ## 📜 Citation
 If you use the NoTeeline code or data, please cite our paper:
@@ -55,5 +56,4 @@ If you use the NoTeeline code or data, please cite our paper:
   location = {Cagliari, Italy}
 }
 ```
-<br />
-🙌 <i>This README was created as an inspiration from <a target = "_blank" href = "https://github.com/web-arena-x/webarena">webarena</a>, which provided valuable insights for structuring and documenting the project.</i>
+<br/>
