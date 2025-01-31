@@ -13,23 +13,12 @@
 </p>
 
 ## Teaser
-<div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-  <video width="600" height="600" controls style="max-width: 100%; height: auto;">
-    <source src="Assets/noteeline_compressed.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</div>
 
-You can also watch the teaser in [YouTube](https://www.youtube.com/watch?v=UUWTUbET86I) <br />
+https://github.com/user-attachments/assets/0bc03e23-759b-4d21-aa63-fe73ba0ebea0
 
-<div align="center">
-  <a href="https://youtu.be/UUWTUbET86I" title="NoTeeline">
-    <img src="https://img.youtube.com/vi/UUWTUbET86I/1.jpg" height="100" alt="NoTeeline">
-  </a>
-</div>
+You can also watch the teaser in <a target = "_blank" href = "https://www.youtube.com/watch?v=UUWTUbET86I">YouTube</a> for a better quality
 
 ## News
-- `[31-01-2025]` Updated readme, motivated by [webarena](https://github.com/web-arena-x/webarena)
 - `[28-01-2025]` The micronotes can be expanded using the openai api which produces streamlined real-time output
 - `[28-01-2025]` A personal openai api key is to be provided in the landing page of NoTeeline for the app to work
 - `[28-01-2025]` NoTeeline got featured in huggingface, [link](https://huggingface.co/papers/2409.16493)
@@ -64,3 +53,5 @@ If you use the NoTeeline code or data, please cite our paper:
   location = {Cagliari, Italy}
 }
 ```
+
+<i>This README was created as an inspiration from [webarena](https://github.com/web-arena-x/webarena), which provided valuable insights for structuring and documenting the project.</i>
