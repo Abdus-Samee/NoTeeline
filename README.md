@@ -15,9 +15,10 @@
 
 ## ✨ Teaser
 
-https://github.com/user-attachments/assets/0bc03e23-759b-4d21-aa63-fe73ba0ebea0
 
-You can also watch the teaser in <a target = "_blank" href = "https://www.youtube.com/watch?v=UUWTUbET86I">YouTube</a> for a better quality
+https://github.com/user-attachments/assets/9ab7edcc-3d8a-4030-a01f-6c076db3605e
+
+You can also find the long preview in <a target = "_blank" href = "https://www.youtube.com/watch?v=UUWTUbET86I">YouTube</a> for a better quality.
 
 ## 📰 News
 - `[28-01-2025]` The micronotes can be expanded using the openai api which produces streamlined real-time output
