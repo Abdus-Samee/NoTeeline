@@ -13,15 +13,20 @@
 </p>
 
 ## Teaser
-<div style="text-align:center">
-<video width="600" height="600" controls>
-  <source src="Assets/noteeline_compressed.mp4" type="video/mp4">
-  Cannot play the mp4 video.
-</video>
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+  <video width="600" height="600" controls style="max-width: 100%; height: auto;">
+    <source src="Assets/noteeline_compressed.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 </div>
 
 You can also watch the teaser in [YouTube](https://www.youtube.com/watch?v=UUWTUbET86I) <br />
-[![NoTeeline](https://img.youtube.com/vi/UUWTUbET86I/0.jpg)](https://youtu.be/UUWTUbET86I "NoTeeline")
+
+<div align="center">
+  <a href="https://youtu.be/UUWTUbET86I" title="NoTeeline">
+    <img src="https://img.youtube.com/vi/UUWTUbET86I/1.jpg" height="100" alt="NoTeeline">
+  </a>
+</div>
 
 ## News
 - `[31-01-2025]` Updated readme, motivated by [webarena](https://github.com/web-arena-x/webarena)
