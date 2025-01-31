@@ -1,7 +1,7 @@
 # NoTeeline: Supporting Real-Time, Personalized Notetaking with LLM-Enhanced Micronotes
 
 <p align = "center">
-    <img src="Assets/summary.png" alt="NoTeeline Summary" width="1000px">
+    <img src="Assets/summary.png" alt="NoTeeline Summary" width="800px">
     <br>
     <b>Write, Organize, Review, and Summarize Personalized Notes</b>
 </p>
