@@ -1,4 +1,4 @@
-/DataAnalysis/UserLog/*
+# /DataAnalysis/UserLog/*
 .ipynb_checkpoints
 *.pdf
 *.csv
