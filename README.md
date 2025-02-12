@@ -15,7 +15,6 @@
 
 ## ✨ Teaser
 
-
 https://github.com/user-attachments/assets/9ab7edcc-3d8a-4030-a01f-6c076db3605e
 
 You can also find the long preview in <a target = "_blank" href = "https://www.youtube.com/watch?v=UUWTUbET86I">YouTube</a> for a better quality.
@@ -59,4 +58,4 @@ If you use the NoTeeline code or data, please cite our paper:
 <br/>
 
 ## 🌟 Questions?
-Please feel free to email Faria (@fhuq@cs.cmu.edu)/ Samee (abdussamee16@gmail.com). Alternatively, you can open a <a target = "_blank" href = "https://github.com/oaishi/NoTeeline/issues">new issue over github</a>!
+Please feel free to email Faria (fhuq@cs.cmu.edu)/ Samee (abdussamee16@gmail.com). Alternatively, you can open a <a target = "_blank" href = "https://github.com/oaishi/NoTeeline/issues">new issue over github</a>!
