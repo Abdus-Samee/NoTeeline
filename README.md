@@ -57,3 +57,6 @@ If you use the NoTeeline code or data, please cite our paper:
 }
 ```
 <br/>
+
+## 🌟 Questions?
+Please feel free to email Faria (@fhuq@cs.cmu.edu)/ Samee (abdussamee16@gmail.com). Alternatively, you can open a <a target = "_blank" href = "https://github.com/oaishi/NoTeeline/issues">new issue over github</a>!
