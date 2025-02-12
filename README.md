@@ -8,7 +8,7 @@
 
 <p align = "center">
     <a target = "_blank" href = "https://noteeline.vercel.app/">Website</a> •
-    <a target = "_blank" href = "https://doi.org/10.1145/3708359.3712086">Paper</a> •
+    <a target = "_blank" href = "https://doi.org/10.1145/3708359.3712086">Doi</a> •
     <a target = "_blank" href = "https://arxiv.org/abs/2409.16493">Arxiv</a> •
     <a target = "_blank" href = "https://huggingface.co/papers/2409.16493">Huggingface</a>
 </p>
